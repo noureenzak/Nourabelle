@@ -1,0 +1,525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Product - Nourabelle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/product.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <header class="navbar">
+    <!-- Mobile Hamburger -->
+    <div class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <nav class="desktop-nav">
+      <a href="index.html">Home</a>
+      <a href="pages/products.html">Products</a>
+      <a href="pages/policy.html">Returns & Exchange</a>
+      <a href="#contact">Contact Us</a>
+    </nav>
+
+    <!-- Centered Logo -->
+    <div class="nav-center">
+      <a href="index.html">
+        <img src="assets/images/logo.jpg" alt="Nourabelle Logo" class="hero-logo">
+      </a>
+    </div>
+
+    <!-- Right Side Icons -->
+    <div class="nav-actions">
+      <!-- Back Button -->
+      <a href="pages/products.html" class="back-btn">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 12H5"/>
+          <path d="M12 19l-7-7 7-7"/>
+        </svg>
+        Back
+      </a>
+
+      <!-- Cart Icon -->
+      <div class="cart-icon-link">
+        <a href="pages/cart.html" aria-label="Cart">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+            <path d="M20 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <span id="cart-count" class="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <img src="assets/images/logo.jpg" alt="Nourabelle" class="mobile-menu-logo">
+      <button class="mobile-close" id="mobileClose">&times;</button>
+    </div>
+
+    <div class="mobile-menu-content">
+      <a href="index.html">Home</a>
+      <a href="pages/products.html">Products</a>
+      <a href="pages/policy.html">Exchange & Return Policy</a>
+      <a href="#contact">Contact Us</a>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <main class="product-main">
+    <div class="container">
+      <!-- Breadcrumb -->
+      <nav class="breadcrumb">
+        <a href="index.html">Home</a>
+        <span class="breadcrumb-separator">/</span>
+        <a href="pages/products.html">Products</a>
+        <span class="breadcrumb-separator">/</span>
+        <span id="product-breadcrumb">Product</span>
+      </nav>
+
+      <!-- Product Layout -->
+      <div class="product-layout">
+        <!-- Image Gallery -->
+        <div class="image-gallery">
+          <div class="main-image-container">
+            <img id="main-image" src="" alt="Product Image" class="main-image">
+            <span id="product-badge" class="image-badge" style="display: none;"></span>
+            
+            <!-- Zoom overlay -->
+            <div class="zoom-overlay" id="zoomOverlay">
+              <img id="zoom-image" src="" alt="Zoomed Image">
+              <button class="zoom-close" id="zoomClose">&times;</button>
+            </div>
+          </div>
+          
+          <div class="thumbnail-container" id="thumbnail-container">
+            <!-- Thumbnails will be loaded here -->
+          </div>
+        </div>
+
+        <!-- Product Info -->
+        <div class="product-info">
+          <div class="product-header">
+            <div id="product-category" class="product-category">Category</div>
+            <h1 id="product-title" class="product-title">Product Name</h1>
+            
+            <div class="product-rating">
+              <div class="stars">
+                <span class="star active">★</span>
+                <span class="star active">★</span>
+                <span class="star active">★</span>
+                <span class="star active">★</span>
+                <span class="star active">★</span>
+              </div>
+              <span class="rating-text">(4.8) • 124 reviews</span>
+            </div>
+            
+            <div class="product-price">
+              <span id="current-price" class="current-price">0 EGP</span>
+              <span id="original-price" class="original-price" style="display: none;">0 EGP</span>
+              <span id="savings" class="savings" style="display: none;">Save 0%</span>
+            </div>
+          </div>
+
+          <div id="product-description" class="product-description">
+            Product description will be loaded here.
+          </div>
+
+          <!-- Size Selection -->
+          <div class="size-section">
+            <div class="size-header">
+              <div class="size-label">Size</div>
+              <button class="size-guide-btn" onclick="showSizeGuide()">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M9 12l2 2 4-4"/>
+                  <path d="M21 12c0 4.97-4.03 9-9 9s-9-4.03-9-9 4.03-9 9-9 9 4.03 9 9z"/>
+                </svg>
+                Size Guide
+              </button>
+            </div>
+            <div class="size-options" id="size-options">
+              <div class="size-option" data-size="XS">XS</div>
+              <div class="size-option" data-size="S">S</div>
+              <div class="size-option selected" data-size="M">M</div>
+              <div class="size-option" data-size="L">L</div>
+              <div class="size-option" data-size="XL">XL</div>
+            </div>
+          </div>
+
+          <!-- Color Selection (if applicable) -->
+          <div class="color-section" id="color-section" style="display: none;">
+            <div class="color-label">Color</div>
+            <div class="color-options" id="color-options">
+              <!-- Colors will be loaded here -->
+            </div>
+          </div>
+
+          <!-- Quantity Selection -->
+          <div class="quantity-section">
+            <div class="quantity-label">Quantity</div>
+            <div class="quantity-selector">
+              <div class="quantity-controls">
+                <button class="quantity-btn" onclick="changeQuantity(-1)">−</button>
+                <input type="number" id="quantity-input" class="quantity-input" value="1" min="1" max="10">
+                <button class="quantity-btn" onclick="changeQuantity(1)">+</button>
+              </div>
+              <div class="stock-info" id="stock-info">In stock</div>
+            </div>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="action-buttons">
+            <button class="add-to-cart-btn" id="add-to-cart-btn" onclick="addToCart()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+                <path d="M20 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+                <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+              </svg>
+              Add to Cart
+            </button>
+            
+            <button class="wishlist-btn" id="wishlist-btn" onclick="toggleWishlist()">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"/>
+              </svg>
+            </button>
+          </div>
+
+          <!-- Product Features -->
+          <div class="product-features">
+            <h3 class="features-title">Product Features</h3>
+            <ul class="features-list" id="features-list">
+              <li>Soft, breathable fabric</li>
+              <li>Modest and elegant design</li>
+              <li>Perfect for daily wear</li>
+              <li>Available in multiple sizes</li>
+              <li>Easy care instructions</li>
+            </ul>
+          </div>
+
+          <!-- Shipping & Returns -->
+          <div class="shipping-info">
+            <div class="shipping-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M16 3h5v5M4 20L20 4"/>
+                <path d="M21 16v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                <path d="M7 21h10"/>
+              </svg>
+              <div>
+                <div class="shipping-title">Free Shipping</div>
+                <div class="shipping-desc">On orders over 2000 EGP</div>
+              </div>
+            </div>
+            
+            <div class="shipping-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/>
+                <polyline points="9,22 9,12 15,12 15,22"/>
+              </svg>
+              <div>
+                <div class="shipping-title">Easy Returns</div>
+                <div class="shipping-desc">7-day return policy</div>
+              </div>
+            </div>
+            
+            <div class="shipping-item">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="1" y="3" width="15" height="13"/>
+                <path d="M16 8h4l3 3v5H16V8z"/>
+                <circle cx="5.5" cy="18.5" r="2.5"/>
+                <circle cx="18.5" cy="18.5" r="2.5"/>
+              </svg>
+              <div>
+                <div class="shipping-title">Fast Delivery</div>
+                <div class="shipping-desc">2-3 business days</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Care Instructions -->
+          <div class="care-instructions">
+            <h3 class="care-title">Care Instructions</h3>
+            <div class="care-grid">
+              <div class="care-item">
+                <div class="care-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M3 6h18l-2 13H5L3 6z"/>
+                    <path d="M8 6V4a2 2 0 0 1 4 0v2"/>
+                  </svg>
+                </div>
+                <div class="care-text">Machine wash cold</div>
+              </div>
+              
+              <div class="care-item">
+                <div class="care-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <circle cx="12" cy="12" r="3"/>
+                    <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                  </svg>
+                </div>
+                <div class="care-text">Do not bleach</div>
+              </div>
+              
+              <div class="care-item">
+                <div class="care-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.072-2.143-.224-4.054 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.153.433-2.294 1-3a2.5 2.5 0 0 0 2.5 2.5z"/>
+                  </svg>
+                </div>
+                <div class="care-text">Hang to dry</div>
+              </div>
+              
+              <div class="care-item">
+                <div class="care-icon">
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M17.8 19.2L16 11l3.5-3.5C21 6 21 4 19 4s-3 2-4.5 3.5L11 16l-8.2 1.8c-.5.1-.8.6-.8 1.1s.5 1.1 1.1 1.1L12 19l7-1z"/>
+                  </svg>
+                </div>
+                <div class="care-text">Iron on low heat</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Product Details Tabs -->
+      <section class="product-tabs">
+        <div class="tab-buttons">
+          <button class="tab-btn active" data-tab="description">Description</button>
+          <button class="tab-btn" data-tab="specifications">Specifications</button>
+          <button class="tab-btn" data-tab="reviews">Reviews</button>
+          <button class="tab-btn" data-tab="shipping">Shipping & Returns</button>
+        </div>
+        
+        <div class="tab-content">
+          <div id="description-tab" class="tab-panel active">
+            <h3>Product Description</h3>
+            <p id="detailed-description">Detailed product description will be loaded here.</p>
+          </div>
+          
+          <div id="specifications-tab" class="tab-panel">
+            <h3>Specifications</h3>
+            <table class="specs-table" id="specs-table">
+              <tr>
+                <td>Material</td>
+                <td>100% Cotton</td>
+              </tr>
+              <tr>
+                <td>Care</td>
+                <td>Machine washable</td>
+              </tr>
+              <tr>
+                <td>Origin</td>
+                <td>Made with care</td>
+              </tr>
+            </table>
+          </div>
+          
+          <div id="reviews-tab" class="tab-panel">
+            <h3>Customer Reviews</h3>
+            <div class="reviews-summary">
+              <div class="rating-overview">
+                <div class="overall-rating">4.8</div>
+                <div class="stars-large">
+                  <span class="star active">★</span>
+                  <span class="star active">★</span>
+                  <span class="star active">★</span>
+                  <span class="star active">★</span>
+                  <span class="star active">★</span>
+                </div>
+                <div class="rating-count">Based on 124 reviews</div>
+              </div>
+            </div>
+            <div class="reviews-list" id="reviews-list">
+              <!-- Reviews will be loaded here -->
+            </div>
+          </div>
+          
+          <div id="shipping-tab" class="tab-panel">
+            <h3>Shipping & Returns</h3>
+            <div class="policy-content">
+              <h4>Shipping Information</h4>
+              <ul>
+                <li>Free shipping on orders over 2000 EGP</li>
+                <li>Standard delivery: 2-3 business days</li>
+                <li>Express delivery: 1-2 business days (additional cost)</li>
+                <li>Delivery available across Egypt</li>
+              </ul>
+              
+              <h4>Return Policy</h4>
+              <ul>
+                <li>7-day return window from delivery date</li>
+                <li>Items must be in original condition with tags</li>
+                <li>Free returns for defective items</li>
+                <li>Exchange available for size/color changes</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Related Products -->
+      <section class="related-products">
+        <h2 class="section-title">You May Also Like</h2>
+        <div class="related-grid" id="related-grid">
+          <!-- Related products will be loaded here -->
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <!-- Size Guide Modal -->
+  <div class="modal" id="size-guide-modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h2 class="modal-title">Size Guide</h2>
+        <button class="modal-close" onclick="closeSizeGuide()">×</button>
+      </div>
+      <div class="modal-body">
+        <div class="size-guide-tabs">
+          <button class="size-tab-btn active" data-size-tab="sets">Sets</button>
+          <button class="size-tab-btn" data-size-tab="cardigans">Cardigans</button>
+        </div>
+        
+        <div class="size-guide-content">
+          <div id="sets-size-guide" class="size-guide-panel active">
+            <table class="size-chart">
+              <thead>
+                <tr>
+                  <th>Size</th>
+                  <th>Bust (cm)</th>
+                  <th>Waist (cm)</th>
+                  <th>Hips (cm)</th>
+                  <th>Length (cm)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>XS</td>
+                  <td>82-86</td>
+                  <td>64-68</td>
+                  <td>88-92</td>
+                  <td>58</td>
+                </tr>
+                <tr>
+                  <td>S</td>
+                  <td>86-90</td>
+                  <td>68-72</td>
+                  <td>92-96</td>
+                  <td>60</td>
+                </tr>
+                <tr>
+                  <td>M</td>
+                  <td>90-94</td>
+                  <td>72-76</td>
+                  <td>96-100</td>
+                  <td>62</td>
+                </tr>
+                <tr>
+                  <td>L</td>
+                  <td>94-98</td>
+                  <td>76-80</td>
+                  <td>100-104</td>
+                  <td>64</td>
+                </tr>
+                <tr>
+                  <td>XL</td>
+                  <td>98-102</td>
+                  <td>80-84</td>
+                  <td>104-108</td>
+                  <td>66</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          
+          <div id="cardigans-size-guide" class="size-guide-panel">
+            <table class="size-chart">
+              <thead>
+                <tr>
+                  <th>Size</th>
+                  <th>Bust (cm)</th>
+                  <th>Sleeve (cm)</th>
+                  <th>Length (cm)</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>S</td>
+                  <td>86-90</td>
+                  <td>58</td>
+                  <td>65</td>
+                </tr>
+                <tr>
+                  <td>M</td>
+                  <td>90-94</td>
+                  <td>60</td>
+                  <td>67</td>
+                </tr>
+                <tr>
+                  <td>L</td>
+                  <td>94-98</td>
+                  <td>62</td>
+                  <td>69</td>
+                </tr>
+                <tr>
+                  <td>XL</td>
+                  <td>98-102</td>
+                  <td>64</td>
+                  <td>71</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        
+        <div class="sizing-tips">
+          <h4>How to Measure</h4>
+          <ul>
+            <li>Bust: Measure around the fullest part of your chest</li>
+            <li>Waist: Measure around your natural waistline</li>
+            <li>Hips: Measure around the fullest part of your hips</li>
+            <li>Length: Measured from shoulder to hem</li>
+            <li>Sleeve: Measured from shoulder to wrist</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <footer id="contact">
+    <div class="footer-content">
+      <a href="https://www.instagram.com/nourabellebynour/" target="_blank" aria-label="Instagram" class="footer-icon-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+        </svg>
+      </a>
+    </div>
+    
+    <div class="footer-links">
+      <a href="pages/policy.html" class="footer-link">Returns & Exchange</a>
+      <span class="footer-dot"></span>
+      <a href="#contact" class="footer-link">Contact Us</a>
+    </div>
+    
+    <div class="footer-brand">
+      <span class="brand-heart">♡</span>
+      <span>Nourabelle</span>
+      <span class="brand-heart">♡</span>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/script.js"></script>
+  <script src="js/product.js"></script>
+</body>
+</html>

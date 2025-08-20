@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nourabelle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+  <!-- Navigation -->
+  <header class="navbar">
+    <!-- Mobile Hamburger -->
+    <div class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <nav class="desktop-nav">
+      <a href="index.html">Home</a>
+      <a href="pages/products.html">Products</a>
+      <a href="pages/policy.html">Returns & Exchange</a>
+      <a href="#contact">Contact Us</a>
+    </nav>
+
+    <!-- Centered Logo -->
+    <div class="nav-center">
+      <a href="index.html">
+        <img src="assets/images/logo.jpg" alt="Nourabelle Logo" class="hero-logo">
+      </a>
+    </div>
+
+    <!-- Right Side Icons -->
+    <div class="nav-actions">
+      <!-- Search Icon -->
+      <button class="search-btn" id="searchBtn" aria-label="Search">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+      </button>
+
+      <!-- Cart Icon -->
+      <div class="cart-icon-link">
+        <a href="pages/cart.html" aria-label="Cart">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+            <path d="M20 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <span id="cart-count" class="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <img src="assets/images/logo.jpg" alt="Nourabelle" class="mobile-menu-logo">
+      <button class="mobile-close" id="mobileClose">&times;</button>
+    </div>
+
+    <div class="mobile-menu-content">
+      <a href="index.html">Home</a>
+      <a href="pages/products.html">Products</a>
+      <a href="pages/policy.html">Exchange & Return Policy</a>
+      <a href="#contact">Contact Us</a>
+    </div>
+
+    <a href="pages/admin-login.html" class="mobile-login">Login</a>
+  </div>
+
+  <!-- Search Overlay -->
+  <div class="search-overlay" id="searchOverlay">
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off">
+      <button class="search-close" id="searchClose">&times;</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <!-- Hero Section with sliding images -->
+  <section class="hero">
+    <div class="slider-wrapper">
+      <img src="assets/images/hero1.jpg" class="slide-img active" alt="Hero Image 1">
+      <img src="assets/images/hero2.jpg" class="slide-img" alt="Hero Image 2">
+      <img src="assets/images/hero3.jpg" class="slide-img" alt="Hero Image 3">
+      <img src="assets/images/blueset2.jpg" class="slide-img" alt="Blue Set">
+      <img src="assets/images/browncardigan2.jpg" class="slide-img" alt="Brown Cardigan">
+    </div>
+    <div class="overlay">
+      <a href="pages/products.html" class="shop-now-btn">
+        Discover Collection
+      </a>
+    </div>
+  </section>
+
+  <!-- Bestsellers Section -->
+  <section class="bestsellers" id="products">
+    <h2>Bestsellers</h2>
+    <div class="scroll-wrapper">
+      <div class="product-scroll" id="product-scroll">
+        <div class="product" onclick="goToProduct('whiteset')">
+          <img id="whiteset" src="assets/images/whiteset1.jpg" alt="White Set">
+          <p>White Set</p>
+          <p class="price">1500 EGP</p>
+        </div>
+        <div class="product" onclick="goToProduct('blackset')">
+          <img id="blackset" src="assets/images/blackset1.jpg" alt="Black Set">
+          <p>Black Set</p>
+          <p class="price">1500 EGP</p>
+        </div>
+        <div class="product" onclick="goToProduct('browncardigan')">
+          <img id="browncardigan" src="assets/images/browncardigan1.jpg" alt="Brown Cardigan">
+          <p>Brown Cardigan</p>
+          <p class="price">1500 EGP</p>
+        </div>
+        <div class="product" onclick="goToProduct('blackcardigan')">
+          <img id="blackcardigan" src="assets/images/blackcardigan1.jpg" alt="Black Cardigan">
+          <p>Black Cardigan</p>
+          <p class="price">1500 EGP</p>
+        </div>
+      </div>
+    </div>
+    <div class="view-more">
+      <a href="pages/products.html" class="view-more-btn">View More</a>
+    </div>
+  </section>
+
+  <!-- Video + Text Section -->
+  <section class="modest-message">
+    <video autoplay loop muted playsinline>
+      <source src="assets/videos/video1.mp4" type="video/mp4">
+    </video>
+    <div class="message">
+      <h3>Made with love</h3>
+      <p>To be modest, elegant, and true to you.</p>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer id="contact">
+    <div class="footer-content">
+      <a href="https://www.instagram.com/nourabellebynour/" target="_blank" aria-label="Instagram" class="footer-icon-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+        </svg>
+      </a>
+    </div>
+    
+    <div class="footer-links">
+      <a href="pages/policy.html" class="footer-link">Returns & Exchange</a>
+      <span class="footer-dot"></span>
+      <a href="#contact" class="footer-link">Contact Us</a>
+    </div>
+    
+    <div class="footer-brand">
+      <span class="brand-heart">♡</span>
+      <span>Nourabelle</span>
+      <span class="brand-heart">♡</span>
+    </div>
+  </footer>
+
+  <script src="js/script.js"></script>
+</body>
+</html>
