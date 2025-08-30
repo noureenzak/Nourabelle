@@ -1,4 +1,4 @@
-// Product Detail Page JavaScript - COMPLETELY FIXED
+// Product Detail Page JavaScript - WITH DEBUG LOGS
 
 'use strict';
 
@@ -13,7 +13,7 @@ const PRODUCTS = [
     images: ['../assets/images/whiteset1.jpg', '../assets/images/whiteset2.jpg', '../assets/images/whiteset3.jpg'],
     category: 'sets',
     badge: 'new',
-    description: 'Elegant and modest white two-piece set. Soft fabric, breathable design, perfect for daily wear. This beautiful set combines comfort with style, featuring a relaxed fit that flatters all body types.',
+    description: 'Elegant and modest white two-piece set. Soft fabric, breathable design, perfect for daily wear.',
     features: [
       'Soft, breathable cotton blend fabric',
       'Modest and elegant design',
@@ -31,7 +31,7 @@ const PRODUCTS = [
     images: ['../assets/images/blackset1.jpg', '../assets/images/blackset2.jpg'],
     category: 'sets',
     badge: null,
-    description: 'Classic black set with a sleek and minimal cut, ideal for any occasion. The Classic Black Set is a wardrobe essential that combines timeless elegance with modern comfort.',
+    description: 'Classic black set with a sleek and minimal cut, ideal for any occasion.',
     features: [
       'Classic timeless design',
       'Versatile styling options',
@@ -49,7 +49,7 @@ const PRODUCTS = [
     images: ['../assets/images/browncardigan1.jpg', '../assets/images/browncardigan2.jpg'],
     category: 'cardigans',
     badge: 'sale',
-    description: 'Cozy brown cardigan with flowy fit. Perfect as a layering piece in all seasons. Our Cozy Brown Cardigan is the perfect layering piece for any season with its flowing silhouette and warm earth tone.',
+    description: 'Cozy brown cardigan with flowy fit. Perfect as a layering piece in all seasons.',
     features: [
       'Flowy, flattering silhouette',
       'Perfect for layering',
@@ -67,7 +67,7 @@ const PRODUCTS = [
     images: ['../assets/images/blackcardigan1.jpg', '../assets/images/blackcardigan2.jpg'],
     category: 'cardigans',
     badge: null,
-    description: 'Timeless black cardigan with soft material and flattering shape. The Timeless Black Cardigan is a sophisticated piece that elevates any ensemble.',
+    description: 'Timeless black cardigan with soft material and flattering shape.',
     features: [
       'Timeless, versatile design',
       'Soft, premium material',
@@ -85,7 +85,7 @@ const PRODUCTS = [
     images: ['../assets/images/beigeset1.jpg', '../assets/images/beigeset2.jpg'],
     category: 'sets',
     badge: null,
-    description: 'Soft beige two-piece set with relaxed fit and modern modest cut. The Soft Beige Set offers a perfect balance of comfort and style with neutral beige tone that complements all skin tones.',
+    description: 'Soft beige two-piece set with relaxed fit and modern modest cut.',
     features: [
       'Relaxed, comfortable fit',
       'Modern modest styling',
@@ -103,7 +103,7 @@ const PRODUCTS = [
     images: ['../assets/images/blueset1.jpg', '../assets/images/blueset2.jpg'],
     category: 'sets',
     badge: null,
-    description: 'Calm and fresh blue set, light and breathable — perfect for summer days. The Fresh Blue Set brings a breath of fresh air to your wardrobe with its calming blue shade and lightweight fabric.',
+    description: 'Calm and fresh blue set, light and breathable — perfect for summer days.',
     features: [
       'Light and breathable fabric',
       'Perfect for summer wear',
@@ -122,7 +122,10 @@ let activeImageIndex = 0;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
-  console.log('Product page initializing...');
+  console.log('=== PRODUCT PAGE DEBUG START ===');
+  console.log('Current URL:', window.location.href);
+  console.log('URL Search Params:', window.location.search);
+  
   loadProductFromURL();
   setupEventListeners();
   updateCartCount();
@@ -132,10 +135,11 @@ function loadProductFromURL() {
   const urlParams = new URLSearchParams(window.location.search);
   const productId = urlParams.get('product');
   
-  console.log('Loading product ID:', productId);
+  console.log('🔍 Loading product ID:', productId);
+  console.log('🔍 Available products:', PRODUCTS.map(p => p.id));
   
   if (!productId) {
-    console.error('No product ID in URL');
+    console.error('❌ No product ID in URL');
     window.location.href = 'products.html';
     return;
   }
@@ -143,19 +147,22 @@ function loadProductFromURL() {
   currentProduct = PRODUCTS.find(p => p.id === productId);
   
   if (!currentProduct) {
-    console.error('Product not found:', productId);
+    console.error('❌ Product not found:', productId);
     showProductNotFound();
     return;
   }
 
-  console.log('Product loaded:', currentProduct);
+  console.log('✅ Product found:', currentProduct);
   renderProduct();
 }
 
 function renderProduct() {
-  if (!currentProduct) return;
+  if (!currentProduct) {
+    console.error('❌ No current product to render');
+    return;
+  }
 
-  console.log('Rendering product:', currentProduct.name);
+  console.log('🎨 Rendering product:', currentProduct.name);
 
   // Update page title
   document.title = `${currentProduct.name} - Nourabelle`;
@@ -165,20 +172,33 @@ function renderProduct() {
   const titleEl = document.getElementById('product-title');
   const descriptionEl = document.getElementById('product-description');
   
-  if (categoryEl) categoryEl.textContent = currentProduct.category.charAt(0).toUpperCase() + currentProduct.category.slice(1);
-  if (titleEl) titleEl.textContent = currentProduct.name;
-  if (descriptionEl) descriptionEl.textContent = currentProduct.description;
+  console.log('📝 Updating text elements...');
+  if (categoryEl) {
+    categoryEl.textContent = currentProduct.category.charAt(0).toUpperCase() + currentProduct.category.slice(1);
+    console.log('✅ Category updated');
+  }
+  if (titleEl) {
+    titleEl.textContent = currentProduct.name;
+    console.log('✅ Title updated');
+  }
+  if (descriptionEl) {
+    descriptionEl.textContent = currentProduct.description;
+    console.log('✅ Description updated');
+  }
 
   // Update price
   const priceEl = document.getElementById('product-price');
-  if (priceEl) priceEl.textContent = `${currentProduct.price} EGP`;
+  if (priceEl) {
+    priceEl.textContent = `${currentProduct.price} EGP`;
+    console.log('✅ Price updated');
+  }
   
   const originalPrice = document.getElementById('original-price');
-  
   if (currentProduct.originalPrice) {
     if (originalPrice) {
       originalPrice.textContent = `${currentProduct.originalPrice} EGP`;
       originalPrice.style.display = 'inline';
+      console.log('✅ Original price shown');
     }
   } else {
     if (originalPrice) originalPrice.style.display = 'none';
@@ -190,29 +210,44 @@ function renderProduct() {
     if (currentProduct.badge) {
       badge.textContent = currentProduct.badge.toUpperCase();
       badge.style.display = 'block';
+      console.log('✅ Badge shown:', currentProduct.badge);
     } else {
       badge.style.display = 'none';
     }
   }
 
-  // Update main image with error handling
+  // Update main image with EXTENSIVE debugging
   const mainImage = document.getElementById('product-image');
   if (mainImage && currentProduct.images && currentProduct.images.length > 0) {
-    console.log('Setting main image to:', currentProduct.images[0]);
+    const imagePath = currentProduct.images[0];
+    console.log('🖼️ Setting main image...');
+    console.log('Image path:', imagePath);
+    console.log('Current page location:', window.location.pathname);
+    console.log('Expected full path:', window.location.origin + window.location.pathname.replace('product.html', '') + imagePath);
     
-    // Add error handling for images
-    mainImage.onerror = function() {
-      console.error('Failed to load image:', this.src);
-      // Try alternative path
-      const altSrc = this.src.replace('../assets/', 'assets/');
-      if (this.src !== altSrc) {
-        console.log('Trying alternative path:', altSrc);
-        this.src = altSrc;
-      }
+    // Test if image exists before setting
+    const testImg = new Image();
+    testImg.onload = function() {
+      console.log('✅ Image loaded successfully:', imagePath);
+      mainImage.src = imagePath;
     };
+    testImg.onerror = function() {
+      console.error('❌ Image failed to load:', imagePath);
+      // Try alternative paths
+      const altPaths = [
+        imagePath.replace('../assets/', 'assets/'),
+        imagePath.replace('../assets/', '../assets/'),
+        imagePath.replace('../', '')
+      ];
+      
+      console.log('🔄 Trying alternative paths:', altPaths);
+      tryAlternativePaths(mainImage, altPaths, 0);
+    };
+    testImg.src = imagePath;
     
-    mainImage.src = currentProduct.images[0];
     mainImage.alt = currentProduct.name;
+  } else {
+    console.error('❌ Main image element not found or no images in product');
   }
 
   // Render thumbnails
@@ -222,36 +257,64 @@ function renderProduct() {
   renderFeatures();
 }
 
+function tryAlternativePaths(imgElement, paths, index) {
+  if (index >= paths.length) {
+    console.error('❌ All image paths failed');
+    imgElement.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzAwIiBoZWlnaHQ9IjMwMCIgdmlld0JveD0iMCAwIDMwMCAzMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIzMDAiIGhlaWdodD0iMzAwIiBmaWxsPSIjZjVmNWY1Ii8+Cjx0ZXh0IHg9IjE1MCIgeT0iMTUwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LXNpemU9IjE2Ij5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+Cjwvc3ZnPg==';
+    return;
+  }
+
+  const testImg = new Image();
+  testImg.onload = function() {
+    console.log('✅ Alternative path worked:', paths[index]);
+    imgElement.src = paths[index];
+  };
+  testImg.onerror = function() {
+    console.log('❌ Alternative path failed:', paths[index]);
+    tryAlternativePaths(imgElement, paths, index + 1);
+  };
+  testImg.src = paths[index];
+}
+
 function renderThumbnails() {
   const container = document.getElementById('thumbnail-container');
   if (!container || !currentProduct.images || currentProduct.images.length <= 1) {
     if (container) container.style.display = 'none';
+    console.log('📸 No thumbnails to show');
     return;
   }
 
+  console.log('📸 Rendering thumbnails...');
   container.style.display = 'flex';
-  container.innerHTML = currentProduct.images.map((image, index) => `
-    <img src="${image}" 
-         alt="${currentProduct.name} ${index + 1}" 
-         class="thumbnail ${index === activeImageIndex ? 'active' : ''}"
-         onclick="selectImage(${index})"
-         onerror="this.onerror=null; this.src=this.src.replace('../assets/', 'assets/');">
-  `).join('');
+  container.innerHTML = currentProduct.images.map((image, index) => {
+    console.log(`Thumbnail ${index}:`, image);
+    return `
+      <img src="${image}" 
+           alt="${currentProduct.name} ${index + 1}" 
+           class="thumbnail ${index === activeImageIndex ? 'active' : ''}"
+           onclick="selectImage(${index})"
+           onerror="console.error('Thumbnail failed:', this.src); this.style.display='none';">
+    `;
+  }).join('');
 }
 
 function renderFeatures() {
   const featuresList = document.getElementById('features-list');
   if (featuresList && currentProduct.features) {
     featuresList.innerHTML = currentProduct.features.map(feature => `<li>${feature}</li>`).join('');
+    console.log('✅ Features updated');
   }
 }
 
 function setupEventListeners() {
+  console.log('🎯 Setting up event listeners...');
+  
   // Size selection
   const sizeSelect = document.getElementById('size');
   if (sizeSelect) {
     sizeSelect.addEventListener('change', (e) => {
       selectedSize = e.target.value;
+      console.log('📏 Size selected:', selectedSize);
     });
   }
 
@@ -261,6 +324,7 @@ function setupEventListeners() {
     quantityInput.addEventListener('change', (e) => {
       quantity = Math.max(1, Math.min(10, parseInt(e.target.value) || 1));
       quantityInput.value = quantity;
+      console.log('🔢 Quantity changed:', quantity);
     });
   }
 
@@ -275,10 +339,11 @@ function setupEventListeners() {
 function selectImage(index) {
   if (!currentProduct || !currentProduct.images) return;
   
+  console.log('🖼️ Selecting image index:', index);
   activeImageIndex = index;
   const mainImage = document.getElementById('product-image');
   if (mainImage) {
-    console.log('Switching to image:', currentProduct.images[index]);
+    console.log('Setting image to:', currentProduct.images[index]);
     mainImage.src = currentProduct.images[index];
   }
   
@@ -294,11 +359,17 @@ function changeQuantity(change) {
   const newQuantity = Math.max(1, Math.min(10, quantity + change));
   quantity = newQuantity;
   if (input) input.value = newQuantity;
+  console.log('🔢 Quantity changed to:', quantity);
 }
 
 // Add to cart function
 function addToCart() {
-  if (!currentProduct) return;
+  if (!currentProduct) {
+    console.error('❌ No product to add to cart');
+    return;
+  }
+
+  console.log('🛒 Adding to cart:', currentProduct.name, 'Size:', selectedSize, 'Qty:', quantity);
 
   const cartItem = {
     id: currentProduct.id,
@@ -320,11 +391,14 @@ function addToCart() {
 
   if (existingIndex > -1) {
     cart[existingIndex].quantity += cartItem.quantity;
+    console.log('📦 Updated existing cart item');
   } else {
     cart.push(cartItem);
+    console.log('📦 Added new cart item');
   }
 
   localStorage.setItem('nourabelle_cart', JSON.stringify(cart));
+  console.log('💾 Cart saved:', cart);
 
   // Visual feedback
   const button = document.getElementById('buy-button');
@@ -368,9 +442,12 @@ function updateCartCount() {
       cartCountEl.style.display = 'none';
     }
   }
+  console.log('🛒 Cart count updated:', count);
 }
 
 function showNotification(message) {
+  console.log('🔔 Showing notification:', message);
+  
   // Remove existing notifications
   const existingNotifications = document.querySelectorAll('.notification');
   existingNotifications.forEach(notif => notif.remove());
@@ -408,6 +485,7 @@ function showNotification(message) {
 }
 
 function showProductNotFound() {
+  console.log('❌ Showing product not found page');
   document.body.innerHTML = `
     <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; text-align: center; padding: 2rem; font-family: var(--font);">
       <h1 style="font-size: 2rem; color: var(--btn); margin-bottom: 1rem;">Product Not Found</h1>
@@ -568,3 +646,5 @@ if (!document.getElementById('product-animations')) {
 window.selectImage = selectImage;
 window.changeQuantity = changeQuantity;
 window.addToCart = addToCart;
+
+console.log('=== PRODUCT JS LOADED ===');

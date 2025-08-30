@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css" />
   <link rel="stylesheet" href="../css/product.css" />
-  <script defer src="../js/script.js"></script>
+  <!-- REMOVED: script.js since it conflicts with product.js -->
   <script defer src="../js/product.js"></script>
 </head>
 <body>
@@ -96,18 +96,18 @@
       <!-- Image section -->
       <div class="product-image-section">
         <div class="main-image-container">
-          <img id="product-image" src="" alt="Product Image" />
+          <img id="product-image" src="../assets/images/whiteset1.jpg" alt="Product Image" />
           <span id="product-badge" class="product-badge" style="display: none;"></span>
         </div>
         
-        <div class="thumbnail-container" id="thumbnail-container">
+        <div class="thumbnail-container" id="thumbnail-container" style="display: none;">
           <!-- Thumbnails will be loaded here -->
         </div>
       </div>
 
       <!-- Product info -->
       <div class="product-info">
-        <div class="product-category" id="product-category">Category</div>
+        <div class="product-category" id="product-category">Sets</div>
         <h2 id="product-title">Product Name</h2>
         
         <div class="product-price-section">

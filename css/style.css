@@ -367,7 +367,7 @@ body {
   overflow-y: auto;
 }
 
-/* Hero Section */
+/* Hero Section - FIXED for full-width on desktop */
 .hero {
   margin-top: 60px;
   position: relative;
@@ -398,11 +398,15 @@ body {
   opacity: 1;
 }
 
-/* Fix zoom on large screens */
+/* FIXED: Remove the contain behavior on large screens to fill full width */
 @media (min-width: 1200px) {
+  .slider-wrapper {
+    height: 80vh;
+  }
+  
   .slide-img {
-    object-fit: contain;
-    background: var(--beige);
+    object-fit: cover; /* Changed from contain to cover */
+    object-position: center;
   }
 }
 
@@ -727,4 +731,3 @@ body.menu-open {
     display: none;
   }
 }
-

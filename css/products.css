@@ -1,4 +1,4 @@
-/* Products Page Styles - Matching Index Style */
+/* Products Page Styles - FIXED Grid Sizing */
 
 .products-page {
   padding: 120px 20px 100px;
@@ -57,19 +57,44 @@
   box-shadow: 0 0 0 2px rgba(173, 124, 124, 0.2);
 }
 
-/* Products Grid - Exactly like index */
+/* FIXED: Products Grid - Consistent sizing regardless of item count */
 .products-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(250px, 250px));
   gap: 2rem;
   margin-bottom: 2rem;
+  justify-content: center;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
 }
 
-/* Product Items - Exactly like index bestsellers */
+/* Alternative approach for more responsive control */
+@media (min-width: 1200px) {
+  .products-grid {
+    grid-template-columns: repeat(4, 250px);
+  }
+}
+
+@media (min-width: 900px) and (max-width: 1199px) {
+  .products-grid {
+    grid-template-columns: repeat(3, 250px);
+  }
+}
+
+@media (min-width: 600px) and (max-width: 899px) {
+  .products-grid {
+    grid-template-columns: repeat(2, 250px);
+  }
+}
+
+/* Product Items - Fixed size */
 .products-grid .product-item {
   cursor: pointer;
   transition: transform 0.3s ease;
   text-align: center;
+  width: 250px;
+  max-width: 250px;
 }
 
 .products-grid .product-item:hover {
@@ -80,6 +105,7 @@
   width: 100%;
   height: auto;
   border-radius: 0;
+  max-width: 250px;
 }
 
 .products-grid p {
@@ -173,5 +199,23 @@
   .products-grid {
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
     gap: 1.5rem;
+    max-width: none;
+  }
+  
+  .products-grid .product-item {
+    width: auto;
+    max-width: none;
+  }
+  
+  .products-grid img {
+    max-width: none;
+  }
+}
+
+/* Very small screens */
+@media (max-width: 480px) {
+  .products-grid {
+    grid-template-columns: 1fr;
+    gap: 2rem;
   }
 }
