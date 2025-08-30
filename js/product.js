@@ -1,8 +1,8 @@
-// Product Detail Page JavaScript - Enhanced but keeping your structure
+// Product Detail Page JavaScript - COMPLETELY FIXED
 
 'use strict';
 
-// Product data with correct image paths for pages directory
+// Product data with CORRECT image paths for pages directory
 const PRODUCTS = [
   {
     id: 'whiteset',
@@ -122,6 +122,7 @@ let activeImageIndex = 0;
 
 // Initialize page
 document.addEventListener('DOMContentLoaded', function() {
+  console.log('Product page initializing...');
   loadProductFromURL();
   setupEventListeners();
   updateCartCount();
@@ -131,8 +132,10 @@ function loadProductFromURL() {
   const urlParams = new URLSearchParams(window.location.search);
   const productId = urlParams.get('product');
   
+  console.log('Loading product ID:', productId);
+  
   if (!productId) {
-    // Redirect to products page if no ID
+    console.error('No product ID in URL');
     window.location.href = 'products.html';
     return;
   }
@@ -140,55 +143,77 @@ function loadProductFromURL() {
   currentProduct = PRODUCTS.find(p => p.id === productId);
   
   if (!currentProduct) {
-    // Show product not found
+    console.error('Product not found:', productId);
     showProductNotFound();
     return;
   }
 
+  console.log('Product loaded:', currentProduct);
   renderProduct();
 }
 
 function renderProduct() {
   if (!currentProduct) return;
 
+  console.log('Rendering product:', currentProduct.name);
+
   // Update page title
   document.title = `${currentProduct.name} - Nourabelle`;
 
   // Update product info
-  document.getElementById('product-category').textContent = currentProduct.category.charAt(0).toUpperCase() + currentProduct.category.slice(1);
-  document.getElementById('product-title').textContent = currentProduct.name;
-  document.getElementById('product-description').textContent = currentProduct.description;
+  const categoryEl = document.getElementById('product-category');
+  const titleEl = document.getElementById('product-title');
+  const descriptionEl = document.getElementById('product-description');
+  
+  if (categoryEl) categoryEl.textContent = currentProduct.category.charAt(0).toUpperCase() + currentProduct.category.slice(1);
+  if (titleEl) titleEl.textContent = currentProduct.name;
+  if (descriptionEl) descriptionEl.textContent = currentProduct.description;
 
   // Update price
-  document.getElementById('product-price').textContent = `${currentProduct.price} EGP`;
+  const priceEl = document.getElementById('product-price');
+  if (priceEl) priceEl.textContent = `${currentProduct.price} EGP`;
   
   const originalPrice = document.getElementById('original-price');
-  const savings = document.getElementById('savings');
   
   if (currentProduct.originalPrice) {
-    originalPrice.textContent = `${currentProduct.originalPrice} EGP`;
-    originalPrice.style.display = 'inline';
-    
-    const discountPercentage = Math.round(((currentProduct.originalPrice - currentProduct.price) / currentProduct.originalPrice) * 100);
-    savings.textContent = `Save ${discountPercentage}%`;
-    savings.style.display = 'inline';
+    if (originalPrice) {
+      originalPrice.textContent = `${currentProduct.originalPrice} EGP`;
+      originalPrice.style.display = 'inline';
+    }
   } else {
-    originalPrice.style.display = 'none';
-    savings.style.display = 'none';
+    if (originalPrice) originalPrice.style.display = 'none';
   }
 
   // Update badge
   const badge = document.getElementById('product-badge');
-  if (currentProduct.badge) {
-    badge.textContent = currentProduct.badge;
-    badge.className = `image-badge badge-${currentProduct.badge}`;
-    badge.style.display = 'block';
-  } else {
-    badge.style.display = 'none';
+  if (badge) {
+    if (currentProduct.badge) {
+      badge.textContent = currentProduct.badge.toUpperCase();
+      badge.style.display = 'block';
+    } else {
+      badge.style.display = 'none';
+    }
   }
 
-  // Update main image
-  document.getElementById('product-image').src = currentProduct.images[0];
+  // Update main image with error handling
+  const mainImage = document.getElementById('product-image');
+  if (mainImage && currentProduct.images && currentProduct.images.length > 0) {
+    console.log('Setting main image to:', currentProduct.images[0]);
+    
+    // Add error handling for images
+    mainImage.onerror = function() {
+      console.error('Failed to load image:', this.src);
+      // Try alternative path
+      const altSrc = this.src.replace('../assets/', 'assets/');
+      if (this.src !== altSrc) {
+        console.log('Trying alternative path:', altSrc);
+        this.src = altSrc;
+      }
+    };
+    
+    mainImage.src = currentProduct.images[0];
+    mainImage.alt = currentProduct.name;
+  }
 
   // Render thumbnails
   renderThumbnails();
@@ -199,8 +224,8 @@ function renderProduct() {
 
 function renderThumbnails() {
   const container = document.getElementById('thumbnail-container');
-  if (!container || currentProduct.images.length <= 1) {
-    container.style.display = 'none';
+  if (!container || !currentProduct.images || currentProduct.images.length <= 1) {
+    if (container) container.style.display = 'none';
     return;
   }
 
@@ -209,7 +234,8 @@ function renderThumbnails() {
     <img src="${image}" 
          alt="${currentProduct.name} ${index + 1}" 
          class="thumbnail ${index === activeImageIndex ? 'active' : ''}"
-         onclick="selectImage(${index})">
+         onclick="selectImage(${index})"
+         onerror="this.onerror=null; this.src=this.src.replace('../assets/', 'assets/');">
   `).join('');
 }
 
@@ -222,16 +248,12 @@ function renderFeatures() {
 
 function setupEventListeners() {
   // Size selection
-  const sizeOptions = document.querySelectorAll('.size-option');
-  sizeOptions.forEach(option => {
-    option.addEventListener('click', () => {
-      // Remove active class from all
-      sizeOptions.forEach(opt => opt.classList.remove('selected'));
-      // Add to clicked
-      option.classList.add('selected');
-      selectedSize = option.dataset.size;
+  const sizeSelect = document.getElementById('size');
+  if (sizeSelect) {
+    sizeSelect.addEventListener('change', (e) => {
+      selectedSize = e.target.value;
     });
-  });
+  }
 
   // Quantity controls
   const quantityInput = document.getElementById('quantity-input');
@@ -244,12 +266,21 @@ function setupEventListeners() {
 
   // Mobile menu
   setupMobileMenu();
+  
+  // Search functionality
+  setupSearch();
 }
 
 // Image selection
 function selectImage(index) {
+  if (!currentProduct || !currentProduct.images) return;
+  
   activeImageIndex = index;
-  document.getElementById('product-image').src = currentProduct.images[index];
+  const mainImage = document.getElementById('product-image');
+  if (mainImage) {
+    console.log('Switching to image:', currentProduct.images[index]);
+    mainImage.src = currentProduct.images[index];
+  }
   
   // Update thumbnail active state
   document.querySelectorAll('.thumbnail').forEach((thumb, i) => {
@@ -262,7 +293,7 @@ function changeQuantity(change) {
   const input = document.getElementById('quantity-input');
   const newQuantity = Math.max(1, Math.min(10, quantity + change));
   quantity = newQuantity;
-  input.value = newQuantity;
+  if (input) input.value = newQuantity;
 }
 
 // Add to cart function
@@ -297,56 +328,28 @@ function addToCart() {
 
   // Visual feedback
   const button = document.getElementById('buy-button');
-  const originalText = button.innerHTML;
-  
-  button.innerHTML = `
-    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-      <path d="M20 6L9 17l-5-5"/>
-    </svg>
-    Added to Cart!
-  `;
-  button.style.background = '#27ae60';
-  
-  setTimeout(() => {
-    button.innerHTML = originalText;
-    button.style.background = 'var(--btn)';
-  }, 2000);
+  if (button) {
+    const originalText = button.innerHTML;
+    
+    button.innerHTML = `
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M20 6L9 17l-5-5"/>
+      </svg>
+      Added to Cart!
+    `;
+    button.style.background = '#27ae60';
+    
+    setTimeout(() => {
+      button.innerHTML = originalText;
+      button.style.background = 'var(--btn)';
+    }, 2000);
+  }
 
   // Update cart count
   updateCartCount();
 
   // Show notification
   showNotification(`${currentProduct.name} added to cart!`);
-}
-
-// Wishlist functions
-function toggleWishlist() {
-  if (!currentProduct) return;
-
-  let wishlist = JSON.parse(localStorage.getItem('nourabelle_wishlist') || '[]');
-  const isInWishlist = wishlist.some(item => item.id === currentProduct.id);
-  
-  const button = document.querySelector('.wishlist-btn');
-  
-  if (isInWishlist) {
-    // Remove from wishlist
-    wishlist = wishlist.filter(item => item.id !== currentProduct.id);
-    button.classList.remove('active');
-    showNotification(`${currentProduct.name} removed from wishlist`);
-  } else {
-    // Add to wishlist
-    wishlist.push({
-      id: currentProduct.id,
-      name: currentProduct.name,
-      price: currentProduct.price,
-      image: currentProduct.image,
-      dateAdded: new Date().toISOString()
-    });
-    button.classList.add('active');
-    showNotification(`${currentProduct.name} added to wishlist!`);
-  }
-
-  localStorage.setItem('nourabelle_wishlist', JSON.stringify(wishlist));
 }
 
 // Utility functions
@@ -416,24 +419,132 @@ function showProductNotFound() {
 
 // Mobile menu setup
 function setupMobileMenu() {
-  const hamburger = document.querySelector('.hamburger');
+  const hamburger = document.getElementById('hamburger');
   const mobileMenu = document.getElementById('mobileMenu');
+  const mobileClose = document.getElementById('mobileClose');
   
   if (hamburger && mobileMenu) {
     hamburger.addEventListener('click', () => {
-      const isOpen = mobileMenu.style.display === 'flex';
-      mobileMenu.style.display = isOpen ? 'none' : 'flex';
-      document.body.style.overflow = isOpen ? '' : 'hidden';
-    });
-    
-    // Close menu when clicking on links
-    mobileMenu.querySelectorAll('a').forEach(link => {
-      link.addEventListener('click', () => {
-        mobileMenu.style.display = 'none';
-        document.body.style.overflow = '';
-      });
+      mobileMenu.classList.add('open');
+      document.body.classList.add('menu-open');
     });
   }
+  
+  if (mobileClose) {
+    mobileClose.addEventListener('click', () => {
+      mobileMenu.classList.remove('open');
+      document.body.classList.remove('menu-open');
+    });
+  }
+  
+  if (mobileMenu) {
+    mobileMenu.addEventListener('click', (e) => {
+      if (e.target === mobileMenu) {
+        mobileMenu.classList.remove('open');
+        document.body.classList.remove('menu-open');
+      }
+    });
+  }
+}
+
+// Search functionality
+function setupSearch() {
+  const searchBtn = document.getElementById('searchBtn');
+  const searchOverlay = document.getElementById('searchOverlay');
+  const searchClose = document.getElementById('searchClose');
+  const searchInput = document.getElementById('searchInput');
+  const searchResults = document.getElementById('searchResults');
+
+  if (!searchBtn || !searchOverlay) return;
+
+  function openSearch() {
+    searchOverlay.classList.add('open');
+    setTimeout(() => searchInput && searchInput.focus(), 100);
+  }
+
+  function closeSearch() {
+    searchOverlay.classList.remove('open');
+    if (searchInput) searchInput.value = '';
+    if (searchResults) searchResults.innerHTML = '';
+  }
+
+  function performSearch() {
+    const query = searchInput.value.toLowerCase().trim();
+    
+    if (query.length < 2) {
+      searchResults.innerHTML = '';
+      return;
+    }
+
+    const results = PRODUCTS.filter(product => 
+      product.name.toLowerCase().includes(query) ||
+      product.category.toLowerCase().includes(query) ||
+      product.description.toLowerCase().includes(query)
+    );
+
+    displaySearchResults(results);
+  }
+
+  function displaySearchResults(results) {
+    if (results.length === 0) {
+      searchResults.innerHTML = '<div style="padding: 20px; text-align: center; color: #666;">No products found</div>';
+      return;
+    }
+
+    searchResults.innerHTML = results.map(product => `
+      <div class="search-result" onclick="window.location.href='product.html?product=${product.id}'" style="
+        display: flex;
+        align-items: center;
+        padding: 15px 20px;
+        border-bottom: 1px solid #eee;
+        cursor: pointer;
+        transition: background 0.3s;
+      " onmouseover="this.style.background='#f5f5f5'" onmouseout="this.style.background=''">
+        <img src="${product.image}" alt="${product.name}" style="
+          width: 50px;
+          height: 50px;
+          object-fit: cover;
+          border-radius: 4px;
+          margin-right: 15px;
+        ">
+        <div>
+          <div style="font-weight: 500; margin-bottom: 4px;">${product.name}</div>
+          <div style="color: var(--btn); font-weight: 600;">${product.price} EGP</div>
+        </div>
+      </div>
+    `).join('');
+  }
+
+  if (searchBtn) searchBtn.addEventListener('click', openSearch);
+  if (searchClose) searchClose.addEventListener('click', closeSearch);
+  if (searchInput) {
+    searchInput.addEventListener('input', debounce(performSearch, 300));
+  }
+
+  if (searchOverlay) {
+    searchOverlay.addEventListener('click', (e) => {
+      if (e.target === searchOverlay) closeSearch();
+    });
+  }
+
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && searchOverlay && searchOverlay.classList.contains('open')) {
+      closeSearch();
+    }
+  });
+}
+
+// Debounce function
+function debounce(func, wait) {
+  let timeout;
+  return function executedFunction(...args) {
+    const later = () => {
+      clearTimeout(timeout);
+      func(...args);
+    };
+    clearTimeout(timeout);
+    timeout = setTimeout(later, wait);
+  };
 }
 
 // Add CSS animations
@@ -453,8 +564,7 @@ if (!document.getElementById('product-animations')) {
   document.head.appendChild(style);
 }
 
-// Global functions
+// Global functions for HTML onclick events
 window.selectImage = selectImage;
 window.changeQuantity = changeQuantity;
 window.addToCart = addToCart;
-window.toggleWishlist = toggleWishlist;

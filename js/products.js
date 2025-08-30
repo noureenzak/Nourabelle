@@ -1,8 +1,8 @@
-// Products Page JavaScript - Fixed Navigation and Consistent with Index
+// Products Page JavaScript - Fixed Navigation and Paths
 
 'use strict';
 
-// Product data with correct image paths and dates for sorting
+// Product data with correct image paths for pages directory
 const PRODUCTS = [
   {
     id: 'whiteset',
@@ -216,12 +216,13 @@ function setupProductInteractions() {
   });
 }
 
-// Product navigation - FIXED to absolute relative path
+// FIXED: Product navigation - correct path within pages directory
 function goToProduct(productId) {
-  window.location.href = '/pages/product.html?product=' + productId;
+  console.log('Navigating to product:', productId);
+  window.location.href = `product.html?product=${productId}`;
 }
 
-// Cart management functions - keeping all your existing functionality
+// Cart management functions
 function updateCartCount() {
   const cart = JSON.parse(localStorage.getItem('nourabelle_cart') || '[]');
   const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
@@ -277,7 +278,7 @@ function showNotification(message) {
   }, 3000);
 }
 
-// Mobile menu setup - keeping your existing functionality
+// Mobile menu setup
 function setupMobileMenu() {
   const hamburger = document.getElementById('hamburger');
   const mobileMenu = document.getElementById('mobileMenu');
@@ -308,7 +309,7 @@ function setupMobileMenu() {
   }
 }
 
-// Search functionality - keeping your existing functionality
+// Search functionality
 function setupSearch() {
   const searchBtn = document.getElementById('searchBtn');
   const searchOverlay = document.getElementById('searchOverlay');

@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Path Test</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            padding: 20px; 
+            background: #f5f5f5;
+        }
+        .test-section {
+            background: white;
+            padding: 20px;
+            margin: 10px 0;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .test-btn {
+            background: #ad7c7c;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+            display: block;
+            width: 300px;
+        }
+        .test-btn:hover { background: #8b6666; }
+        .result { 
+            margin: 10px 0; 
+            padding: 10px; 
+            background: #f8f9fa; 
+            border-radius: 5px;
+        }
+        .success { color: #27ae60; font-weight: bold; }
+        .error { color: #e74c3c; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Nourabelle Path Test</h1>
+    <p><strong>Current URL:</strong> <span id="current-url"></span></p>
+    <p><strong>Current Directory:</strong> <span id="current-dir"></span></p>
+
+    <div class="test-section">
+        <h2>File Existence Tests</h2>
+        <button class="test-btn" onclick="testProductPage()">Test: Does product.html exist?</button>
+        <button class="test-btn" onclick="testWithParams()">Test: product.html?product=whiteset</button>
+        <button class="test-btn" onclick="testAbsolutePath()">Test: Absolute path navigation</button>
+        <div id="test-results"></div>
+    </div>
+
+    <div class="test-section">
+        <h2>Direct Navigation Tests</h2>
+        <button class="test-btn" onclick="directNav1()">Direct: product.html?product=whiteset</button>
+        <button class="test-btn" onclick="directNav2()">Direct: ./product.html?product=whiteset</button>
+        <button class="test-btn" onclick="directNav3()">Test: Check if images load</button>
+        <div id="nav-results"></div>
+    </div>
+
+    <script>
+        // Display current location info
+        document.getElementById('current-url').textContent = window.location.href;
+        document.getElementById('current-dir').textContent = window.location.pathname;
+
+        function testProductPage() {
+            const results = document.getElementById('test-results');
+            results.innerHTML = '<p>Testing if product.html exists...</p>';
+            
+            fetch('product.html', { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        results.innerHTML += '<p class="success">✅ product.html exists and is accessible!</p>';
+                    } else {
+                        results.innerHTML += `<p class="error">❌ product.html not found (HTTP ${response.status})</p>`;
+                    }
+                })
+                .catch(error => {
+                    results.innerHTML += `<p class="error">❌ Error accessing product.html: ${error.message}</p>`;
+                });
+        }
+
+        function testWithParams() {
+            const results = document.getElementById('test-results');
+            const testUrl = 'product.html?product=whiteset';
+            
+            fetch(testUrl, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        results.innerHTML += '<p class="success">✅ product.html?product=whiteset is accessible!</p>';
+                    } else {
+                        results.innerHTML += `<p class="error">❌ product.html with params failed (HTTP ${response.status})</p>`;
+                    }
+                })
+                .catch(error => {
+                    results.innerHTML += `<p class="error">❌ Error with params: ${error.message}</p>`;
+                });
+        }
+
+        function testAbsolutePath() {
+            const results = document.getElementById('test-results');
+            const currentPath = window.location.pathname;
+            const basePath = currentPath.substring(0, currentPath.lastIndexOf('/'));
+            const absoluteUrl = window.location.origin + basePath + '/product.html';
+            
+            results.innerHTML += `<p>Testing absolute path: ${absoluteUrl}</p>`;
+            
+            fetch(absoluteUrl, { method: 'HEAD' })
+                .then(response => {
+                    if (response.ok) {
+                        results.innerHTML += '<p class="success">✅ Absolute path works!</p>';
+                    } else {
+                        results.innerHTML += `<p class="error">❌ Absolute path failed (HTTP ${response.status})</p>`;
+                    }
+                })
+                .catch(error => {
+                    results.innerHTML += `<p class="error">❌ Absolute path error: ${error.message}</p>`;
+                });
+        }
+
+        function directNav1() {
+            console.log('Direct navigation test 1: product.html?product=whiteset');
+            window.location.href = 'product.html?product=whiteset';
+        }
+
+        function directNav2() {
+            console.log('Direct navigation test 2: ./product.html?product=whiteset');
+            window.location.href = './product.html?product=whiteset';
+        }
+
+        function directNav3() {
+            const results = document.getElementById('nav-results');
+            results.innerHTML = '<h3>Image Loading Test:</h3>';
+            
+            const testImages = [
+                '../assets/images/whiteset1.jpg',
+                '../assets/images/blackset1.jpg',
+                '../assets/images/logo.jpg'
+            ];
+            
+            testImages.forEach(imagePath => {
+                const img = document.createElement('img');
+                img.src = imagePath;
+                img.style.cssText = 'width: 100px; height: 100px; object-fit: cover; margin: 5px; border: 2px solid #ddd;';
+                
+                img.onload = function() {
+                    this.style.borderColor = '#27ae60';
+                    results.innerHTML += `<p class="success">✅ Image loaded: ${imagePath}</p>`;
+                };
+                
+                img.onerror = function() {
+                    this.style.borderColor = '#e74c3c';
+                    results.innerHTML += `<p class="error">❌ Image failed: ${imagePath}</p>`;
+                };
+                
+                results.appendChild(img);
+            });
+        }
+
+        // Auto-run when page loads
+        window.addEventListener('load', function() {
+            console.log('Test page loaded');
+            console.log('Location:', window.location.href);
+            console.log('Pathname:', window.location.pathname);
+            
+            // Check if we can see product.html
+            const productLink = document.createElement('a');
+            productLink.href = 'product.html';
+            console.log('Resolved product.html URL:', productLink.href);
+        });
+    </script>
+</body>
+</html>

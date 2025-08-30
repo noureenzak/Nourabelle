@@ -1,4 +1,4 @@
-// Nourabelle - Clean JavaScript (No contradictions)
+// Nourabelle - Clean JavaScript (Fixed Navigation)
 
 'use strict';
 
@@ -268,7 +268,7 @@ function initCartSystem() {
 
 function getCart() {
   try {
-    return JSON.parse(sessionStorage.getItem('cart') || '[]');
+    return JSON.parse(localStorage.getItem('nourabelle_cart') || '[]');
   } catch (e) {
     console.error('Cart parsing error:', e);
     return [];
@@ -277,7 +277,7 @@ function getCart() {
 
 function saveCart(cart) {
   try {
-    sessionStorage.setItem('cart', JSON.stringify(cart));
+    localStorage.setItem('nourabelle_cart', JSON.stringify(cart));
     updateCartCount();
     document.dispatchEvent(new CustomEvent('cartUpdated'));
   } catch (e) {
@@ -377,11 +377,13 @@ function scrollToProducts() {
 }
 
 // ========== GLOBAL FUNCTIONS ==========
+// FIXED: Correct navigation from homepage to product page
 window.goToProduct = function(productId) {
   // Validate product ID
   const product = PRODUCTS.find(p => p.id === productId);
   if (product) {
-    window.location.href = `pages/product.html?id=${encodeURIComponent(productId)}`;
+    // FIXED: Use correct path - pages/product.html, not pages/pages/product.html
+    window.location.href = `pages/product.html?product=${encodeURIComponent(productId)}`;
   }
 };
 
