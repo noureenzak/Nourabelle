@@ -3,207 +3,163 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Our Collection – Nourabelle</title>
-  <link rel="stylesheet" href="style.css" />
-  <link rel="stylesheet" href="products.css" />
-  <script defer src="script.js"></script>
-  <script defer src="cart.js"></script>
-  <script defer src="products.js"></script>
-
+  <title>All Products – Nourabelle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/products.css" />
+  <script defer src="../js/script.js"></script>
+  <script defer src="../js/products.js"></script>
 </head>
 <body>
+
   <!-- Navbar -->
   <header class="navbar">
-    <!-- Hamburger (mobile only) -->
-    <div class="hamburger">&#9776;</div>
+    <!-- Mobile Hamburger -->
+    <div class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <nav class="desktop-nav">
+      <a href="../index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="policy.html">Returns & Exchange</a>
+      <a href="#contact">Contact Us</a>
+    </nav>
 
     <!-- Centered Logo -->
     <div class="nav-center">
-      <a href="index.html">
-        <img src="images/logo.jpg" alt="Nourabelle Logo" class="hero-logo" />
+      <a href="../index.html">
+        <img src="../assets/images/logo.jpg" alt="Nourabelle Logo" class="hero-logo" />
       </a>
     </div>
 
-    <!-- Cart Icon (right) -->
-    <div class="cart-icon-link">
-      <a href="cart.html" aria-label="Cart">
-        <svg xmlns="http://www.w3.org/2000/svg" class="cart-icon" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M7 18c-1.104 0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zm10 0c-1.104 
-          0-2 .896-2 2s.896 2 2 2 2-.896 2-2-.896-2-2-2zM7.333 14l-.867-2H18v-2H7l-.867-2H3v2h2l3.6 
-          7.59-1.35 2.44c-.16.29-.25.63-.25 1 0 1.1.9 2 2 2h12v-2H7.42c-.14 
-          0-.25-.11-.25-.25l.03-.12L8.1 16h8.45c.75 0 1.41-.41 1.75-1.03l3.58-6.49-1.74-1.01L18.1 
-          13H7.333z"/>
+    <!-- Right Side Icons -->
+    <div class="nav-actions">
+      <!-- Search Icon -->
+      <button class="search-btn" id="searchBtn" aria-label="Search">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
         </svg>
-        <span id="cart-count" class="cart-count">0</span>
-      </a>
-    </div>
+      </button>
 
-    <!-- Mobile Menu -->
-    <div id="mobileMenu" class="mobile-menu">
-      <a href="index.html">Home</a>
-      <a href="products.html">Products</a>
-      <a href="#contact">Contact Us</a>
+      <!-- Cart Icon -->
+      <div class="cart-icon-link">
+        <a href="cart.html" aria-label="Cart">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+            <path d="M20 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <span id="cart-count" class="cart-count">0</span>
+        </a>
+      </div>
     </div>
   </header>
 
-  <!-- Enhanced Products Page -->
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <img src="../assets/images/logo.jpg" alt="Nourabelle" class="mobile-menu-logo">
+      <button class="mobile-close" id="mobileClose">&times;</button>
+    </div>
+
+    <div class="mobile-menu-content">
+      <a href="../index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="policy.html">Exchange & Return Policy</a>
+      <a href="#contact">Contact Us</a>
+    </div>
+  </div>
+
+  <!-- Search Overlay -->
+  <div class="search-overlay" id="searchOverlay">
+    <div class="search-container">
+      <input type="text" id="searchInput" placeholder="Search products..." autocomplete="off">
+      <button class="search-close" id="searchClose">&times;</button>
+    </div>
+    <div class="search-results" id="searchResults"></div>
+  </div>
+
+  <!-- Products Grid -->
   <main class="products-page">
-    <!-- Page Header -->
-    <h1 class="page-title">Our Collection</h1>
-    <p class="page-subtitle">Modest fashion for the modern woman</p>
-
-    <!-- Aesthetic Filter Section -->
-    <section class="filter-section">
-      <div class="filter-content">
-        <h2 class="filter-title">Discover Your Style</h2>
-        <p class="filter-subtitle">Curated with love for every occasion</p>
+    <h1>Our Collection</h1>
+    
+    <!-- Filter and Sort Section -->
+    <div class="filters-section">
+      <div class="filter-controls">
+        <select id="categoryFilter" class="filter-dropdown">
+          <option value="all">All Categories</option>
+          <option value="sets">Sets</option>
+          <option value="cardigans">Cardigans</option>
+          <option value="sale">Sale Items</option>
+        </select>
         
-        <div class="filter-buttons">
-          <button class="filter-btn active" data-filter="all">All Treasures</button>
-          <button class="filter-btn" data-filter="sets">Elegant Sets</button>
-          <button class="filter-btn" data-filter="cardigans">Cozy Cardigans</button>
-          <button class="filter-btn" data-filter="sale">Special Offers</button>
-        </div>
-        
-        <div class="sort-section">
-          <span class="sort-label">Sort by:</span>
-          <select id="sortSelect" class="sort-select">
-            <option value="featured">Featured</option>
-            <option value="price-low">Price: Low to High</option>
-            <option value="price-high">Price: High to Low</option>
-            <option value="name">Name A-Z</option>
-          </select>
-        </div>
+        <select id="sortFilter" class="filter-dropdown">
+          <option value="newest">Newest First</option>
+          <option value="oldest">Oldest First</option>
+          <option value="price-low">Price: Low to High</option>
+          <option value="price-high">Price: High to Low</option>
+          <option value="sale">Sale Items First</option>
+        </select>
       </div>
-    </section>
+    </div>
 
-    <!-- Enhanced Products Grid -->
-    <div class="products-grid">
-      <div class="product-item" 
-           onclick="goToProduct('whiteset')" 
-           data-category="sets" 
-           data-price="1500" 
-           data-name="White Set">
-        <div class="product-image-container">
-          <img src="images/whiteset1.jpg" alt="White Set">
-          <div class="product-actions">
-            <button class="action-btn" onclick="quickAddToCart('whiteset', event)" title="Quick Add">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">White Set</h3>
-          <p class="product-price">1500 EGP</p>
-        </div>
+    <!-- Loading state -->
+    <div class="loading-state" id="loadingState" style="display: none;">
+      <div class="loading-spinner"></div>
+      <p>Loading our beautiful collection...</p>
+    </div>
+
+    <!-- Products grid -->
+    <div class="products-grid" id="productsGrid">
+      <div class="product-item" onclick="goToProduct('whiteset')">
+        <img src="../assets/images/whiteset1.jpg" alt="White Set">
+        <p>Elegant White Set</p>
+        <p class="price">1500 EGP</p>
       </div>
 
-      <div class="product-item" 
-           onclick="goToProduct('blackset')" 
-           data-category="sets" 
-           data-price="1500" 
-           data-name="Black Set">
-        <div class="product-image-container">
-          <img src="images/blackset1.jpg" alt="Black Set">
-          <div class="product-actions">
-            <button class="action-btn" onclick="quickAddToCart('blackset', event)" title="Quick Add">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">Black Set</h3>
-          <p class="product-price">1500 EGP</p>
-        </div>
+      <div class="product-item" onclick="goToProduct('blackset')">
+        <img src="../assets/images/blackset1.jpg" alt="Black Set">
+        <p>Classic Black Set</p>
+        <p class="price">1500 EGP</p>
       </div>
 
-      <div class="product-item" 
-           onclick="goToProduct('browncardigan')" 
-           data-category="cardigans" 
-           data-price="1275" 
-           data-name="Brown Cardigan">
-        <div class="product-image-container">
-          <img src="images/browncardigan1.jpg" alt="Brown Cardigan">
-          <div class="product-actions">
-            <button class="action-btn" onclick="quickAddToCart('browncardigan', event)" title="Quick Add">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">Brown Cardigan</h3>
-          <p class="product-price">1275 EGP</p>
-        </div>
+      <div class="product-item" onclick="goToProduct('browncardigan')">
+        <img src="../assets/images/browncardigan1.jpg" alt="Brown Cardigan">
+        <p>Cozy Brown Cardigan</p>
+        <p class="price-sale">
+          <span class="current-price">1275 EGP</span>
+          <span class="original-price">1500 EGP</span>
+        </p>
       </div>
 
-      <div class="product-item" 
-           onclick="goToProduct('blackcardigan')" 
-           data-category="cardigans" 
-           data-price="1500" 
-           data-name="Black Cardigan">
-        <div class="product-image-container">
-          <img src="images/blackcardigan1.jpg" alt="Black Cardigan">
-          <div class="product-actions">
-            <button class="action-btn" onclick="quickAddToCart('blackcardigan', event)" title="Quick Add">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">Black Cardigan</h3>
-          <p class="product-price">1500 EGP</p>
-        </div>
+      <div class="product-item" onclick="goToProduct('blackcardigan')">
+        <img src="../assets/images/blackcardigan1.jpg" alt="Black Cardigan">
+        <p>Timeless Black Cardigan</p>
+        <p class="price">1500 EGP</p>
       </div>
 
-      <div class="product-item" 
-           onclick="goToProduct('beigeset')" 
-           data-category="sets" 
-           data-price="1500" 
-           data-name="Beige Set">
-        <div class="product-image-container">
-          <img src="images/beigeset1.jpg" alt="Beige Set">
-          <div class="product-actions">
-            <button class="action-btn" onclick="quickAddToCart('beigeset', event)" title="Quick Add">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">Beige Set</h3>
-          <p class="product-price">1500 EGP</p>
-        </div>
+      <div class="product-item" onclick="goToProduct('beigeset')">
+        <img src="../assets/images/beigeset1.jpg" alt="Beige Set">
+        <p>Soft Beige Set</p>
+        <p class="price">1500 EGP</p>
       </div>
 
-      <div class="product-item" 
-           onclick="goToProduct('blueset')" 
-           data-category="sets" 
-           data-price="1500" 
-           data-name="Blue Set">
-        <div class="product-image-container">
-          <img src="images/blueset1.jpg" alt="Blue Set">
-          <div class="product-actions">
-            <button class="action-btn" onclick="quickAddToCart('blueset', event)" title="Quick Add">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M12 5v14M5 12h14"/>
-              </svg>
-            </button>
-          </div>
-        </div>
-        <div class="product-info">
-          <h3 class="product-name">Blue Set</h3>
-          <p class="product-price">1500 EGP</p>
-        </div>
+      <div class="product-item" onclick="goToProduct('blueset')">
+        <img src="../assets/images/blueset1.jpg" alt="Blue Set">
+        <p>Fresh Blue Set</p>
+        <p class="price">1500 EGP</p>
       </div>
+    </div>
+
+    <!-- No products state -->
+    <div class="no-products" id="noProducts" style="display: none;">
+      <h3>No products found</h3>
+      <p>Try adjusting your filters or check back later for new items.</p>
     </div>
   </main>
 
@@ -211,21 +167,24 @@
   <footer id="contact">
     <div class="footer-content">
       <a href="https://www.instagram.com/nourabellebynour/" target="_blank" aria-label="Instagram" class="footer-icon-link">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M7.75 2h8.5A5.75 5.75 0 0122 7.75v8.5A5.75 5.75 0 0116.25 22h-8.5A5.75 5.75 0 012 16.25v-8.5A5.75 5.75 0 017.75 2zm0 1.5A4.25 4.25 0 003.5 7.75v8.5A4.25 4.25 0 007.75 20.5h8.5a4.25 4.25 0 004.25-4.25v-8.5A4.25 4.25 0 0016.25 3.5h-8.5zM12 7a5 5 0 110 10 5 5 0 010-10zm0 1.5a3.5 3.5 0 100 7 3.5 3.5 0 000-7zm4.75-.25a1.25 1.25 0 11-2.5 0 1.25 1.25 0 012.5 0z"/>
-        </svg>
-      </a>
-      <a href="mailto:nourabelle@email.com" aria-label="Email" class="footer-icon-link">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M20 4H4a2 2 0 00-2 2v12a2 2 0 002 2h16a2 2 0 002-2V6a2 2 0 00-2-2zm0 2v.01L12 13 4 6.01V6h16zM4 18V8l7.17 5.83a1 1 0 001.66 0L20 8v10H4z"/>
-        </svg>
-      </a>
-      <a href="tel:+201234567890" aria-label="Phone" class="footer-icon-link">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
-          <path d="M6.62 10.79a15.093 15.093 0 006.59 6.59l2.2-2.2a1 1 0 011.11-.21 11.436 11.436 0 003.58.57 1 1 0 011 1v3.5a1 1 0 01-1 1A16 16 0 013 5a1 1 0 011-1h3.5a1 1 0 011 1 11.436 11.436 0 00.57 3.58 1 1 0 01-.21 1.11l-2.24 2.1z"/>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
         </svg>
       </a>
     </div>
+    
+    <div class="footer-links">
+      <a href="policy.html" class="footer-link">Returns & Exchange</a>
+      <span class="footer-dot"></span>
+      <a href="#contact" class="footer-link">Contact Us</a>
+    </div>
+    
+    <div class="footer-brand">
+      <span class="brand-heart">♡</span>
+      <span>Nourabelle</span>
+      <span class="brand-heart">♡</span>
+    </div>
   </footer>
+
 </body>
 </html>
