@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nourabelle Admin Dashboard</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #fdf7f0 0%, #f0e3da 100%);
+            min-height: 100vh;
+        }
+
+        /* Header */
+        .admin-header {
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #ad7c7c;
+        }
+
+        .logout-btn {
+            background: #ad7c7c;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 6px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: #8b6666;
+            transform: translateY(-1px);
+        }
+
+        /* Main Container */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        /* Dashboard Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(173, 124, 124, 0.1);
+            text-align: center;
+            transition: transform 0.3s ease;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #ad7c7c;
+            margin-bottom: 0.5rem;
+        }
+
+        .stat-label {
+            color: #666;
+            font-size: 1rem;
+        }
+
+        /* Quick Actions */
+        .quick-actions {
+            margin-bottom: 3rem;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            color: #2b2b2b;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+
+        .action-btn {
+            background: white;
+            border: 2px solid #ad7c7c;
+            color: #ad7c7c;
+            padding: 1.5rem;
+            border-radius: 12px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .action-btn:hover {
+            background: #ad7c7c;
+            color: white;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(173, 124, 124, 0.3);
+        }
+
+        .action-icon {
+            font-size: 2rem;
+        }
+
+        /* Products Section */
+        .products-section {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 4px 20px rgba(173, 124, 124, 0.1);
+        }
+
+        .products-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .add-product-btn {
+            background: #ad7c7c;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .add-product-btn:hover {
+            background: #8b6666;
+            transform: translateY(-2px);
+        }
+
+        .products-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .product-card {
+            border: 2px solid #f0e3da;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .product-card:hover {
+            border-color: #ad7c7c;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 25px rgba(173, 124, 124, 0.15);
+        }
+
+        .product-image {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            background: #f5f5f5;
+        }
+
+        .product-info {
+            padding: 1.5rem;
+        }
+
+        .product-name {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #2b2b2b;
+            margin-bottom: 0.5rem;
+        }
+
+        .product-price {
+            font-size: 1rem;
+            color: #ad7c7c;
+            font-weight: 600;
+            margin-bottom: 1rem;
+        }
+
+        .product-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .btn-small {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            flex: 1;
+        }
+
+        .btn-edit {
+            background: #ad7c7c;
+            color: white;
+        }
+
+        .btn-delete {
+            background: #dc3545;
+            color: white;
+        }
+
+        .btn-small:hover {
+            transform: translateY(-1px);
+            opacity: 0.9;
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #666;
+        }
+
+        .empty-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+            opacity: 0.3;
+        }
+
+        /* Loading State */
+        .loading {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 200px;
+        }
+
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid #f0e3da;
+            border-top: 4px solid #ad7c7c;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .admin-header {
+                padding: 1rem;
+            }
+
+            .stat-number {
+                font-size: 2rem;
+            }
+
+            .products-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="logo">Nourabelle Admin</div>
+        <button class="logout-btn" onclick="logout()">Logout</button>
+    </header>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Dashboard Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-number" id="total-products">-</div>
+                <div class="stat-label">Total Products</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="featured-products">-</div>
+                <div class="stat-label">Featured Products</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="sale-products">-</div>
+                <div class="stat-label">Sale Products</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-number" id="total-orders">0</div>
+                <div class="stat-label">Total Orders</div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="quick-actions">
+            <h2 class="section-title">Quick Actions</h2>
+            <div class="action-buttons">
+                <button class="action-btn" onclick="showAddProductModal()">
+                    <div class="action-icon">➕</div>
+                    <div>Add New Product</div>
+                </button>
+                <button class="action-btn" onclick="window.open('../index.html', '_blank')">
+                    <div class="action-icon">🌐</div>
+                    <div>View Website</div>
+                </button>
+                <button class="action-btn" onclick="exportProducts()">
+                    <div class="action-icon">📊</div>
+                    <div>Export Products</div>
+                </button>
+                <button class="action-btn" onclick="showSettings()">
+                    <div class="action-icon">⚙️</div>
+                    <div>Settings</div>
+                </button>
+            </div>
+        </div>
+
+        <!-- Products Section -->
+        <div class="products-section">
+            <div class="products-header">
+                <h2 class="section-title">Products</h2>
+                <button class="add-product-btn" onclick="showAddProductModal()">
+                    <span>➕</span>
+                    Add Product
+                </button>
+            </div>
+
+            <div id="products-container">
+                <div class="loading">
+                    <div class="spinner"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Product Modal -->
+    <div id="product-modal" style="display: none;">
+        <!-- Modal content will be loaded here -->
+    </div>
+
+    <script>
+        // API Configuration
+        const API_BASE_URL = 'http://localhost:5000/api';
+
+        // Global variables
+        let products = [];
+        let editingProduct = null;
+
+        // Initialize dashboard
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+        });
+
+        async function loadDashboard() {
+            try {
+                await loadProducts();
+                updateStats();
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                showError('Failed to load dashboard data');
+            }
+        }
+
+        async function loadProducts() {
+            try {
+                const response = await fetch(`${API_BASE_URL}/products`);
+                const result = await response.json();
+                
+                if (result.success) {
+                    products = result.data;
+                    renderProducts();
+                } else {
+                    throw new Error(result.error);
+                }
+            } catch (error) {
+                console.error('Error loading products:', error);
+                renderEmptyState();
+            }
+        }
+
+        function renderProducts() {
+            const container = document.getElementById('products-container');
+            
+            if (products.length === 0) {
+                renderEmptyState();
+                return;
+            }
+
+            container.innerHTML = `
+                <div class="products-grid">
+                    ${products.map(product => `
+                        <div class="product-card">
+                            <img src="${product.images[0] || '/placeholder-image.jpg'}" 
+                                 alt="${product.name}" 
+                                 class="product-image"
+                                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjgwIiBoZWlnaHQ9IjIwMCIgdmlld0JveD0iMCAwIDI4MCAyMDAiIGZpbGw9Im5vbmUiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+CjxyZWN0IHdpZHRoPSIyODAiIGhlaWdodD0iMjAwIiBmaWxsPSIjZjVmNWY1Ii8+Cjx0ZXh0IHg9IjE0MCIgeT0iMTAwIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LXNpemU9IjE0Ij5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+Cjwvc3ZnPg==';">
+                            <div class="product-info">
+                                <div class="product-name">${product.name}</div>
+                                <div class="product-price">
+                                    ${product.original_price ? 
+                                        `<span style="text-decoration: line-through; color: #999;">${product.original_price} EGP</span> ${product.price} EGP` :
+                                        `${product.price} EGP`
+                                    }
+                                    ${product.featured ? '<span style="background: #ad7c7c; color: white; padding: 0.2rem 0.5rem; border-radius: 3px; font-size: 0.8rem; margin-left: 0.5rem;">Featured</span>' : ''}
+                                </div>
+                                <div class="product-actions">
+                                    <button class="btn-small btn-edit" onclick="editProduct(${product.id})">Edit</button>
+                                    <button class="btn-small btn-delete" onclick="deleteProduct(${product.id})">Delete</button>
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function renderEmptyState() {
+            const container = document.getElementById('products-container');
+            container.innerHTML = `
+                <div class="empty-state">
+                    <div class="empty-icon">📦</div>
+                    <h3>No Products Yet</h3>
+                    <p>Add your first product to get started!</p>
+                    <button class="add-product-btn" onclick="showAddProductModal()" style="margin-top: 1rem;">
+                        <span>➕</span>
+                        Add Your First Product
+                    </button>
+                </div>
+            `;
+        }
+
+        function updateStats() {
+            document.getElementById('total-products').textContent = products.length;
+            document.getElementById('featured-products').textContent = products.filter(p => p.featured).length;
+            document.getElementById('sale-products').textContent = products.filter(p => p.original_price).length;
+        }
+
+        function showAddProductModal() {
+            editingProduct = null;
+            // We'll implement the modal in the next step
+            alert('Add Product Modal - Coming in next step!');
+        }
+
+        function editProduct(id) {
+            editingProduct = products.find(p => p.id === id);
+            // We'll implement the edit modal in the next step
+            alert(`Edit Product: ${editingProduct.name} - Coming in next step!`);
+        }
+
+        async function deleteProduct(id) {
+            if (!confirm('Are you sure you want to delete this product?')) return;
+
+            try {
+                const response = await fetch(`${API_BASE_URL}/admin/products/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    await loadProducts();
+                    updateStats();
+                    showSuccess('Product deleted successfully!');
+                } else {
+                    throw new Error('Failed to delete product');
+                }
+            } catch (error) {
+                console.error('Error deleting product:', error);
+                showError('Failed to delete product');
+            }
+        }
+
+        function exportProducts() {
+            const csv = 'Name,Price,Category,Featured\n' + 
+                products.map(p => `"${p.name}",${p.price},"${p.category}",${p.featured ? 'Yes' : 'No'}`).join('\n');
+            
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'nourabelle-products.csv';
+            a.click();
+        }
+
+        function showSettings() {
+            alert('Settings page - Coming soon!');
+        }
+
+        function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                localStorage.removeItem('admin_token');
+                window.location.href = 'login.html';
+            }
+        }
+
+        function showError(message) {
+            // Simple error notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed; top: 20px; right: 20px; z-index: 1000;
+                background: #dc3545; color: white; padding: 1rem; border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+
+        function showSuccess(message) {
+            // Simple success notification
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed; top: 20px; right: 20px; z-index: 1000;
+                background: #28a745; color: white; padding: 1rem; border-radius: 8px;
+                box-shadow: 0 4px 12px rgba(0,0,0,0.15); animation: slideIn 0.3s ease;
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+            setTimeout(() => notification.remove(), 3000);
+        }
+    </script>
+</body>
+</html>
