@@ -731,3 +731,175 @@ body.menu-open {
     display: none;
   }
 }
+/* Contact Page */
+.contact-page {
+  margin-top: 80px;
+  padding: 3rem 1rem;
+  display: flex;
+  justify-content: center;
+}
+
+.contact-container {
+  max-width: 600px;
+  width: 100%;
+  background: white;
+  padding: 2rem;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(173,124,124,0.15);
+}
+
+.contact-container h1 {
+  font-size: 2rem;
+  margin-bottom: 1rem;
+  color: var(--btn);
+}
+
+.contact-container p {
+  margin-bottom: 1.5rem;
+  font-size: 1rem;
+}
+
+.contact-form label {
+  display: block;
+  font-weight: 600;
+  margin-bottom: 0.5rem;
+}
+
+.contact-form input,
+.contact-form textarea {
+  width: 100%;
+  padding: 12px;
+  margin-bottom: 1.5rem;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  font-family: var(--font);
+  font-size: 1rem;
+}
+
+.contact-form input:focus,
+.contact-form textarea:focus {
+  border-color: var(--btn);
+  outline: none;
+}
+
+.submit-btn {
+  background: var(--btn);
+  color: white;
+  padding: 14px 30px;
+  border: none;
+  border-radius: 25px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.submit-btn:hover {
+  background: var(--btn-hover);
+  transform: translateY(-2px);
+}
+
+.contact-info {
+  margin-top: 2rem;
+  font-size: 0.95rem;
+}
+
+.contact-info a {
+  color: var(--btn);
+  text-decoration: none;
+}
+
+.contact-info a:hover {
+  text-decoration: underline;
+}
+/* Policy Section */
+.policy-section {
+  max-width: 800px;
+  margin: 60px auto;
+  padding: 40px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
+  font-family: "Montserrat", sans-serif;
+  line-height: 1.7;
+  color: #444;
+}
+
+.policy-section h2 {
+  text-align: center;
+  font-size: 2rem;
+  margin-bottom: 20px;
+  color: #222;
+}
+
+.policy-section h3 {
+  margin-top: 25px;
+  margin-bottom: 10px;
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.policy-section p {
+  margin-bottom: 15px;
+  font-size: 1rem;
+}
+
+.policy-section ul {
+  list-style: disc;
+  margin: 10px 0 20px 20px;
+}
+
+.policy-section li {
+  margin-bottom: 8px;
+}
+
+.policy-help {
+  margin-top: 30px;
+  text-align: center;
+}
+
+.policy-btn {
+  display: inline-block;
+  margin-top: 10px;
+  padding: 12px 28px;
+  background: var(--btn);
+  color: #fff;
+  border-radius: 30px;
+  text-decoration: none;
+  font-weight: 600;
+  transition: 0.3s;
+}
+
+.policy-btn:hover {
+  background: #a38568;
+}
+/* Add this CSS to your style.css file for the login link */
+
+.desktop-nav .login-link {
+  background: var(--btn);
+  color: white !important;
+  padding: 8px 16px;
+  border-radius: 20px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  transition: all 0.3s ease;
+  margin-left: 10px;
+}
+
+.desktop-nav .login-link:hover {
+  background: var(--btn-hover);
+  color: white !important;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(173, 124, 124, 0.3);
+}
+
+.desktop-nav .login-link::after {
+  display: none; /* Remove the underline effect for login button */
+}
+
+/* Adjust desktop nav spacing */
+@media (min-width: 769px) {
+  .desktop-nav {
+    gap: 25px; /* Slightly reduce gap to accommodate login button */
+  }
+}

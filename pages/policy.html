@@ -1,37 +1,34 @@
-<!DOCTYPE html>
+polish it dotn toufch nav or fiooter and need help shoudl lead to contact page. <!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nourabelle</title>
+  <title>Contact Us - Nourabelle</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-  <!-- Navigation -->
+  <!-- Navbar -->
   <header class="navbar">
-    <!-- Mobile Hamburger -->
+    <!-- Hamburger for mobile -->
     <div class="hamburger" id="hamburger">
-      <span></span>
-      <span></span>
-      <span></span>
+      <span></span><span></span><span></span>
     </div>
 
-    <!-- Desktop Navigation Links -->
+    <!-- Desktop nav -->
     <nav class="desktop-nav">
-      <a href="index.html">Home</a>
-      <a href="pages/products.html">Products</a>
-      <a href="pages/policy.html">Returns & Exchange</a>
-      <a href="#contact">Contact Us</a>
+      <a href="../index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="policy.html">Returns & Exchange</a>
+      <a href="contactus.html" class="active">Contact Us</a>
     </nav>
 
-    <!-- Centered Logo -->
+    <!-- Logo -->
     <div class="nav-center">
-      <a href="index.html">
-        <img src="assets/images/logo.jpg" alt="Nourabelle Logo" class="hero-logo">
+      <a href="../index.html">
+        <img src="../assets/images/logo.jpg" alt="Nourabelle Logo" class="hero-logo">
       </a>
     </div>
-
     <!-- Right Side Icons -->
     <div class="nav-actions">
       <!-- Search Icon -->
@@ -42,7 +39,7 @@
         </svg>
       </button>
 
-      <!-- Cart Icon -->
+  <!-- Cart Icon -->
       <div class="cart-icon-link">
         <a href="pages/cart.html" aria-label="Cart">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -68,7 +65,6 @@
       <a href="pages/products.html">Products</a>
       <a href="pages/policy.html">Exchange & Return Policy</a>
 <a href="pages/contactus.html">Contact Us</a>
-<a href="admin/login.html">Login</a>
     </div>
 
     <a href="admin/login.html" class="mobile-login">Login</a>
@@ -83,64 +79,32 @@
     <div class="search-results" id="searchResults"></div>
   </div>
 
-  <!-- Hero Section with sliding images -->
-  <section class="hero">
-    <div class="slider-wrapper">
-      <img src="assets/images/hero1.jpg" class="slide-img active" alt="Hero Image 1">
-      <img src="assets/images/hero2.jpg" class="slide-img" alt="Hero Image 2">
-      <img src="assets/images/hero3.jpg" class="slide-img" alt="Hero Image 3">
-      <img src="assets/images/blueset2.jpg" class="slide-img" alt="Blue Set">
-      <img src="assets/images/browncardigan2.jpg" class="slide-img" alt="Brown Cardigan">
-    </div>
-    <div class="overlay">
-      <a href="pages/products.html" class="shop-now-btn">
-        Discover Collection
-      </a>
-    </div>
-  </section>
+<!-- Exchange & Returns Section -->
+<section class="policy-section">
+  <h2>Exchange & Returns Policy</h2>
+  
+  <p>We want you to love your Nourabelle purchase. If you’re not fully satisfied, you may request an exchange or return under these conditions:</p>
+  
+  <h3>Eligibility</h3>
+  <ul>
+    <li>Items must be returned within <strong>14 days</strong> of delivery.</li>
+    <li>Products must be <strong>unworn, unwashed, and in original packaging</strong> with all tags attached.</li>
+    <li>Sale or discounted items are <strong>final</strong> and cannot be returned or exchanged.</li>
+  </ul>
+  
+  <h3>Process</h3>
+  <p>Contact our team within 14 days. Once approved, you’ll receive return instructions. Customers are responsible for return shipping.</p>
+  
+  <h3>Refunds & Exchanges</h3>
+  <p>Refunds will be issued to your original payment method. Exchanges depend on availability of the requested item or size.</p>
+  
+  <div class="policy-help">
+    <p>Need assistance?</p>
+    <a href="contactus.html" class="policy-btn">Contact Us</a>
+  </div>
+</section>
 
-  <!-- Bestsellers Section -->
-  <section class="bestsellers" id="products">
-    <h2>Bestsellers</h2>
-    <div class="scroll-wrapper">
-      <div class="product-scroll" id="product-scroll">
-        <div class="product" onclick="goToProduct('whiteset')">
-          <img id="whiteset" src="assets/images/whiteset1.jpg" alt="White Set">
-          <p>White Set</p>
-          <p class="price">1500 EGP</p>
-        </div>
-        <div class="product" onclick="goToProduct('blackset')">
-          <img id="blackset" src="assets/images/blackset1.jpg" alt="Black Set">
-          <p>Black Set</p>
-          <p class="price">1500 EGP</p>
-        </div>
-        <div class="product" onclick="goToProduct('browncardigan')">
-          <img id="browncardigan" src="assets/images/browncardigan1.jpg" alt="Brown Cardigan">
-          <p>Brown Cardigan</p>
-          <p class="price">1500 EGP</p>
-        </div>
-        <div class="product" onclick="goToProduct('blackcardigan')">
-          <img id="blackcardigan" src="assets/images/blackcardigan1.jpg" alt="Black Cardigan">
-          <p>Black Cardigan</p>
-          <p class="price">1500 EGP</p>
-        </div>
-      </div>
-    </div>
-    <div class="view-more">
-      <a href="pages/products.html" class="view-more-btn">View More</a>
-    </div>
-  </section>
 
-  <!-- Video + Text Section -->
-  <section class="modest-message">
-    <video autoplay loop muted playsinline>
-      <source src="assets/videos/video1.mp4" type="video/mp4">
-    </video>
-    <div class="message">
-      <h3>Made with love</h3>
-      <p>To be modest, elegant, and true to you.</p>
-    </div>
-  </section>
 
   <!-- Footer -->
   <footer id="contact">
@@ -165,7 +129,6 @@
     </div>
   </footer>
 
-<!-- Add this before your existing script tag -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/script.js"></script></body>
+  <script src="../js/script.js"></script>
+</body>
 </html>

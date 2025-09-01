@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nourabelle Admin Dashboard</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/admin-dashboard.css">
+</head>
+<body>
+    <!-- Header -->
+    <header class="admin-header">
+        <div class="header-content">
+            <div class="brand">
+                <h1>Nourabelle</h1>
+                <span>Admin Dashboard</span>
+            </div>
+            <div class="header-actions">
+                <div class="admin-info">
+                    <span id="adminName">Loading...</span>
+                    <button id="logoutBtn" class="logout-btn">Logout</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Navigation -->
+    <nav class="admin-nav">
+        <ul class="nav-menu">
+            <li class="nav-item active" data-tab="overview">
+                <span class="nav-icon">📊</span>
+                Overview
+            </li>
+            <li class="nav-item" data-tab="products">
+                <span class="nav-icon">📦</span>
+                Products
+            </li>
+            <li class="nav-item" data-tab="orders">
+                <span class="nav-icon">📋</span>
+                Orders
+            </li>
+            <li class="nav-item" data-tab="categories">
+                <span class="nav-icon">📁</span>
+                Categories
+            </li>
+            <li class="nav-item" data-tab="settings">
+                <span class="nav-icon">⚙️</span>
+                Settings
+            </li>
+        </ul>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="admin-main">
+        <!-- Overview Tab -->
+        <section id="overview" class="tab-content active">
+            <div class="dashboard-grid">
+                <div class="stat-card">
+                    <div class="stat-icon">📦</div>
+                    <div class="stat-info">
+                        <h3 id="totalProducts">-</h3>
+                        <p>Total Products</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">📋</div>
+                    <div class="stat-info">
+                        <h3 id="totalOrders">-</h3>
+                        <p>Total Orders</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">⏳</div>
+                    <div class="stat-info">
+                        <h3 id="pendingOrders">-</h3>
+                        <p>Pending Orders</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">💰</div>
+                    <div class="stat-info">
+                        <h3 id="totalRevenue">-</h3>
+                        <p>Total Revenue</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="recent-section">
+                <h2>Recent Orders</h2>
+                <div class="recent-orders" id="recentOrdersList">
+                    <div class="loading">Loading recent orders...</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Products Tab -->
+        <section id="products" class="tab-content">
+            <div class="tab-header">
+                <h2>Products Management</h2>
+                <button id="addProductBtn" class="primary-btn">Add New Product</button>
+            </div>
+            
+            <div class="filters">
+                <input type="search" id="productSearch" placeholder="Search products...">
+                <select id="categoryFilter">
+                    <option value="">All Categories</option>
+                </select>
+                <select id="statusFilter">
+                    <option value="">All Status</option>
+                    <option value="true">Active</option>
+                    <option value="false">Inactive</option>
+                </select>
+            </div>
+
+            <div class="products-grid" id="productsGrid">
+                <div class="loading">Loading products...</div>
+            </div>
+        </section>
+
+        <!-- Orders Tab -->
+        <section id="orders" class="tab-content">
+            <div class="tab-header">
+                <h2>Orders Management</h2>
+            </div>
+            
+            <div class="filters">
+                <input type="search" id="orderSearch" placeholder="Search orders...">
+                <select id="orderStatusFilter">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="processing">Processing</option>
+                    <option value="shipped">Shipped</option>
+                    <option value="delivered">Delivered</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+
+            <div class="orders-table">
+                <table id="ordersTable">
+                    <thead>
+                        <tr>
+                            <th>Order #</th>
+                            <th>Customer</th>
+                            <th>Total</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTableBody">
+                        <tr><td colspan="6" class="loading">Loading orders...</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Categories Tab -->
+        <section id="categories" class="tab-content">
+            <div class="tab-header">
+                <h2>Categories Management</h2>
+                <button id="addCategoryBtn" class="primary-btn">Add Category</button>
+            </div>
+            
+            <div class="categories-list" id="categoriesList">
+                <div class="loading">Loading categories...</div>
+            </div>
+        </section>
+
+        <!-- Settings Tab -->
+        <section id="settings" class="tab-content">
+            <div class="tab-header">
+                <h2>Site Settings</h2>
+            </div>
+            
+            <div class="settings-form">
+                <div class="form-group">
+                    <label>Site Name</label>
+                    <input type="text" id="siteName" placeholder="Nourabelle">
+                </div>
+                <div class="form-group">
+                    <label>Contact Email</label>
+                    <input type="email" id="contactEmail" placeholder="contact@nourabelle.com">
+                </div>
+                <div class="form-group">
+                    <label>Shipping Cost</label>
+                    <input type="number" id="shippingCost" placeholder="0.00" step="0.01">
+                </div>
+                <button id="saveSettingsBtn" class="primary-btn">Save Settings</button>
+            </div>
+        </section>
+    </main>
+
+    <!-- Product Form Modal -->
+    <div id="productModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">Add New Product</h3>
+                <button class="close-btn" id="closeModal">&times;</button>
+            </div>
+            
+            <form id="productForm">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Product Name *</label>
+                        <input type="text" id="productName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category *</label>
+                        <select id="productCategory" required>
+                            <option value="">Select Category</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Description</label>
+                    <textarea id="productDescription" rows="3"></textarea>
+                </div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Price *</label>
+                        <input type="number" id="productPrice" step="0.01" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Original Price</label>
+                        <input type="number" id="productOriginalPrice" step="0.01">
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Images (URLs, one per line)</label>
+                    <textarea id="productImages" rows="3" placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg"></textarea>
+                </div>
+                
+                <div class="form-group">
+    <label>Sizes & Stock</label>
+    <div class="size-stock-grid">
+        <div class="size-item">
+            <label>S-M</label>
+            <input type="number" id="stockSM" min="0" value="0">
+        </div>
+        <div class="size-item">
+            <label>M-L</label>
+            <input type="number" id="stockML" min="0" value="0">
+        </div>
+    </div>
+</div>
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="productActive">
+                            Active
+                        </label>
+                    </div>
+                    <div class="form-group">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="productFeatured">
+                            Featured
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="modal-actions">
+                    <button type="button" id="cancelProductBtn" class="secondary-btn">Cancel</button>
+                    <button type="submit" id="saveProductBtn" class="primary-btn">Save Product</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Order Details Modal -->
+    <div id="orderModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Order Details</h3>
+                <button class="close-btn" id="closeOrderModal">&times;</button>
+            </div>
+            <div id="orderDetails">
+                <!-- Order details will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div id="loadingOverlay" class="loading-overlay">
+        <div class="loader"></div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container"></div>
+
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

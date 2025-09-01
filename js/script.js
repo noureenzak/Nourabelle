@@ -1,16 +1,28 @@
-// Nourabelle - Clean JavaScript (Fixed Navigation)
+// Updated Nourabelle Website JavaScript - Database Integration
 
 'use strict';
 
-// Product data with your exact file paths
-const PRODUCTS = [
+// Supabase Configuration
+const SUPABASE_URL = 'https://ebiwoiaduskjodegnhvq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViaXdvaWFkdXNram9kZWduaHZxIiwicm9sZUOiImFub24iLCJpYXQiOjE3NTY1OTQ5OTEsImV4cCI6MjA3MjE3MDk5MX0.tuWREO0QuDKfgJQ6fbVpi4UI9ckKUYlqoCy3g2_cJW8';
+
+// Initialize Supabase
+const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// Global products array - will be populated from database
+let PRODUCTS = [];
+
+// Fallback products (your original static products as backup)
+const FALLBACK_PRODUCTS = [
   {
     id: 'whiteset',
     name: 'White Set',
     price: 1500,
     image: 'assets/images/whiteset1.jpg',
     images: ['assets/images/whiteset1.jpg', 'assets/images/whiteset2.jpg'],
-    category: 'sets'
+    category: 'sets',
+    featured: true,
+    is_active: true
   },
   {
     id: 'blackset',
@@ -18,7 +30,9 @@ const PRODUCTS = [
     price: 1500,
     image: 'assets/images/blackset1.jpg',
     images: ['assets/images/blackset1.jpg', 'assets/images/blackset2.jpg'],
-    category: 'sets'
+    category: 'sets',
+    featured: true,
+    is_active: true
   },
   {
     id: 'browncardigan',
@@ -26,7 +40,9 @@ const PRODUCTS = [
     price: 1500,
     image: 'assets/images/browncardigan1.jpg',
     images: ['assets/images/browncardigan1.jpg', 'assets/images/browncardigan2.jpg'],
-    category: 'cardigans'
+    category: 'cardigans',
+    featured: true,
+    is_active: true
   },
   {
     id: 'blackcardigan',
@@ -34,9 +50,88 @@ const PRODUCTS = [
     price: 1500,
     image: 'assets/images/blackcardigan1.jpg',
     images: ['assets/images/blackcardigan1.jpg', 'assets/images/blackcardigan2.jpg'],
-    category: 'cardigans'
+    category: 'cardigans',
+    featured: true,
+    is_active: true
   }
 ];
+
+// Load products from database
+async function loadProducts() {
+  try {
+    console.log('Loading products from database...');
+    
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('is_active', true)
+      .order('created_at', { ascending: false });
+
+    if (error && error.code !== 'PGRST116') {
+      throw error;
+    }
+
+    if (data && data.length > 0) {
+      // Transform database products to match website format
+      PRODUCTS = data.map(product => ({
+        id: product.id.toString(),
+        name: product.name,
+        price: product.price,
+        image: product.images && product.images[0] ? product.images[0] : 'assets/images/placeholder.jpg',
+        images: product.images || ['assets/images/placeholder.jpg'],
+        category: product.category || 'uncategorized',
+        featured: product.featured || false,
+        is_active: product.is_active,
+        description: product.description,
+        stock: product.stock,
+        original_price: product.original_price
+      }));
+      
+      console.log(`Loaded ${PRODUCTS.length} products from database`);
+    } else {
+      // Use fallback products if database is empty
+      PRODUCTS = FALLBACK_PRODUCTS;
+      console.log('Using fallback products - database empty or unavailable');
+    }
+    
+    // Update the homepage products display
+    updateHomepageProducts();
+    
+  } catch (error) {
+    console.error('Error loading products:', error);
+    PRODUCTS = FALLBACK_PRODUCTS;
+    updateHomepageProducts();
+  }
+}
+
+// Update homepage products display
+function updateHomepageProducts() {
+  const productContainer = document.getElementById('product-scroll');
+  if (!productContainer) return;
+
+  // Get featured products, fallback to first 4 products
+  const featuredProducts = PRODUCTS.filter(p => p.featured).slice(0, 4);
+  const displayProducts = featuredProducts.length > 0 ? featuredProducts : PRODUCTS.slice(0, 4);
+
+  if (displayProducts.length === 0) return;
+
+  productContainer.innerHTML = displayProducts.map(product => `
+    <div class="product" onclick="goToProduct('${product.id}')">
+      <img id="${product.id}" src="${product.image}" alt="${product.name}" 
+           onerror="this.src='assets/images/placeholder.jpg'">
+      <p>${product.name}</p>
+      <div class="price-container">
+        ${product.original_price && product.original_price > product.price ? 
+          `<p class="original-price">${product.original_price} EGP</p>` : ''
+        }
+        <p class="price">${product.price} EGP</p>
+      </div>
+    </div>
+  `).join('');
+
+  // Re-initialize hover effects for new products
+  initProductHoverEffects();
+}
 
 // ========== MOBILE MENU ==========
 function initMobileMenu() {
@@ -76,35 +171,27 @@ function initMobileMenu() {
     }
   }
 
-  // Hamburger click to toggle
   hamburger.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Hamburger clicked');
     toggleMenu();
   });
 
-  // Close button click
   mobileClose.addEventListener('click', function(e) {
     e.preventDefault();
     e.stopPropagation();
-    console.log('Close button clicked');
     closeMenu();
   });
 
-  // Close when clicking menu links
   const menuLinks = mobileMenu.querySelectorAll('.mobile-menu-content a');
   menuLinks.forEach(link => {
     link.addEventListener('click', function() {
-      console.log('Menu link clicked');
       closeMenu();
     });
   });
 
-  // Close on escape key
   document.addEventListener('keydown', function(e) {
     if (e.key === 'Escape' && isMenuOpen) {
-      console.log('Escape key pressed');
       closeMenu();
     }
   });
@@ -141,7 +228,8 @@ function initSearch() {
 
     const results = PRODUCTS.filter(product => 
       product.name.toLowerCase().includes(query) ||
-      product.category.toLowerCase().includes(query)
+      product.category.toLowerCase().includes(query) ||
+      (product.description && product.description.toLowerCase().includes(query))
     );
 
     displaySearchResults(results);
@@ -168,10 +256,15 @@ function initSearch() {
           object-fit: cover;
           border-radius: 4px;
           margin-right: 15px;
-        ">
+        " onerror="this.src='assets/images/placeholder.jpg'">
         <div>
           <div style="font-weight: 500; margin-bottom: 4px;">${product.name}</div>
-          <div style="color: var(--btn); font-weight: 600;">${product.price} EGP</div>
+          <div style="color: var(--btn); font-weight: 600;">
+            ${product.original_price && product.original_price > product.price ? 
+              `<span style="text-decoration: line-through; color: #999; margin-right: 8px;">${product.original_price} EGP</span>` : ''
+            }
+            ${product.price} EGP
+          </div>
         </div>
       </div>
     `).join('');
@@ -181,12 +274,10 @@ function initSearch() {
   searchClose.addEventListener('click', closeSearch);
   searchInput.addEventListener('input', debounce(performSearch, 300));
 
-  // Close search when clicking overlay
   searchOverlay.addEventListener('click', (e) => {
     if (e.target === searchOverlay) closeSearch();
   });
 
-  // Close on escape
   document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape' && searchOverlay.classList.contains('open')) {
       closeSearch();
@@ -207,47 +298,46 @@ function initHeroSlider() {
     slides[currentSlide].classList.add('active');
   }
 
-  // Auto slide every 2.5 seconds (faster)
   setInterval(nextSlide, 2500);
 }
 
 // ========== PRODUCT IMAGE HOVER EFFECTS ==========
 function initProductHoverEffects() {
-  const products = [
-    { id: 'whiteset', images: ['assets/images/whiteset1.jpg', 'assets/images/whiteset2.jpg'] },
-    { id: 'blackset', images: ['assets/images/blackset1.jpg', 'assets/images/blackset2.jpg'] },
-    { id: 'browncardigan', images: ['assets/images/browncardigan1.jpg', 'assets/images/browncardigan2.jpg'] },
-    { id: 'blackcardigan', images: ['assets/images/blackcardigan1.jpg', 'assets/images/blackcardigan2.jpg'] }
-  ];
-
-  products.forEach(product => {
+  // Get all product images and apply hover effects based on loaded products
+  PRODUCTS.forEach(product => {
     const img = document.getElementById(product.id);
-    if (!img || product.images.length < 2) return;
+    if (!img || !product.images || product.images.length < 2) return;
 
     let currentIndex = 0;
+    let originalSrc = img.src;
 
     img.addEventListener('mouseenter', () => {
-      currentIndex = (currentIndex + 1) % product.images.length;
-      img.src = product.images[currentIndex];
+      if (product.images.length > 1) {
+        currentIndex = 1; // Switch to second image
+        img.src = product.images[currentIndex];
+      }
     });
 
     img.addEventListener('mouseleave', () => {
-      img.src = product.images[0];
       currentIndex = 0;
+      img.src = product.images[0] || originalSrc;
     });
 
     // Mobile touch effect
     if (window.innerWidth <= 768) {
       const observer = new IntersectionObserver((entries) => {
         entries.forEach(entry => {
-          if (entry.isIntersecting) {
+          if (entry.isIntersecting && product.images.length > 1) {
             setTimeout(() => {
-              currentIndex = (currentIndex + 1) % product.images.length;
-              img.src = product.images[currentIndex];
-            }, 2000);
-          } else {
-            img.src = product.images[0];
-            currentIndex = 0;
+              if (currentIndex === 0) {
+                currentIndex = 1;
+                img.src = product.images[currentIndex];
+                setTimeout(() => {
+                  currentIndex = 0;
+                  img.src = product.images[0];
+                }, 1500);
+              }
+            }, 1000);
           }
         });
       }, { threshold: 0.8 });
@@ -260,8 +350,6 @@ function initProductHoverEffects() {
 // ========== CART MANAGEMENT ==========
 function initCartSystem() {
   updateCartCount();
-
-  // Listen for cart updates
   window.addEventListener('storage', updateCartCount);
   document.addEventListener('cartUpdated', updateCartCount);
 }
@@ -311,7 +399,6 @@ function updateCartCount() {
   const cartCountEl = document.getElementById('cart-count');
   
   if (cartCountEl) {
-    // Only update if count actually changed to prevent glitches
     if (parseInt(cartCountEl.textContent) !== count) {
       cartCountEl.textContent = count;
       
@@ -327,7 +414,6 @@ function updateCartCount() {
 }
 
 function showNotification(message) {
-  // Remove existing notifications
   const existing = document.querySelectorAll('.notification');
   existing.forEach(notif => notif.remove());
 
@@ -377,12 +463,9 @@ function scrollToProducts() {
 }
 
 // ========== GLOBAL FUNCTIONS ==========
-// FIXED: Correct navigation from homepage to product page
 window.goToProduct = function(productId) {
-  // Validate product ID
-  const product = PRODUCTS.find(p => p.id === productId);
+  const product = PRODUCTS.find(p => p.id == productId);
   if (product) {
-    // FIXED: Use correct path - pages/product.html, not pages/pages/product.html
     window.location.href = `pages/product.html?product=${encodeURIComponent(productId)}`;
   }
 };
@@ -392,14 +475,17 @@ window.getCart = getCart;
 window.saveCart = saveCart;
 window.updateCartCount = updateCartCount;
 window.scrollToProducts = scrollToProducts;
+window.PRODUCTS = PRODUCTS; // Make products globally available
 
 // ========== INITIALIZATION ==========
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+  // Load products from database first
+  await loadProducts();
+  
   // Initialize all modules
   initMobileMenu();
   initSearch();
   initHeroSlider();
-  initProductHoverEffects();
   initCartSystem();
 
   // Add CSS animations
@@ -415,17 +501,20 @@ document.addEventListener('DOMContentLoaded', function() {
         from { transform: translateX(0); opacity: 1; }
         to { transform: translateX(100%); opacity: 0; }
       }
+      .original-price {
+        text-decoration: line-through;
+        color: #999;
+        font-size: 0.85rem;
+        margin: 0;
+      }
+      .price-container {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
     `;
     document.head.appendChild(style);
   }
-
-  // Security: Prevent XSS through URL parameters
-  const urlParams = new URLSearchParams(window.location.search);
-  urlParams.forEach((value, key) => {
-    if (value.includes('<script') || value.includes('javascript:')) {
-      window.location.href = '/';
-    }
-  });
 
   console.log('Nourabelle homepage initialized successfully');
 });
