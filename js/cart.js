@@ -1,190 +1,270 @@
+// Updated Cart Management System - cart.js
+'use strict';
 
-    // Cart Page Functionality
-    let currentShipping = 0;
+// Cart state
+let currentShipping = 0;
 
-    // Initialize cart page
-    document.addEventListener('DOMContentLoaded', function() {
-      displayCartItems();
-      setupMobileMenu();
-      setupSearch();
-    });
+// Initialize cart page
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Cart page initializing...');
+    displayCartItems();
+    setupMobileMenu();
+    setupSearch();
+    updateCartCount();
+});
 
-    // Display cart items
-    function displayCartItems() {
-      const cart = getCart();
-      const emptyCart = document.getElementById('emptyCart');
-      const cartContent = document.getElementById('cartContent');
-      const cartItemsList = document.getElementById('cartItemsList');
+// Cart utility functions
+function getCart() {
+    try {
+        return JSON.parse(localStorage.getItem('nourabelle_cart') || '[]');
+    } catch (e) {
+        console.error('Cart parsing error:', e);
+        return [];
+    }
+}
 
-      if (!cart || cart.length === 0) {
-        emptyCart.style.display = 'block';
-        cartContent.style.display = 'none';
+function saveCart(cart) {
+    try {
+        localStorage.setItem('nourabelle_cart', JSON.stringify(cart));
+        updateCartCount();
+        document.dispatchEvent(new CustomEvent('cartUpdated'));
+    } catch (e) {
+        console.error('Cart save error:', e);
+    }
+}
+
+function getCartTotal() {
+    const cart = getCart();
+    return cart.reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0);
+}
+
+// Display cart items
+function displayCartItems() {
+    const cart = getCart();
+    const emptyCart = document.getElementById('emptyCart');
+    const cartContent = document.getElementById('cartContent');
+    const cartItemsList = document.getElementById('cartItemsList');
+
+    console.log('Displaying cart items:', cart);
+
+    if (!cart || cart.length === 0) {
+        if (emptyCart) emptyCart.style.display = 'block';
+        if (cartContent) cartContent.style.display = 'none';
         return;
-      }
+    }
 
-      emptyCart.style.display = 'none';
-      cartContent.style.display = 'grid';
+    if (emptyCart) emptyCart.style.display = 'none';
+    if (cartContent) cartContent.style.display = 'grid';
 
-      cartItemsList.innerHTML = cart.map((item, index) => `
+    if (!cartItemsList) return;
+
+    cartItemsList.innerHTML = cart.map((item, index) => `
         <div class="cart-item">
-          <div class="item-image">
-            <img src="${item.image}" alt="${item.name}" onerror="this.src='../assets/images/placeholder.jpg'">
-          </div>
-          
-          <div class="item-info">
-            <h3>${item.name}</h3>
-            <p>Size: ${item.size}</p>
-            <p>Category: ${item.category}</p>
+            <div class="item-image">
+                <img src="${item.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk5OSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'}" 
+                     alt="${item.name}" 
+                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk5OSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'">
+            </div>
+            
+            <div class="item-info">
+                <h3>${item.name}</h3>
+                <p>Size: ${item.size}</p>
+                <p>Category: ${item.category || 'Product'}</p>
+            </div>
+
             <div class="item-price">${item.price} EGP</div>
-          </div>
 
-          <div class="quantity-controls">
-            <button class="quantity-btn" onclick="changeQuantity(${index}, -1)">−</button>
-            <span class="quantity-display">${item.quantity}</span>
-            <button class="quantity-btn" onclick="changeQuantity(${index}, 1)">+</button>
-          </div>
+            <div class="quantity-controls">
+                <button class="quantity-btn" onclick="changeQuantity(${index}, -1)">-</button>
+                <span class="quantity-display">${item.quantity}</span>
+                <button class="quantity-btn" onclick="changeQuantity(${index}, 1)">+</button>
+            </div>
 
-          <div class="item-controls">
-            <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
-          </div>
+            <div class="item-controls">
+                <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
+            </div>
         </div>
-      `).join('');
+    `).join('');
 
-      updateTotals();
-    }
+    updateTotals();
+}
 
-    // Change quantity
-    function changeQuantity(index, change) {
-      updateQuantity(index, change);
-      displayCartItems();
-    }
+// Change quantity
+function changeQuantity(index, change) {
+    const cart = getCart();
+    if (!cart[index]) return;
+    
+    cart[index].quantity = Math.max(1, cart[index].quantity + change);
+    saveCart(cart);
+    displayCartItems();
+}
 
-    // Remove item
-    function removeItem(index) {
-      if (confirm('Remove this item from your cart?')) {
-        removeFromCart(index);
+// Remove item
+function removeItem(index) {
+    if (confirm('Remove this item from your cart?')) {
+        const cart = getCart();
+        cart.splice(index, 1);
+        saveCart(cart);
         displayCartItems();
-      }
     }
+}
 
-    // Update shipping
-    function updateShipping() {
-      const select = document.getElementById('shippingSelect');
-      const shippingCosts = { cairo: 50, alexandria: 60, giza: 55, other: 80 };
-      currentShipping = shippingCosts[select.value] || 0;
-      updateTotals();
+// Update shipping cost
+function updateShipping() {
+    const select = document.getElementById('shippingSelect');
+    if (!select) return;
+    
+    const shippingCosts = { 
+        cairo: 50, 
+        alexandria: 60, 
+        giza: 55, 
+        other: 80 
+    };
+    
+    currentShipping = shippingCosts[select.value] || 0;
+    updateTotals();
+}
+
+// Update totals
+function updateTotals() {
+    const subtotal = getCartTotal();
+    const total = subtotal + currentShipping;
+
+    const subtotalEl = document.getElementById('subtotal');
+    const totalEl = document.getElementById('total');
+    const checkoutBtn = document.getElementById('checkoutBtn');
+
+    if (subtotalEl) subtotalEl.textContent = `${subtotal.toFixed(2)} EGP`;
+    if (totalEl) totalEl.textContent = `${total.toFixed(2)} EGP`;
+    
+    if (checkoutBtn) {
+        checkoutBtn.disabled = subtotal === 0 || currentShipping === 0;
     }
+}
 
-    // Update totals
-    function updateTotals() {
-      const subtotal = getCartTotal();
-      const total = subtotal + currentShipping;
-
-      document.getElementById('subtotal').textContent = `${subtotal} EGP`;
-      document.getElementById('total').textContent = `${total} EGP`;
-
-      const checkoutBtn = document.getElementById('checkoutBtn');
-      checkoutBtn.disabled = subtotal === 0 || currentShipping === 0;
-    }
-
-    // Proceed to checkout
-    function proceedToCheckout() {
-      const cart = getCart();
-      const shippingSelect = document.getElementById('shippingSelect');
-      
-      if (cart.length === 0) {
+// Proceed to checkout (placeholder - implement your checkout logic)
+function proceedToCheckout() {
+    const cart = getCart();
+    const shippingSelect = document.getElementById('shippingSelect');
+    
+    if (cart.length === 0) {
         alert('Your cart is empty');
         return;
-      }
-      
-      if (!shippingSelect.value) {
+    }
+    
+    if (!shippingSelect || !shippingSelect.value) {
         alert('Please select shipping location');
         return;
-      }
-
-      // Store checkout data
-      const checkoutData = {
-        items: cart,
-        subtotal: getCartTotal(),
-        shipping: currentShipping,
-        total: getCartTotal() + currentShipping,
-        shippingLocation: shippingSelect.value
-      };
-
-      localStorage.setItem('nourabelle_checkout', JSON.stringify(checkoutData));
-
-      // Redirect to checkout page
-      window.location.href = 'checkout.html';
     }
 
-    // Mobile menu setup
-    function setupMobileMenu() {
-      const hamburger = document.getElementById('hamburger');
-      const mobileMenu = document.getElementById('mobileMenu');
-      const mobileClose = document.getElementById('mobileClose');
-      
-      if (hamburger && mobileMenu) {
+    // For now, just show an alert - implement your actual checkout process
+    alert('Checkout functionality will be implemented. Total: ' + (getCartTotal() + currentShipping).toFixed(2) + ' EGP');
+    
+    // Example of what you might do:
+    // const checkoutData = {
+    //     items: cart,
+    //     subtotal: getCartTotal(),
+    //     shipping: currentShipping,
+    //     total: getCartTotal() + currentShipping,
+    //     shippingLocation: shippingSelect.value
+    // };
+    // localStorage.setItem('nourabelle_checkout', JSON.stringify(checkoutData));
+    // window.location.href = 'checkout.html';
+}
+
+// Update cart count in header
+function updateCartCount() {
+    const cart = getCart();
+    const count = cart.reduce((total, item) => total + (item.quantity || 1), 0);
+    const cartCountEl = document.getElementById('cart-count');
+    
+    if (cartCountEl) {
+        cartCountEl.textContent = count;
+        if (count > 0) {
+            cartCountEl.classList.add('visible');
+            cartCountEl.style.display = 'flex';
+        } else {
+            cartCountEl.classList.remove('visible');
+            cartCountEl.style.display = 'none';
+        }
+    }
+}
+
+// Mobile menu setup
+function setupMobileMenu() {
+    const hamburger = document.getElementById('hamburger');
+    const mobileMenu = document.getElementById('mobileMenu');
+    const mobileClose = document.getElementById('mobileClose');
+    
+    if (hamburger && mobileMenu) {
         hamburger.addEventListener('click', () => {
-          mobileMenu.classList.add('open');
-          document.body.classList.add('menu-open');
+            mobileMenu.classList.add('open');
+            document.body.classList.add('menu-open');
         });
-      }
-      
-      if (mobileClose) {
+    }
+    
+    if (mobileClose) {
         mobileClose.addEventListener('click', () => {
-          mobileMenu.classList.remove('open');
-          document.body.classList.remove('menu-open');
-        });
-      }
-      
-      if (mobileMenu) {
-        mobileMenu.addEventListener('click', (e) => {
-          if (e.target === mobileMenu) {
             mobileMenu.classList.remove('open');
             document.body.classList.remove('menu-open');
-          }
         });
-      }
+    }
+    
+    if (mobileMenu) {
+        mobileMenu.addEventListener('click', (e) => {
+            if (e.target === mobileMenu) {
+                mobileMenu.classList.remove('open');
+                document.body.classList.remove('menu-open');
+            }
+        });
+    }
+}
+
+// Search functionality
+function setupSearch() {
+    const searchBtn = document.getElementById('searchBtn');
+    const searchOverlay = document.getElementById('searchOverlay');
+    const searchClose = document.getElementById('searchClose');
+    const searchInput = document.getElementById('searchInput');
+
+    if (!searchBtn || !searchOverlay) return;
+
+    if (searchBtn) {
+        searchBtn.addEventListener('click', () => {
+            searchOverlay.classList.add('open');
+            setTimeout(() => searchInput && searchInput.focus(), 100);
+        });
     }
 
-    // Search functionality
-    function setupSearch() {
-      const searchBtn = document.getElementById('searchBtn');
-      const searchOverlay = document.getElementById('searchOverlay');
-      const searchClose = document.getElementById('searchClose');
-      const searchInput = document.getElementById('searchInput');
-
-      if (searchBtn) {
-        searchBtn.addEventListener('click', () => {
-          searchOverlay.classList.add('open');
-          setTimeout(() => searchInput && searchInput.focus(), 100);
-        });
-      }
-
-      if (searchClose) {
+    if (searchClose) {
         searchClose.addEventListener('click', () => {
-          searchOverlay.classList.remove('open');
-          if (searchInput) searchInput.value = '';
-        });
-      }
-
-      if (searchOverlay) {
-        searchOverlay.addEventListener('click', (e) => {
-          if (e.target === searchOverlay) {
             searchOverlay.classList.remove('open');
             if (searchInput) searchInput.value = '';
-          }
         });
-      }
-
-      document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && searchOverlay && searchOverlay.classList.contains('open')) {
-          searchOverlay.classList.remove('open');
-          if (searchInput) searchInput.value = '';
-        }
-      });
     }
 
-    // Listen for cart updates
-    document.addEventListener('cartUpdated', displayCartItems);
- 
+    if (searchOverlay) {
+        searchOverlay.addEventListener('click', (e) => {
+            if (e.target === searchOverlay) {
+                searchOverlay.classList.remove('open');
+                if (searchInput) searchInput.value = '';
+            }
+        });
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape' && searchOverlay && searchOverlay.classList.contains('open')) {
+            searchOverlay.classList.remove('open');
+            if (searchInput) searchInput.value = '';
+        }
+    });
+}
+
+// Listen for cart updates
+document.addEventListener('cartUpdated', displayCartItems);
+
+// Make functions globally available
+window.changeQuantity = changeQuantity;
+window.removeItem = removeItem;
+window.updateShipping = updateShipping;
+window.proceedToCheckout = proceedToCheckout;

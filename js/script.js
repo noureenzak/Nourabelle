@@ -12,49 +12,6 @@ const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 // Global products array - will be populated from database
 let PRODUCTS = [];
 
-// Fallback products (your original static products as backup)
-const FALLBACK_PRODUCTS = [
-  {
-    id: 'whiteset',
-    name: 'White Set',
-    price: 1500,
-    image: 'assets/images/whiteset1.jpg',
-    images: ['assets/images/whiteset1.jpg', 'assets/images/whiteset2.jpg'],
-    category: 'sets',
-    featured: true,
-    is_active: true
-  },
-  {
-    id: 'blackset',
-    name: 'Black Set',
-    price: 1500,
-    image: 'assets/images/blackset1.jpg',
-    images: ['assets/images/blackset1.jpg', 'assets/images/blackset2.jpg'],
-    category: 'sets',
-    featured: true,
-    is_active: true
-  },
-  {
-    id: 'browncardigan',
-    name: 'Brown Cardigan',
-    price: 1500,
-    image: 'assets/images/browncardigan1.jpg',
-    images: ['assets/images/browncardigan1.jpg', 'assets/images/browncardigan2.jpg'],
-    category: 'cardigans',
-    featured: true,
-    is_active: true
-  },
-  {
-    id: 'blackcardigan',
-    name: 'Black Cardigan',
-    price: 1500,
-    image: 'assets/images/blackcardigan1.jpg',
-    images: ['assets/images/blackcardigan1.jpg', 'assets/images/blackcardigan2.jpg'],
-    category: 'cardigans',
-    featured: true,
-    is_active: true
-  }
-];
 
 // Load products from database
 async function loadProducts() {

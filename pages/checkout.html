@@ -1,0 +1,773 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Checkout - Nourabelle</title>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../css/style.css">
+  <style>
+    /* Checkout Page Styles */
+    .checkout-page {
+      margin-top: 80px;
+      padding: 2rem;
+      max-width: 1200px;
+      margin-left: auto;
+      margin-right: auto;
+      min-height: calc(100vh - 200px);
+    }
+
+    .checkout-header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+
+    .checkout-header h1 {
+      font-size: 2rem;
+      color: var(--text);
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+
+    .checkout-steps {
+      display: flex;
+      justify-content: center;
+      margin-bottom: 3rem;
+      gap: 2rem;
+    }
+
+    .step {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      background: #f5f5f5;
+      color: #666;
+      font-size: 0.9rem;
+      font-weight: 500;
+    }
+
+    .step.active {
+      background: var(--btn);
+      color: white;
+    }
+
+    .checkout-content {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 3rem;
+      align-items: start;
+    }
+
+    .checkout-form {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .form-section {
+      margin-bottom: 2rem;
+    }
+
+    .form-section h3 {
+      font-size: 1.2rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+      color: var(--text);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.5rem;
+    }
+
+    .form-row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-bottom: 1rem;
+    }
+
+    .form-group {
+      margin-bottom: 1rem;
+    }
+
+    .form-group label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+      color: var(--text);
+      font-size: 0.9rem;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 12px 16px;
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      font-size: 1rem;
+      font-family: var(--font);
+      transition: all 0.3s ease;
+      background: white;
+    }
+
+    .form-group input:focus,
+    .form-group select:focus,
+    .form-group textarea:focus {
+      outline: none;
+      border-color: var(--btn);
+      box-shadow: 0 0 0 3px rgba(173, 124, 124, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+    }
+
+    .required {
+      color: #e74c3c;
+    }
+
+    .order-summary {
+      background: white;
+      border-radius: 12px;
+      padding: 2rem;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+      position: sticky;
+      top: 100px;
+    }
+
+    .summary-title {
+      font-size: 1.3rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+      color: var(--text);
+      border-bottom: 2px solid var(--accent);
+      padding-bottom: 0.5rem;
+    }
+
+    .order-item {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      padding: 1rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .order-item:last-child {
+      border-bottom: none;
+    }
+
+    .item-image {
+      width: 60px;
+      height: 60px;
+      object-fit: cover;
+      border-radius: 6px;
+    }
+
+    .item-details h4 {
+      font-size: 0.9rem;
+      font-weight: 600;
+      margin-bottom: 0.25rem;
+      color: var(--text);
+    }
+
+    .item-details p {
+      font-size: 0.8rem;
+      color: #666;
+    }
+
+    .item-price {
+      margin-left: auto;
+      font-weight: 600;
+      color: var(--btn);
+    }
+
+    .summary-line {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 0.75rem 0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .summary-line:last-child {
+      border-bottom: none;
+      font-weight: 600;
+      font-size: 1.1rem;
+      margin-top: 1rem;
+      padding-top: 1rem;
+      border-top: 2px solid var(--accent);
+    }
+
+    .place-order-btn {
+      width: 100%;
+      padding: 15px;
+      background: var(--btn);
+      color: white;
+      border: none;
+      border-radius: 25px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 2rem;
+      font-family: var(--font);
+    }
+
+    .place-order-btn:hover {
+      background: var(--btn-hover);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 25px rgba(173, 124, 124, 0.3);
+    }
+
+    .place-order-btn:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+
+    .payment-methods {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+      margin-top: 1rem;
+    }
+
+    .payment-option {
+      border: 2px solid #e0e0e0;
+      border-radius: 8px;
+      padding: 1rem;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      text-align: center;
+    }
+
+    .payment-option:hover {
+      border-color: var(--btn);
+    }
+
+    .payment-option.selected {
+      border-color: var(--btn);
+      background: rgba(173, 124, 124, 0.05);
+    }
+
+    .payment-option input[type="radio"] {
+      display: none;
+    }
+
+    .payment-option label {
+      cursor: pointer;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+
+    .success-message {
+      display: none;
+      text-align: center;
+      padding: 3rem 2rem;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+    }
+
+    .success-message.show {
+      display: block;
+    }
+
+    .success-icon {
+      font-size: 4rem;
+      color: #27ae60;
+      margin-bottom: 1rem;
+    }
+
+    .success-message h2 {
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    .order-number {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: var(--btn);
+      margin: 1rem 0;
+    }
+
+    /* Mobile Responsive */
+    @media (max-width: 768px) {
+      .checkout-content {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+      }
+
+      .form-row {
+        grid-template-columns: 1fr;
+      }
+
+      .checkout-steps {
+        gap: 1rem;
+        flex-wrap: wrap;
+      }
+
+      .step {
+        font-size: 0.8rem;
+        padding: 0.4rem 0.8rem;
+      }
+
+      .payment-methods {
+        grid-template-columns: 1fr;
+      }
+
+      .order-summary {
+        position: static;
+      }
+
+      .checkout-page {
+        padding: 1rem;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Navigation -->
+  <header class="navbar">
+    <!-- Mobile Hamburger -->
+    <div class="hamburger" id="hamburger">
+      <span></span>
+      <span></span>
+      <span></span>
+    </div>
+
+    <!-- Desktop Navigation Links -->
+    <nav class="desktop-nav">
+      <a href="../index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="policy.html">Returns & Exchange</a>
+      <a href="contactus.html">Contact Us</a>
+    </nav>
+
+    <!-- Centered Logo -->
+    <div class="nav-center">
+      <a href="../index.html">
+        <img src="../assets/images/logo.jpg" alt="Nourabelle Logo" class="hero-logo">
+      </a>
+    </div>
+
+    <!-- Right Side Icons -->
+    <div class="nav-actions">
+      <!-- Search Icon -->
+      <button class="search-btn" id="searchBtn" aria-label="Search">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="8"/>
+          <path d="m21 21-4.35-4.35"/>
+        </svg>
+      </button>
+
+      <!-- Cart Icon -->
+      <div class="cart-icon-link">
+        <a href="cart.html" aria-label="Cart">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M9 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+            <path d="M20 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
+            <path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>
+          </svg>
+          <span id="cart-count" class="cart-count">0</span>
+        </a>
+      </div>
+    </div>
+  </header>
+
+  <!-- Mobile Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <div class="mobile-menu-header">
+      <img src="../assets/images/logo.jpg" alt="Nourabelle" class="mobile-menu-logo">
+      <button class="mobile-close" id="mobileClose">&times;</button>
+    </div>
+
+    <div class="mobile-menu-content">
+      <a href="../index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="policy.html">Returns & Exchange</a>
+      <a href="contactus.html">Contact Us</a>
+    </div>
+
+    <a href="../admin/login.html" class="mobile-login">Admin Login</a>
+  </div>
+
+  <!-- Checkout Page Content -->
+  <main class="checkout-page">
+    <div class="checkout-header">
+      <h1>Checkout</h1>
+      <div class="checkout-steps">
+        <div class="step active">
+          <span>1</span>
+          <span>Information</span>
+        </div>
+        <div class="step">
+          <span>2</span>
+          <span>Payment</span>
+        </div>
+        <div class="step">
+          <span>3</span>
+          <span>Confirmation</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Checkout Form -->
+    <div class="checkout-content" id="checkoutContent">
+      <div class="checkout-form">
+        <form id="checkoutForm">
+          <!-- Customer Information -->
+          <div class="form-section">
+            <h3>Customer Information</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>First Name <span class="required">*</span></label>
+                <input type="text" id="firstName" name="firstName" required>
+              </div>
+              <div class="form-group">
+                <label>Last Name <span class="required">*</span></label>
+                <input type="text" id="lastName" name="lastName" required>
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label>Email <span class="required">*</span></label>
+                <input type="email" id="email" name="email" required>
+              </div>
+              <div class="form-group">
+                <label>Phone Number <span class="required">*</span></label>
+                <input type="tel" id="phone" name="phone" required>
+              </div>
+            </div>
+          </div>
+
+          <!-- Shipping Information -->
+          <div class="form-section">
+            <h3>Shipping Information</h3>
+            <div class="form-group">
+              <label>Address <span class="required">*</span></label>
+              <textarea id="address" name="address" placeholder="Enter your full address" required></textarea>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label>City <span class="required">*</span></label>
+                <select id="city" name="city" required>
+                  <option value="">Select City</option>
+                  <option value="cairo">Cairo</option>
+                  <option value="alexandria">Alexandria</option>
+                  <option value="giza">Giza</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label>Postal Code</label>
+                <input type="text" id="postalCode" name="postalCode">
+              </div>
+            </div>
+          </div>
+
+          <!-- Payment Method -->
+          <div class="form-section">
+            <h3>Payment Method</h3>
+            <div class="payment-methods">
+              <div class="payment-option" onclick="selectPayment('cod')">
+                <input type="radio" id="cod" name="payment" value="cod" checked>
+                <label for="cod">Cash on Delivery</label>
+                <p style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">Pay when you receive your order</p>
+              </div>
+              <div class="payment-option" onclick="selectPayment('bank')">
+                <input type="radio" id="bank" name="payment" value="bank">
+                <label for="bank">Bank Transfer</label>
+                <p style="font-size: 0.8rem; color: #666; margin-top: 0.5rem;">Transfer to our bank account</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Order Notes -->
+          <div class="form-section">
+            <h3>Order Notes (Optional)</h3>
+            <div class="form-group">
+              <textarea id="orderNotes" name="orderNotes" placeholder="Any special instructions for your order..."></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <h3 class="summary-title">Order Summary</h3>
+        
+        <div id="orderItems">
+          <!-- Order items will be loaded here -->
+        </div>
+
+        <div class="summary-line">
+          <span>Subtotal:</span>
+          <span id="summarySubtotal">0 EGP</span>
+        </div>
+
+        <div class="summary-line">
+          <span>Shipping:</span>
+          <span id="summaryShipping">0 EGP</span>
+        </div>
+
+        <div class="summary-line">
+          <span>Total:</span>
+          <span id="summaryTotal">0 EGP</span>
+        </div>
+
+        <button class="place-order-btn" id="placeOrderBtn" onclick="placeOrder()">
+          Place Order
+        </button>
+      </div>
+    </div>
+
+    <!-- Success Message -->
+    <div class="success-message" id="successMessage">
+      <div class="success-icon">✓</div>
+      <h2>Order Placed Successfully!</h2>
+      <p>Thank you for your order. We'll contact you soon to confirm the details.</p>
+      <div class="order-number" id="orderNumber"></div>
+      <p style="margin-top: 2rem;">You will receive an email confirmation shortly.</p>
+      <a href="../index.html" style="display: inline-block; margin-top: 2rem; padding: 12px 30px; background: var(--btn); color: white; text-decoration: none; border-radius: 25px;">Continue Shopping</a>
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer id="contact">
+    <div class="footer-content">
+      <a href="https://www.instagram.com/nourabellebynour/" target="_blank" aria-label="Instagram" class="footer-icon-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
+        </svg>
+      </a>
+    </div>
+    
+    <div class="footer-links">
+      <a href="policy.html" class="footer-link">Returns & Exchange</a>
+      <span class="footer-dot"></span>
+      <a href="contactus.html" class="footer-link">Contact Us</a>
+    </div>
+    
+    <div class="footer-brand">
+      <span class="brand-heart">♡</span>
+      <span>Nourabelle</span>
+      <span class="brand-heart">♡</span>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="../js/cart.js"></script>
+  <script>
+    // Checkout Page Functionality
+    let checkoutData = {};
+    let selectedPayment = 'cod';
+
+    // Initialize checkout page
+    document.addEventListener('DOMContentLoaded', function() {
+      loadCheckoutData();
+      setupMobileMenu();
+      updatePaymentSelection();
+    });
+
+    // Load checkout data from localStorage
+    function loadCheckoutData() {
+      const data = localStorage.getItem('nourabelle_checkout');
+      if (!data) {
+        alert('No checkout data found. Redirecting to cart...');
+        window.location.href = 'cart.html';
+        return;
+      }
+
+      try {
+        checkoutData = JSON.parse(data);
+        displayOrderSummary();
+      } catch (e) {
+        console.error('Error parsing checkout data:', e);
+        window.location.href = 'cart.html';
+      }
+    }
+
+    // Display order summary
+    function displayOrderSummary() {
+      const orderItems = document.getElementById('orderItems');
+      const summarySubtotal = document.getElementById('summarySubtotal');
+      const summaryShipping = document.getElementById('summaryShipping');
+      const summaryTotal = document.getElementById('summaryTotal');
+
+      // Display items
+      orderItems.innerHTML = checkoutData.items.map(item => `
+        <div class="order-item">
+          <img src="${item.image}" alt="${item.name}" class="item-image" onerror="this.src='../assets/images/placeholder.jpg'">
+          <div class="item-details">
+            <h4>${item.name}</h4>
+            <p>Size: ${item.size} | Qty: ${item.quantity}</p>
+          </div>
+          <div class="item-price">${item.price * item.quantity} EGP</div>
+        </div>
+      `).join('');
+
+      // Display totals
+      summarySubtotal.textContent = `${checkoutData.subtotal} EGP`;
+      summaryShipping.textContent = `${checkoutData.shipping} EGP`;
+      summaryTotal.textContent = `${checkoutData.total} EGP`;
+    }
+
+    // Select payment method
+    function selectPayment(method) {
+      selectedPayment = method;
+      document.getElementById(method).checked = true;
+      updatePaymentSelection();
+    }
+
+    // Update payment selection UI
+    function updatePaymentSelection() {
+      document.querySelectorAll('.payment-option').forEach(option => {
+        option.classList.remove('selected');
+      });
+      
+      const selectedOption = document.querySelector(`input[name="payment"]:checked`).closest('.payment-option');
+      if (selectedOption) {
+        selectedOption.classList.add('selected');
+      }
+    }
+
+    // Place order
+    async function placeOrder() {
+      const form = document.getElementById('checkoutForm');
+      if (!form.checkValidity()) {
+        form.reportValidity();
+        return;
+      }
+
+      const formData = new FormData(form);
+      const orderData = {
+        // Customer info
+        firstName: formData.get('firstName'),
+        lastName: formData.get('lastName'),
+        email: formData.get('email'),
+        phone: formData.get('phone'),
+        
+        // Shipping info
+        address: formData.get('address'),
+        city: formData.get('city'),
+        postalCode: formData.get('postalCode'),
+        
+        // Order details
+        items: checkoutData.items,
+        subtotal: checkoutData.subtotal,
+        shipping: checkoutData.shipping,
+        total: checkoutData.total,
+        paymentMethod: selectedPayment,
+        orderNotes: formData.get('orderNotes'),
+        
+        // Meta
+        orderDate: new Date().toISOString(),
+        orderNumber: generateOrderNumber(),
+        status: 'pending'
+      };
+
+      try {
+        // Disable button to prevent double submission
+        const btn = document.getElementById('placeOrderBtn');
+        btn.disabled = true;
+        btn.textContent = 'Processing...';
+
+        // Submit to Google Sheets (we'll implement this next)
+        await submitOrderToSheets(orderData);
+
+        // Show success message
+        showSuccessMessage(orderData.orderNumber);
+
+        // Clear cart and checkout data
+        localStorage.removeItem('nourabelle_cart');
+        localStorage.removeItem('nourabelle_checkout');
+
+      } catch (error) {
+        console.error('Error placing order:', error);
+        alert('There was an error placing your order. Please try again.');
+        
+        // Re-enable button
+        const btn = document.getElementById('placeOrderBtn');
+        btn.disabled = false;
+        btn.textContent = 'Place Order';
+      }
+    }
+
+    // Generate order number
+    function generateOrderNumber() {
+      const date = new Date();
+      const year = date.getFullYear().toString().slice(-2);
+      const month = (date.getMonth() + 1).toString().padStart(2, '0');
+      const day = date.getDate().toString().padStart(2, '0');
+      const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+      
+      return `NB${year}${month}${day}${random}`;
+    }
+
+    // Submit order to Google Sheets
+    async function submitOrderToSheets(orderData) {
+      // Google Sheets Web App URL (you'll need to create this)
+      const SHEETS_URL = 'YOUR_GOOGLE_SHEETS_WEB_APP_URL_HERE';
+
+      // For now, we'll simulate the submission
+      console.log('Order data to submit:', orderData);
+      
+      // Simulate delay
+      await new Promise(resolve => setTimeout(resolve, 2000));
+      
+      // TODO: Replace with actual Google Sheets submission
+      // const response = await fetch(SHEETS_URL, {
+      //   method: 'POST',
+      //   headers: {
+      //     'Content-Type': 'application/json',
+      //   },
+      //   body: JSON.stringify(orderData)
+      // });
+      
+      // if (!response.ok) {
+      //   throw new Error('Failed to submit order');
+      // }
+    }
+
+    // Show success message
+    function showSuccessMessage(orderNumber) {
+      document.getElementById('checkoutContent').style.display = 'none';
+      document.getElementById('successMessage').classList.add('show');
+      document.getElementById('orderNumber').textContent = `Order #${orderNumber}`;
+    }
+
+    // Mobile menu setup
+    function setupMobileMenu() {
+      const hamburger = document.getElementById('hamburger');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileClose = document.getElementById('mobileClose');
+      
+      if (hamburger && mobileMenu) {
+        hamburger.addEventListener('click', () => {
+          mobileMenu.classList.add('open');
+          document.body.classList.add('menu-open');
+        });
+      }
+      
+      if (mobileClose) {
+        mobileClose.addEventListener('click', () => {
+          mobileMenu.classList.remove('open');
+          document.body.classList.remove('menu-open');
+        });
+      }
+    }
+
+    // Listen for payment method changes
+    document.querySelectorAll('input[name="payment"]').forEach(radio => {
+      radio.addEventListener('change', updatePaymentSelection);
+    });
+  </script>
+</body>
+</html>
