@@ -1,12 +1,13 @@
-    <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Nourabelle</title>
+  <title>Shopping Cart - Nourabelle</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/cart.css">
   <link rel="stylesheet" href="../css/style.css">
+    <link rel="stylesheet" href="../css/cart.css">
+  
 </head>
 <body>
   <!-- Navigation -->
@@ -20,14 +21,14 @@
 
     <!-- Desktop Navigation Links -->
     <nav class="desktop-nav">
-      <a href="index.html">Home</a>
-      <a href="pages/products.html">Products</a>
-      <a href="pages/policy.html">Returns & Exchange</a>
-      <a href="#contact">Contact Us</a>
+      <a href="../index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="policy.html">Returns & Exchange</a>
+      <a href="contactus.html">Contact Us</a>
     </nav>
 
     <!-- Centered Logo -->
-    <div class="../nav-center">
+    <div class="nav-center">
       <a href="../index.html">
         <img src="../assets/images/logo.jpg" alt="Nourabelle Logo" class="hero-logo">
       </a>
@@ -45,7 +46,7 @@
 
       <!-- Cart Icon -->
       <div class="cart-icon-link">
-        <a href="pages/cart.html" aria-label="Cart">
+        <a href="cart.html" aria-label="Cart">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
             <path d="M20 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
@@ -60,19 +61,18 @@
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-header">
-      <img src="assets/images/logo.jpg" alt="Nourabelle" class="mobile-menu-logo">
+      <img src="../assets/images/logo.jpg" alt="Nourabelle" class="mobile-menu-logo">
       <button class="mobile-close" id="mobileClose">&times;</button>
     </div>
 
     <div class="mobile-menu-content">
-      <a href="index.html">Home</a>
-      <a href="pages/products.html">Products</a>
-      <a href="pages/policy.html">Exchange & Return Policy</a>
-<a href="pages/contactus.html">Contact Us</a>
-<a href="admin/login.html">Login</a>
+      <a href="../index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="policy.html">Returns & Exchange</a>
+      <a href="contactus.html">Contact Us</a>
     </div>
 
-    <a href="admin/login.html" class="mobile-login">Login</a>
+    <a href="../admin/login.html" class="mobile-login">Admin Login</a>
   </div>
 
   <!-- Search Overlay -->
@@ -84,38 +84,61 @@
     <div class="search-results" id="searchResults"></div>
   </div>
 
-  <!-- Cart Content -->
-    <div id="cart-content" class="cart-content" style="display:none;">
-      <div class="cart-items-section">
-        <div id="cart-items" class="cart-items"></div>
+  <!-- Cart Page Content -->
+  <main class="cart-page">
+    <div class="cart-header">
+      <h1>Shopping Cart</h1>
+    </div>
+
+    <!-- Empty Cart State -->
+    <div class="empty-cart" id="emptyCart">
+      <h3>Your cart is empty</h3>
+      <p>Looks like you haven't added anything to your cart yet.</p>
+      <a href="products.html" class="empty-cart-btn">Continue Shopping</a>
+    </div>
+
+    <!-- Cart Content -->
+    <div class="cart-content" id="cartContent" style="display: none;">
+      <!-- Cart Items -->
+      <div class="cart-items">
+        <div id="cartItemsList">
+          <!-- Cart items will be loaded here -->
+        </div>
       </div>
 
-      <div class="cart-summary-section">
-        <div class="cart-summary">
-          <h2>Order Summary</h2>
-          <div class="order-totals">
-            <div class="total-line">
-              <span>Subtotal:</span>
-              <span id="subtotal-amount">0 EGP</span>
-            </div>
-            <div class="total-line">
-              <span>Shipping:</span>
-              <span id="shipping-amount">Select city</span>
-            </div>
-            <div class="total-line total">
-              <span>Total:</span>
-              <span id="total-amount">0 EGP</span>
-            </div>
-          </div>
-          <button id="checkout-btn" class="checkout-btn" disabled>Proceed to Checkout</button>
+      <!-- Cart Summary -->
+      <div class="cart-summary">
+        <h3 class="summary-title">Order Summary</h3>
+        
+        <div class="summary-line">
+          <span>Subtotal:</span>
+          <span id="subtotal">0 EGP</span>
         </div>
+
+        <div class="summary-line">
+          <span>Shipping:</span>
+          <select id="shippingSelect" class="shipping-select" onchange="updateShipping()">
+            <option value="">Select city</option>
+            <option value="cairo">Cairo (50 EGP)</option>
+            <option value="alexandria">Alexandria (60 EGP)</option>
+            <option value="giza">Giza (55 EGP)</option>
+            <option value="other">Other (80 EGP)</option>
+          </select>
+        </div>
+
+        <div class="summary-line">
+          <span>Total:</span>
+          <span id="total">0 EGP</span>
+        </div>
+
+        <button class="checkout-btn" id="checkoutBtn" onclick="proceedToCheckout()" disabled>
+          Proceed to Checkout
+        </button>
       </div>
     </div>
   </main>
-  <script src="../js/cart.js"></script>
-</body>
-</html>
- <!-- Footer -->
+
+  <!-- Footer -->
   <footer id="contact">
     <div class="footer-content">
       <a href="https://www.instagram.com/nourabellebynour/" target="_blank" aria-label="Instagram" class="footer-icon-link">
@@ -126,9 +149,9 @@
     </div>
     
     <div class="footer-links">
-      <a href="pages/policy.html" class="footer-link">Returns & Exchange</a>
+      <a href="policy.html" class="footer-link">Returns & Exchange</a>
       <span class="footer-dot"></span>
-      <a href="#contact" class="footer-link">Contact Us</a>
+      <a href="contactus.html" class="footer-link">Contact Us</a>
     </div>
     
     <div class="footer-brand">
@@ -138,7 +161,6 @@
     </div>
   </footer>
 
-<!-- Add this before your existing script tag -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/cart.js"></script></body>
-</html>
+  <!-- Scripts -->
+  <script src="../js/cart.js"></script>
+  
