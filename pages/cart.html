@@ -1,18 +1,15 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>All Products – Nourabelle</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Nourabelle</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="../css/style.css" />
-  <link rel="stylesheet" href="../css/products.css" />
-  <!-- REMOVED: script.js since it conflicts with products.js -->
-  <script defer src="../js/products.js"></script>
+  <link rel="stylesheet" href="../css/cart.css">
+  <link rel="stylesheet" href="../css/style.css">
 </head>
 <body>
-
-  <!-- Navbar -->
+  <!-- Navigation -->
   <header class="navbar">
     <!-- Mobile Hamburger -->
     <div class="hamburger" id="hamburger">
@@ -23,16 +20,16 @@
 
     <!-- Desktop Navigation Links -->
     <nav class="desktop-nav">
-      <a href="../index.html">Home</a>
-      <a href="products.html">Products</a>
-      <a href="policy.html">Returns & Exchange</a>
+      <a href="index.html">Home</a>
+      <a href="pages/products.html">Products</a>
+      <a href="pages/policy.html">Returns & Exchange</a>
       <a href="#contact">Contact Us</a>
     </nav>
 
     <!-- Centered Logo -->
-    <div class="nav-center">
+    <div class="../nav-center">
       <a href="../index.html">
-        <img src="../assets/images/logo.jpg" alt="Nourabelle Logo" class="hero-logo" />
+        <img src="../assets/images/logo.jpg" alt="Nourabelle Logo" class="hero-logo">
       </a>
     </div>
 
@@ -48,7 +45,7 @@
 
       <!-- Cart Icon -->
       <div class="cart-icon-link">
-        <a href="cart.html" aria-label="Cart">
+        <a href="pages/cart.html" aria-label="Cart">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
             <path d="M20 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
@@ -63,16 +60,19 @@
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-header">
-      <img src="../assets/images/logo.jpg" alt="Nourabelle" class="mobile-menu-logo">
+      <img src="assets/images/logo.jpg" alt="Nourabelle" class="mobile-menu-logo">
       <button class="mobile-close" id="mobileClose">&times;</button>
     </div>
 
     <div class="mobile-menu-content">
-      <a href="../index.html">Home</a>
-      <a href="products.html">Products</a>
-      <a href="policy.html">Exchange & Return Policy</a>
-      <a href="#contact">Contact Us</a>
+      <a href="index.html">Home</a>
+      <a href="pages/products.html">Products</a>
+      <a href="pages/policy.html">Exchange & Return Policy</a>
+<a href="pages/contactus.html">Contact Us</a>
+<a href="admin/login.html">Login</a>
     </div>
+
+    <a href="admin/login.html" class="mobile-login">Login</a>
   </div>
 
   <!-- Search Overlay -->
@@ -84,41 +84,38 @@
     <div class="search-results" id="searchResults"></div>
   </div>
 
-<!-- Products Grid -->
-  <main class="products-page">
-    <h1>Our Collection</h1>
-    <div class="filters-section">
-      <div class="filter-controls">
-        <select id="categoryFilter" class="filter-dropdown">
-          <option value="all">All Categories</option>
-          <option value="sets">Sets</option>
-          <option value="cardigans">Cardigans</option>
-          <option value="sale">Sale Items</option>
-        </select>
-        <select id="sortFilter" class="filter-dropdown">
-          <option value="newest">Newest First</option>
-          <option value="oldest">Oldest First</option>
-          <option value="price-low">Price: Low to High</option>
-          <option value="price-high">Price: High to Low</option>
-          <option value="sale">Sale Items First</option>
-        </select>
+  <!-- Cart Content -->
+    <div id="cart-content" class="cart-content" style="display:none;">
+      <div class="cart-items-section">
+        <div id="cart-items" class="cart-items"></div>
+      </div>
+
+      <div class="cart-summary-section">
+        <div class="cart-summary">
+          <h2>Order Summary</h2>
+          <div class="order-totals">
+            <div class="total-line">
+              <span>Subtotal:</span>
+              <span id="subtotal-amount">0 EGP</span>
+            </div>
+            <div class="total-line">
+              <span>Shipping:</span>
+              <span id="shipping-amount">Select city</span>
+            </div>
+            <div class="total-line total">
+              <span>Total:</span>
+              <span id="total-amount">0 EGP</span>
+            </div>
+          </div>
+          <button id="checkout-btn" class="checkout-btn" disabled>Proceed to Checkout</button>
+        </div>
       </div>
     </div>
-
-    <div class="loading-state" id="loadingState">
-      <div class="loading-spinner"></div>
-      <p>Loading our beautiful collection...</p>
-    </div>
-
-    <div class="products-grid" id="productsGrid"></div>
-    <div class="no-products" id="noProducts" style="display:none;">
-      <h3>No products found</h3>
-      <p>Try adjusting your filters or check back later for new items.</p>
-    </div>
   </main>
-
-
-  <!-- Footer -->
+  <script src="../js/cart.js"></script>
+</body>
+</html>
+ <!-- Footer -->
   <footer id="contact">
     <div class="footer-content">
       <a href="https://www.instagram.com/nourabellebynour/" target="_blank" aria-label="Instagram" class="footer-icon-link">
@@ -129,7 +126,7 @@
     </div>
     
     <div class="footer-links">
-      <a href="policy.html" class="footer-link">Returns & Exchange</a>
+      <a href="pages/policy.html" class="footer-link">Returns & Exchange</a>
       <span class="footer-dot"></span>
       <a href="#contact" class="footer-link">Contact Us</a>
     </div>
@@ -140,8 +137,8 @@
       <span class="brand-heart">♡</span>
     </div>
   </footer>
+
 <!-- Add this before your existing script tag -->
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/script.js"></script>
-</body>
+<script src="js/cart.js"></script></body>
 </html>

@@ -4,7 +4,7 @@
 
 // Supabase Configuration
 const SUPABASE_URL = 'https://ebiwoiaduskjodegnhvq.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViaXdvaWFkdXNram9kZWduaHZxIiwicm9sZUOiImFub24iLCJpYXQiOjE3NTY1OTQ5OTEsImV4cCI6MjA3MjE3MDk5MX0.tuWREO0QuDKfgJQ6fbVpi4UI9ckKUYlqoCy3g2_cJW8';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImViaXdvaWFkdXNram9kZWduaHZxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY1OTQ5OTEsImV4cCI6MjA3MjE3MDk5MX0.tuWREO0QuDKfgJQ6fbVpi4UI9ckKUYlqoCy3g2_cJW8';
 
 // Initialize Supabase
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -72,27 +72,27 @@ async function loadProducts() {
     }
 
     if (data && data.length > 0) {
-      // Transform database products to match website format
-      PRODUCTS = data.map(product => ({
-        id: product.id.toString(),
-        name: product.name,
-        price: product.price,
-        image: product.images && product.images[0] ? product.images[0] : 'assets/images/placeholder.jpg',
-        images: product.images || ['assets/images/placeholder.jpg'],
-        category: product.category || 'uncategorized',
-        featured: product.featured || false,
-        is_active: product.is_active,
-        description: product.description,
-        stock: product.stock,
-        original_price: product.original_price
-      }));
-      
-      console.log(`Loaded ${PRODUCTS.length} products from database`);
-    } else {
-      // Use fallback products if database is empty
-      PRODUCTS = FALLBACK_PRODUCTS;
-      console.log('Using fallback products - database empty or unavailable');
-    }
+  PRODUCTS = data.map(product => ({
+    id: product.id.toString(),
+    name: product.name,
+    price: product.price,
+   image: (product.images && product.images[0]) || 'assets/images/placeholder.jpg',
+images: product.images || ['assets/images/placeholder.jpg'],
+stock: product.stock || {},
+
+    category: product.category || 'uncategorized',
+    featured: product.featured || false,
+    is_active: product.is_active,
+    description: product.description,
+    original_price: product.original_price
+  }));
+  
+  console.log(`Loaded ${PRODUCTS.length} products from database`);
+} else {
+  PRODUCTS = FALLBACK_PRODUCTS;
+  console.log('Using fallback products - database empty or unavailable');
+}
+
     
     // Update the homepage products display
     updateHomepageProducts();
@@ -515,6 +515,36 @@ document.addEventListener('DOMContentLoaded', async function() {
     `;
     document.head.appendChild(style);
   }
+  // Cart icon update
+function updateCartCount() {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+  const count = cart.reduce((acc, item) => acc + item.quantity, 0);
+  document.getElementById('cart-count').textContent = count;
+}
+
+// Call on page load
+updateCartCount();
+
+// Function to add product to cart
+function addToCart(product) {
+  const cart = JSON.parse(localStorage.getItem('cart')) || [];
+
+  // Check if product with same id and size already exists
+  const existingIndex = cart.findIndex(
+    item => item.id === product.id && item.size === product.size
+  );
+
+  if (existingIndex > -1) {
+    cart[existingIndex].quantity += product.quantity;
+  } else {
+    cart.push(product);
+  }
+
+  localStorage.setItem('cart', JSON.stringify(cart));
+  updateCartCount();
+  alert(`${product.name} (${product.size}) added to cart!`);
+}
+
 
   console.log('Nourabelle homepage initialized successfully');
 });
