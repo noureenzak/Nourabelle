@@ -485,16 +485,37 @@ function updateCategoryFilters() {
     categoryFilter.innerHTML = '<option value="">All Categories</option>' + options;
 }
 
+function loadCategoriesIntoProductSelect() {
+    const select = document.getElementById('productCategory');
+    if (!select) return;
+    
+    const options = allCategories.map(cat => 
+        `<option value="${cat.name}">${cat.name}</option>`
+    ).join('');
+    
+    select.innerHTML = '<option value="">Select Category</option>' + options;
+    console.log('Categories loaded into select:', allCategories.length);
+}
+
 // Product Modal Functions
 function openProductModal(productId = null) {
     currentEditingProduct = productId;
     const modal = document.getElementById('productModal');
     const title = document.getElementById('modalTitle');
     
+    // Update form with image upload FIRST
+    updateProductForm();
+    
+    // ALWAYS load categories into select
+    loadCategoriesIntoProductSelect();
+    
     if (productId) {
         const product = allProducts.find(p => p.id === productId);
         if (product) {
-            fillProductForm(product);
+            // Use setTimeout to ensure form is updated first
+            setTimeout(() => {
+                fillProductForm(product);
+            }, 100);
             if (title) title.textContent = 'Edit Product';
         }
     } else {
@@ -556,37 +577,58 @@ async function uploadProductImages(files) {
     
     for (const file of files) {
         try {
-            // Create unique filename
-            const fileExt = file.name.split('.').pop();
-            const fileName = `${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+            console.log('Uploading file:', file.name);
+            
+            // Create unique filename with timestamp
+            const fileExt = file.name.split('.').pop().toLowerCase();
+            const fileName = `product-${Date.now()}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+            
+            console.log('Generated filename:', fileName);
             
             // Upload to Supabase storage
             const { data, error } = await supabase.storage
                 .from('product-images')
                 .upload(fileName, file, {
                     cacheControl: '3600',
-                    upsert: false
+                    upsert: false,
+                    contentType: file.type
                 });
             
-            if (error) throw error;
+            if (error) {
+                console.error('Upload error:', error);
+                throw new Error(`Upload failed: ${error.message}`);
+            }
+            
+            console.log('Upload successful:', data);
             
             // Get public URL
             const { data: { publicUrl } } = supabase.storage
                 .from('product-images')
                 .getPublicUrl(fileName);
             
-            uploadedUrls.push(publicUrl);
+            console.log('Public URL generated:', publicUrl);
+            
+            // Verify the URL is accessible
+            if (publicUrl && publicUrl.includes('supabase')) {
+                uploadedUrls.push(publicUrl);
+                console.log('URL added to array:', publicUrl);
+            } else {
+                throw new Error('Invalid URL generated');
+            }
             
         } catch (error) {
-            console.error('Error uploading image:', error);
+            console.error(`Error uploading ${file.name}:`, error);
             showMessage(`Error uploading ${file.name}: ${error.message}`, 'error');
         }
     }
     
+    console.log('All uploads completed. URLs:', uploadedUrls);
     return uploadedUrls;
 }
 
-// Update the product form to handle file uploads
+
+// Replace the updateProductForm function in your admin.js with this fixed version
+
 function updateProductForm() {
     const imagesTextarea = document.getElementById('productImages');
     if (!imagesTextarea) return;
@@ -600,7 +642,7 @@ function updateProductForm() {
             <div class="upload-zone" onclick="document.getElementById('productImageFiles').click()">
                 <div class="upload-text">
                     📷 Click to upload images
-                    <small>Or drag and drop images here</small>
+                    <small>Select multiple images (hold Ctrl/Cmd)</small>
                 </div>
             </div>
             <div class="image-preview" id="imagePreview"></div>
@@ -613,8 +655,8 @@ function updateProductForm() {
     const fileInput = document.getElementById('productImageFiles');
     const imagePreview = document.getElementById('imagePreview');
     
-    // Handle file input change
-    fileInput.addEventListener('change', handleImageSelection);
+    // Handle file input change - ALLOW MULTIPLE UPLOADS
+    fileInput.addEventListener('change', handleMultipleImageSelection);
     
     // Handle drag and drop
     uploadZone.addEventListener('dragover', (e) => {
@@ -631,10 +673,62 @@ function updateProductForm() {
         uploadZone.classList.remove('drag-over');
         const files = Array.from(e.dataTransfer.files).filter(file => file.type.startsWith('image/'));
         if (files.length > 0) {
-            fileInput.files = createFileList(files);
-            handleImageSelection();
+            // Create a new file input with the dropped files
+            const dataTransfer = new DataTransfer();
+            files.forEach(file => dataTransfer.items.add(file));
+            fileInput.files = dataTransfer.files;
+            handleMultipleImageSelection();
         }
     });
+}
+
+// NEW: Handle multiple image selection and upload
+async function handleMultipleImageSelection() {
+    const fileInput = document.getElementById('productImageFiles');
+    const imagePreview = document.getElementById('imagePreview');
+    const hiddenInput = document.getElementById('productImages');
+    
+    if (!fileInput.files.length) return;
+    
+    console.log(`Uploading ${fileInput.files.length} images...`);
+    
+    // Show loading state
+    imagePreview.innerHTML = '<div class="uploading">Uploading ' + fileInput.files.length + ' images...</div>';
+    
+    try {
+        // Get existing images from hidden input
+        let existingUrls = [];
+        try {
+            existingUrls = JSON.parse(hiddenInput.value || '[]');
+        } catch (e) {
+            existingUrls = [];
+        }
+        
+        // Upload new images and get URLs
+        const newUrls = await uploadProductImages(Array.from(fileInput.files));
+        
+        if (newUrls.length === 0) {
+            throw new Error('No images could be uploaded');
+        }
+        
+        // Combine existing and new URLs
+        const allUrls = [...existingUrls, ...newUrls];
+        
+        // Store all URLs in hidden input
+        hiddenInput.value = JSON.stringify(allUrls);
+        
+        console.log(`Successfully uploaded ${newUrls.length} images. Total: ${allUrls.length}`);
+        
+        // Show preview of all images
+        displayImagePreviews(allUrls);
+        
+        // Clear file input for next selection
+        fileInput.value = '';
+        
+    } catch (error) {
+        console.error('Error handling images:', error);
+        imagePreview.innerHTML = '<div class="error">Error uploading images: ' + error.message + '</div>';
+    }
 }
 
 // Handle image selection and preview
@@ -728,66 +822,121 @@ function openProductModal(productId = null) {
     loadCategoriesIntoProductSelect();
 }
 
-// Global function to make removeImage available
-window.removeImage = removeImage;
-
-function loadCategoriesIntoProductSelect() {
-    const select = document.getElementById('productCategory');
-    if (!select) return;
+function displayImagePreviews(urls) {
+    const imagePreview = document.getElementById('imagePreview');
     
-    const options = allCategories.map(cat => 
-        `<option value="${cat.name}">${cat.name}</option>`
-    ).join('');
+    if (!urls || urls.length === 0) {
+        imagePreview.innerHTML = '<div style="text-align: center; padding: 20px; color: #666;">No images uploaded yet</div>';
+        return;
+    }
     
-    select.innerHTML = '<option value="">Select Category</option>' + options;
+    console.log('Displaying images:', urls);
+    
+    const previewHtml = urls.map((url, index) => {
+        // Clean the URL and add error handling
+        const cleanUrl = url.trim();
+        return `
+            <div class="image-preview-item">
+                <img src="${cleanUrl}" 
+                     alt="Product image ${index + 1}" 
+                     onload="console.log('Image loaded successfully:', '${cleanUrl}')"
+                     onerror="console.error('Image failed to load:', '${cleanUrl}'); this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTUwIiBoZWlnaHQ9IjE1MCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9Ijc1IiB5PSI3NSIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk5OSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+';">
+                <button type="button" class="remove-image" onclick="removeImage(${index})">×</button>
+            </div>
+        `;
+    }).join('');
+    
+    imagePreview.innerHTML = previewHtml;
 }
 
 // Save product
 async function saveProduct(e) {
     e.preventDefault();
     
-    const formData = {
-        name: document.getElementById('productName')?.value || '',
-        category: document.getElementById('productCategory')?.value || '',
-        description: document.getElementById('productDescription')?.value || '',
-        price: parseFloat(document.getElementById('productPrice')?.value || 0),
-        original_price: document.getElementById('productOriginalPrice')?.value ? 
-            parseFloat(document.getElementById('productOriginalPrice').value) : null,
-        images: (document.getElementById('productImages')?.value || '')
-            .split('\n')
-            .map(url => url.trim())
-            .filter(url => url),
-        stock: {
-            Small: parseInt(document.getElementById('stockSmall')?.value || 0),
-            Medium: parseInt(document.getElementById('stockMedium')?.value || 0),
-            Large: parseInt(document.getElementById('stockLarge')?.value || 0)
-        },
-        is_active: document.getElementById('productActive')?.checked || false,
-        featured: document.getElementById('productFeatured')?.checked || false
-    };
-    
     try {
         showLoading(true);
         
+        // Get images from hidden input
+        let images = [];
+        const imagesInput = document.getElementById('productImages');
+        if (imagesInput && imagesInput.value) {
+            try {
+                images = JSON.parse(imagesInput.value);
+                console.log('Images to save:', images);
+            } catch (e) {
+                // Fallback to text parsing
+                images = imagesInput.value
+                    .split('\n')
+                    .map(url => url.trim())
+                    .filter(url => url);
+            }
+        }
+        
+        const formData = {
+            name: document.getElementById('productName')?.value?.trim() || '',
+            category: document.getElementById('productCategory')?.value || '',
+            description: document.getElementById('productDescription')?.value?.trim() || '',
+            price: parseFloat(document.getElementById('productPrice')?.value || 0),
+            original_price: document.getElementById('productOriginalPrice')?.value ? 
+                parseFloat(document.getElementById('productOriginalPrice').value) : null,
+            images: images, // This should be an array
+            stock: {
+                'S-M': parseInt(document.getElementById('stockSM')?.value || 0),
+                'M-L': parseInt(document.getElementById('stockML')?.value || 0)
+            },
+            is_active: document.getElementById('productActive')?.checked || false,
+            featured: document.getElementById('productFeatured')?.checked || false,
+            created_at: new Date().toISOString(),
+            updated_at: new Date().toISOString()
+        };
+        
+        console.log('Form data to save:', formData);
+        
+        // Validation
+        if (!formData.name) {
+            throw new Error('Product name is required');
+        }
+        
+        if (!formData.category) {
+            throw new Error('Product category is required');
+        }
+        
+        if (formData.price <= 0) {
+            throw new Error('Product price must be greater than 0');
+        }
+        
         if (currentEditingProduct) {
+            // Update existing product
+            console.log('Updating product:', currentEditingProduct);
             const { error } = await supabase
                 .from('products')
-                .update({ ...formData, updated_at: new Date().toISOString() })
+                .update(formData)
                 .eq('id', currentEditingProduct);
             
-            if (error) throw error;
+            if (error) {
+                console.error('Update error:', error);
+                throw error;
+            }
             showMessage('Product updated successfully', 'success');
         } else {
-            const { error } = await supabase
+            // Create new product
+            console.log('Creating new product');
+            const { data, error } = await supabase
                 .from('products')
-                .insert([formData]);
+                .insert([formData])
+                .select();
             
-            if (error) throw error;
+            if (error) {
+                console.error('Insert error:', error);
+                throw error;
+            }
+            
+            console.log('Product created:', data);
             showMessage('Product created successfully', 'success');
         }
         
         closeProductModal();
-        loadProducts();
+        await loadProducts(); // Reload products
         
     } catch (error) {
         console.error('Error saving product:', error);
@@ -847,31 +996,106 @@ function deleteCategory(id) {
         showMessage('Category deletion coming soon', 'info');
     }
 }
+// UPDATED: Remove image function with re-indexing
+function removeImage(index) {
+    const hiddenInput = document.getElementById('productImages');
+    
+    let urls = [];
+    try {
+        urls = JSON.parse(hiddenInput.value || '[]');
+    } catch (e) {
+        urls = [];
+    }
+    
+    // Remove the image at the specified index
+    urls.splice(index, 1);
+    hiddenInput.value = JSON.stringify(urls);
+    
+    // Refresh the preview with updated indices
+    displayImagePreviews(urls);
+}
+// NEW: Display all image previews
+function displayImagePreviews(urls) {
+    const imagePreview = document.getElementById('imagePreview');
+    
+    if (!urls || urls.length === 0) {
+        imagePreview.innerHTML = '';
+        return;
+    }
+    
+    const previewHtml = urls.map((url, index) => `
+        <div class="image-preview-item">
+            <img src="${url}" alt="Product image ${index + 1}" 
+                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';"
+                 onload="console.log('Image loaded:', '${url}')">
+            <div style="display: none; padding: 20px; text-align: center; color: #999;">
+                Image failed to load
+            </div>
+            <button type="button" class="remove-image" onclick="removeImage(${index})">×</button>
+        </div>
+    `).join('');
+    
+    imagePreview.innerHTML = previewHtml;
+}
 
-
+// Fixed fillProductForm for S-M/M-L and proper image handling
 function fillProductForm(product) {
+    console.log('Filling form for product:', product);
+    
     const fields = {
         'productName': product.name || '',
         'productCategory': product.category || '',
         'productDescription': product.description || '',
         'productPrice': product.price || '',
         'productOriginalPrice': product.original_price || '',
-        'productImages': product.images ? product.images.join('\n') : '',
         'stockSM': product.stock?.['S-M'] || 0,
         'stockML': product.stock?.['M-L'] || 0
     };
     
     Object.entries(fields).forEach(([id, value]) => {
         const element = document.getElementById(id);
-        if (element) element.value = value;
+        if (element) {
+            element.value = value;
+            console.log(`Set ${id} to:`, value);
+        }
     });
+    
+    // Handle images separately with proper JSON
+    const hiddenInput = document.getElementById('productImages');
+    if (hiddenInput && product.images && Array.isArray(product.images)) {
+        hiddenInput.value = JSON.stringify(product.images);
+        displayImagePreviews(product.images);
+        console.log('Images set:', product.images);
+    }
     
     const activeCheckbox = document.getElementById('productActive');
     if (activeCheckbox) activeCheckbox.checked = product.is_active;
     
     const featuredCheckbox = document.getElementById('productFeatured');
     if (featuredCheckbox) featuredCheckbox.checked = product.featured;
-} 
+}
+
+// Add this debug function to check what's in your database
+async function debugProducts() {
+    console.log('=== DEBUG: Products in Database ===');
+    try {
+        const { data, error } = await supabase.from('products').select('*');
+        console.log('Products found:', data?.length || 0);
+        console.log('Products data:', data);
+        if (data && data.length > 0) {
+            console.log('Sample product:', data[0]);
+        }
+        if (error) console.error('Error:', error);
+        return data;
+    } catch (error) {
+        console.error('Debug error:', error);
+    }
+}
+
+// Make debug function globally available
+window.debugProducts = debugProducts;
+
+
 // Replace the deleteProduct function in your admin.js with this fixed version
 
 async function deleteProduct(productId) {
@@ -1033,6 +1257,83 @@ function closeOrderModal() {
     const modal = document.getElementById('orderModal');
     if (modal) modal.classList.remove('show');
 }
+// UPDATED: Reset form
+function resetProductForm() {
+    const form = document.getElementById('productForm');
+    if (form) form.reset();
+    
+    // Clear image preview
+    const imagePreview = document.getElementById('imagePreview');
+    if (imagePreview) imagePreview.innerHTML = '';
+    
+    const hiddenInput = document.getElementById('productImages');
+    if (hiddenInput) hiddenInput.value = '';
+    
+    const activeCheckbox = document.getElementById('productActive');
+    if (activeCheckbox) activeCheckbox.checked = true;
+    
+    const featuredCheckbox = document.getElementById('productFeatured');
+    if (featuredCheckbox) featuredCheckbox.checked = false;
+}
+function renderProducts(products) {
+    const container = document.getElementById('productsGrid');
+    if (!container) return;
+    
+    console.log('Rendering products:', products);
+    
+    if (!products.length) {
+        container.innerHTML = '<div class="loading">No products found</div>';
+        return;
+    }
+    
+    const html = products.map(product => {
+        console.log('Product:', product.name, 'Images:', product.images);
+        
+        // Handle images properly
+        let imageUrl = '';
+        if (product.images && Array.isArray(product.images) && product.images.length > 0) {
+            imageUrl = product.images[0];
+        }
+        
+        const image = imageUrl ? 
+            `<img src="${imageUrl}" alt="${product.name}" onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='">` :
+            '<div style="padding: 50px; text-align: center; color: #999; background: #f5f5f5;">📦<br>No Image</div>';
+        
+        const badges = [];
+        if (product.featured) badges.push('<span class="badge featured">Featured</span>');
+        if (product.original_price && product.price < product.original_price) badges.push('<span class="badge sale">Sale</span>');
+        if (!product.is_active) badges.push('<span class="badge inactive">Inactive</span>');
+        
+        // Updated for S-M/M-L sizes
+        const stock = product.stock ? 
+            `S-M: ${product.stock['S-M'] || 0}, M-L: ${product.stock['M-L'] || 0}` :
+            'No stock data';
+        
+        return `
+            <div class="product-card" data-id="${product.id}">
+                <div class="product-image">${image}</div>
+                <div class="product-info">
+                    <div class="product-header">
+                        <div class="product-title">${product.name || 'Untitled'}</div>
+                    </div>
+                    <div class="product-badges">${badges.join('')}</div>
+                    <div class="product-price">
+                        $${product.price || '0.00'}
+                        ${product.original_price ? `<span class="product-original-price">$${product.original_price}</span>` : ''}
+                    </div>
+                    <div class="product-category">${product.category || 'Uncategorized'}</div>
+                    <div class="product-stock">${stock}</div>
+                    <div class="product-actions">
+                        <button class="edit-btn" onclick="openProductModal(${product.id})">Edit</button>
+                        <button class="danger-btn" onclick="deleteProduct(${product.id})">Delete</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    
+    container.innerHTML = html;
+}
 
 // Make functions globally available
 window.openProductModal = openProductModal;
@@ -1041,5 +1342,8 @@ window.updateOrderStatus = updateOrderStatus;
 window.viewOrder = viewOrder;
 window.editCategory = editCategory;
 window.deleteCategory = deleteCategory;
+// Make functions globally available
+window.removeImage = removeImage;
+window.handleMultipleImageSelection = handleMultipleImageSelection;
 
 console.log('Admin dashboard script loaded successfully');
