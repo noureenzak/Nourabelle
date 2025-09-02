@@ -1,4 +1,4 @@
-<style>
+
     /* Cart Page Specific Styles */
     .cart-page {
       margin-top: 80px;
@@ -63,19 +63,6 @@
       border-radius: 12px;
       padding: 2rem;
       box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    }
-
-    .cart-item {
-      display: grid;
-      grid-template-columns: 100px 1fr auto auto;
-      gap: 1.5rem;
-      align-items: center;
-      padding: 1.5rem 0;
-      border-bottom: 1px solid #f0f0f0;
-    }
-
-    .cart-item:last-child {
-      border-bottom: none;
     }
 
     .item-image {
@@ -144,20 +131,39 @@
       font-size: 1rem;
     }
 
-    .remove-btn {
-      background: #e74c3c;
-      color: white;
-      border: none;
-      padding: 6px 12px;
-      border-radius: 4px;
-      cursor: pointer;
-      font-size: 0.85rem;
-      transition: all 0.3s ease;
-    }
+    /* Remove button (X in top-right) */
+.cart-item {
+  position: relative;
+  display: grid;
+  grid-template-columns: 100px 1fr auto auto;
+  gap: 1.5rem;
+  align-items: center;
+  padding: 1.5rem 0;
+  border-bottom: 1px solid #f0f0f0;
+}
 
-    .remove-btn:hover {
-      background: #c0392b;
-    }
+.cart-item:last-child {
+  border-bottom: none;
+}
+
+.remove-btn {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  background: transparent;
+  color: #c9928c;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.remove-btn:hover {
+  transform: scale(1.2);
+  color: #c0392b;
+}
+
 
     .cart-summary {
       background: white;

@@ -39,13 +39,12 @@ function getCartTotal() {
 }
 
 // Display cart items
+// Display cart items
 function displayCartItems() {
     const cart = getCart();
     const emptyCart = document.getElementById('emptyCart');
     const cartContent = document.getElementById('cartContent');
     const cartItemsList = document.getElementById('cartItemsList');
-
-    console.log('Displaying cart items:', cart);
 
     if (!cart || cart.length === 0) {
         if (emptyCart) emptyCart.style.display = 'block';
@@ -60,10 +59,10 @@ function displayCartItems() {
 
     cartItemsList.innerHTML = cart.map((item, index) => `
         <div class="cart-item">
+            <button class="remove-btn" onclick="removeItem(${index})">&times;</button>
+
             <div class="item-image">
-                <img src="${item.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk5OSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'}" 
-                     alt="${item.name}" 
-                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwIiBoZWlnaHQ9IjEwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjUwIiB5PSI1MCIgZG9taW5hbnQtYmFzZWxpbmU9Im1pZGRsZSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZmlsbD0iIzk5OSI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'">
+                <img src="${item.image || 'placeholder.jpg'}" alt="${item.name}">
             </div>
             
             <div class="item-info">
@@ -79,15 +78,12 @@ function displayCartItems() {
                 <span class="quantity-display">${item.quantity}</span>
                 <button class="quantity-btn" onclick="changeQuantity(${index}, 1)">+</button>
             </div>
-
-            <div class="item-controls">
-                <button class="remove-btn" onclick="removeItem(${index})">Remove</button>
-            </div>
         </div>
     `).join('');
 
     updateTotals();
 }
+
 
 // Change quantity
 function changeQuantity(index, change) {
@@ -142,7 +138,7 @@ function updateTotals() {
     }
 }
 
-// Proceed to checkout (placeholder - implement your checkout logic)
+// Proceed to checkout
 function proceedToCheckout() {
     const cart = getCart();
     const shippingSelect = document.getElementById('shippingSelect');
@@ -157,20 +153,20 @@ function proceedToCheckout() {
         return;
     }
 
-    // For now, just show an alert - implement your actual checkout process
-    alert('Checkout functionality will be implemented. Total: ' + (getCartTotal() + currentShipping).toFixed(2) + ' EGP');
-    
-    // Example of what you might do:
-    // const checkoutData = {
-    //     items: cart,
-    //     subtotal: getCartTotal(),
-    //     shipping: currentShipping,
-    //     total: getCartTotal() + currentShipping,
-    //     shippingLocation: shippingSelect.value
-    // };
-    // localStorage.setItem('nourabelle_checkout', JSON.stringify(checkoutData));
-    // window.location.href = 'checkout.html';
+    // Save checkout data for checkout page
+    const checkoutData = {
+        items: cart,
+        subtotal: getCartTotal(),
+        shipping: currentShipping,
+        total: getCartTotal() + currentShipping,
+        shippingLocation: shippingSelect.value
+    };
+    localStorage.setItem('nourabelle_checkout', JSON.stringify(checkoutData));
+
+    // Redirect to checkout page
+    window.location.href = 'checkout.html';
 }
+
 
 // Update cart count in header
 function updateCartCount() {

@@ -39,7 +39,6 @@ body {
   top: 0;
   z-index: 1000;
   backdrop-filter: blur(10px);
-  border-bottom: 1px solid rgba(173, 124, 124, 0.1);
   box-shadow: 0 2px 20px rgba(173, 124, 124, 0.1);
 }
 
@@ -392,6 +391,8 @@ body {
   object-position: center;
   opacity: 0;
   transition: opacity 1.5s ease-in-out;
+    background-color: #000; /* adds a black background instead of white gaps */
+
 }
 
 .slide-img.active {
@@ -569,7 +570,6 @@ footer {
   color: var(--text);
   background: linear-gradient(135deg, var(--accent) 0%, rgba(247, 242, 235, 0.95) 100%);
   backdrop-filter: blur(10px);
-  border-top: 1px solid rgba(173, 124, 124, 0.08);
   position: relative;
   overflow: hidden;
 }
