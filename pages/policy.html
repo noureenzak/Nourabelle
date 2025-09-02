@@ -1,9 +1,9 @@
-polish it dotn toufch nav or fiooter and need help shoudl lead to contact page. <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Contact Us - Nourabelle</title>
+  <title>Returns & Exchange Policy - Nourabelle</title>
   <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../css/style.css">
 </head>
@@ -20,7 +20,7 @@ polish it dotn toufch nav or fiooter and need help shoudl lead to contact page. 
       <a href="../index.html">Home</a>
       <a href="products.html">Products</a>
       <a href="policy.html">Returns & Exchange</a>
-      <a href="contactus.html" class="active">Contact Us</a>
+      <a href="contactus.html">Contact Us</a>
     </nav>
 
     <!-- Logo -->
@@ -29,6 +29,7 @@ polish it dotn toufch nav or fiooter and need help shoudl lead to contact page. 
         <img src="../assets/images/logo.jpg" alt="Nourabelle Logo" class="hero-logo">
       </a>
     </div>
+    
     <!-- Right Side Icons -->
     <div class="nav-actions">
       <!-- Search Icon -->
@@ -39,9 +40,17 @@ polish it dotn toufch nav or fiooter and need help shoudl lead to contact page. 
         </svg>
       </button>
 
-  <!-- Cart Icon -->
+      <!-- Login Icon -->
+      <a href="../admin/login.html" class="login-btn" aria-label="Login">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="12" cy="8" r="4"/>
+          <path d="M6 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/>
+        </svg>
+      </a>
+
+      <!-- Cart Icon -->
       <div class="cart-icon-link">
-        <a href="..pages/cart.html" aria-label="Cart">
+        <a href="cart.html" aria-label="Cart">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
             <path d="M9 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
             <path d="M20 22c1.1 0 2-.9 2-2s-.9-2-2-2-2 .9-2 2 .9 2 2 2z"/>
@@ -56,18 +65,17 @@ polish it dotn toufch nav or fiooter and need help shoudl lead to contact page. 
   <!-- Mobile Menu -->
   <div class="mobile-menu" id="mobileMenu">
     <div class="mobile-menu-header">
-      <img src="assets/images/logo.jpg" alt="Nourabelle" class="mobile-menu-logo">
+      <img src="../assets/images/logo.jpg" alt="Nourabelle" class="mobile-menu-logo">
       <button class="mobile-close" id="mobileClose">&times;</button>
     </div>
 
     <div class="mobile-menu-content">
-      <a href="index.html">Home</a>
-      <a href="pages/products.html">Products</a>
-      <a href="pages/policy.html">Exchange & Return Policy</a>
-<a href="pages/contactus.html">Contact Us</a>
+      <a href="../index.html">Home</a>
+      <a href="products.html">Products</a>
+      <a href="policy.html">Returns & Exchange</a>
+      <a href="contactus.html">Contact Us</a>
+      <a href="../admin/login.html">Login</a>
     </div>
-
-    <a href="admin/login.html" class="mobile-login">Login</a>
   </div>
 
   <!-- Search Overlay -->
@@ -79,32 +87,49 @@ polish it dotn toufch nav or fiooter and need help shoudl lead to contact page. 
     <div class="search-results" id="searchResults"></div>
   </div>
 
-<!-- Exchange & Returns Section -->
-<section class="policy-section">
-  <h2>Exchange & Returns Policy</h2>
-  
-  <p>We want you to love your Nourabelle purchase. If you’re not fully satisfied, you may request an exchange or return under these conditions:</p>
-  
-  <h3>Eligibility</h3>
-  <ul>
-    <li>Items must be returned within <strong>14 days</strong> of delivery.</li>
-    <li>Products must be <strong>unworn, unwashed, and in original packaging</strong> with all tags attached.</li>
-    <li>Sale or discounted items are <strong>final</strong> and cannot be returned or exchanged.</li>
-  </ul>
-  
-  <h3>Process</h3>
-  <p>Contact our team within 14 days. Once approved, you’ll receive return instructions. Customers are responsible for return shipping.</p>
-  
-  <h3>Refunds & Exchanges</h3>
-  <p>Refunds will be issued to your original payment method. Exchanges depend on availability of the requested item or size.</p>
-  
-  <div class="policy-help">
-    <p>Need assistance?</p>
-    <a href="contactus.html" class="policy-btn">Contact Us</a>
-  </div>
-</section>
-
-
+  <!-- Exchange & Returns Policy Section -->
+  <section class="policy-section">
+    <h2>Exchange & Returns Policy</h2>
+    
+    <p>We want you to love your Nourabelle purchase. If you're not fully satisfied, you may request an exchange or return under these conditions:</p>
+    
+    <h3>Eligibility Requirements</h3>
+    <ul>
+      <li>Items must be returned within <strong>14 days</strong> of delivery date.</li>
+      <li>Products must be <strong>unworn, unwashed, and in original packaging</strong> with all tags attached.</li>
+      <li>Items must be in their original condition with no signs of wear, damage, or alteration.</li>
+      <li>Sale or discounted items are <strong>final sale</strong> and cannot be returned or exchanged.</li>
+      <li>Custom or personalized items are non-returnable unless defective.</li>
+    </ul>
+    
+    <h3>Return Process</h3>
+    <p>To initiate a return or exchange, please contact our customer service team within 14 days of receiving your order. Once your return request is approved, you'll receive detailed return instructions including:</p>
+    <ul>
+      <li>Return authorization number</li>
+      <li>Shipping address for returns</li>
+      <li>Packaging guidelines</li>
+    </ul>
+    <p><strong>Important:</strong> Customers are responsible for return shipping costs unless the item received was defective or incorrect.</p>
+    
+    <h3>Refunds & Exchanges</h3>
+    <p><strong>Refunds:</strong> Once we receive and inspect your returned item, refunds will be processed to your original payment method within 3-5 business days. Please note that original shipping costs are non-refundable.</p>
+    
+    <p><strong>Exchanges:</strong> Item exchanges are subject to availability of the requested size, color, or style. If the desired item is unavailable, we'll offer a full refund instead.</p>
+    
+    <h3>Damaged or Defective Items</h3>
+    <p>If you receive a damaged or defective item, please contact us immediately with photos of the issue. We'll provide a prepaid return label and expedited replacement or full refund.</p>
+    
+    <h3>International Returns</h3>
+    <p>International customers are responsible for all return shipping costs and any customs duties. Returns must still comply with our 14-day return window from delivery date.</p>
+    
+    <div class="policy-help">
+      <p><strong>Need assistance with your return or have questions about our policy?</strong></p>
+      <a href="contactus.html" class="policy-btn">Contact Our Team</a>
+      <p style="margin-top: 15px; font-size: 0.9rem; color: #666;">
+        Our customer service team is here to help make your return process as smooth as possible.
+      </p>
+    </div>
+  </section>
 
   <!-- Footer -->
   <footer id="contact">
@@ -114,12 +139,17 @@ polish it dotn toufch nav or fiooter and need help shoudl lead to contact page. 
           <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/>
         </svg>
       </a>
+      <a href="https://www.tiktok.com/@nourabellebynour" target="_blank" aria-label="TikTok" class="footer-icon-link">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+          <path d="M16 8.04c1.11.8 2.47 1.27 3.93 1.31V6.14a5.6 5.6 0 0 1-3.06-.95A5.7 5.7 0 0 1 14.73 2h-2.73v14.3a2.7 2.7 0 1 1-2.7-2.7c.37 0 .72.08 1.04.22V10.9a6 6 0 0 0-1.04-.09 5.7 5.7 0 1 0 5.7 5.7V8.04z"/>
+        </svg>
+      </a>
     </div>
     
     <div class="footer-links">
-      <a href="pages/policy.html" class="footer-link">Returns & Exchange</a>
+      <a href="policy.html" class="footer-link">Returns & Exchange</a>
       <span class="footer-dot"></span>
-      <a href="#contact" class="footer-link">Contact Us</a>
+      <a href="contactus.html" class="footer-link">Contact Us</a>
     </div>
     
     <div class="footer-brand">
@@ -129,6 +159,91 @@ polish it dotn toufch nav or fiooter and need help shoudl lead to contact page. 
     </div>
   </footer>
 
-  <script src="../js/script.js"></script>
+  <!-- FIXED: Add mobile menu JavaScript -->
+  <script>
+    // Mobile menu functionality for policy page
+    document.addEventListener('DOMContentLoaded', function() {
+      const hamburger = document.getElementById('hamburger');
+      const mobileMenu = document.getElementById('mobileMenu');
+      const mobileClose = document.getElementById('mobileClose');
+      
+      console.log('Policy page mobile menu initializing...');
+      
+      if (!hamburger || !mobileMenu || !mobileClose) {
+        console.error('Mobile menu elements not found');
+        return;
+      }
+
+      let isMenuOpen = false;
+
+      function openMenu() {
+        console.log('Opening menu');
+        isMenuOpen = true;
+        hamburger.classList.add('active');
+        mobileMenu.classList.add('open');
+        document.body.classList.add('menu-open');
+      }
+
+      function closeMenu() {
+        console.log('Closing menu');
+        isMenuOpen = false;
+        hamburger.classList.remove('active');
+        mobileMenu.classList.remove('open');
+        document.body.classList.remove('menu-open');
+      }
+
+      function toggleMenu() {
+        console.log('Toggle menu - current state:', isMenuOpen);
+        if (isMenuOpen) {
+          closeMenu();
+        } else {
+          openMenu();
+        }
+      }
+
+      // Hamburger click event
+      hamburger.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Hamburger clicked');
+        toggleMenu();
+      });
+
+      // Close button click event
+      mobileClose.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Close button clicked');
+        closeMenu();
+      });
+
+      // Close menu when clicking on menu links
+      const menuLinks = mobileMenu.querySelectorAll('.mobile-menu-content a');
+      menuLinks.forEach(link => {
+        link.addEventListener('click', function() {
+          console.log('Menu link clicked, closing menu');
+          closeMenu();
+        });
+      });
+
+      // Close menu on outside click
+      mobileMenu.addEventListener('click', function(e) {
+        if (e.target === mobileMenu) {
+          console.log('Outside click, closing menu');
+          closeMenu();
+        }
+      });
+
+      // Close menu on escape key
+      document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isMenuOpen) {
+          console.log('Escape pressed, closing menu');
+          closeMenu();
+        }
+      });
+
+      console.log('Policy page mobile menu setup complete');
+    });
+  </script>
 </body>
 </html>

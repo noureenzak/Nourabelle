@@ -1,4 +1,4 @@
-// Updated Cart Management System - cart.js
+// Updated Cart Management System - cart.js - FIXED MOBILE MENU
 'use strict';
 
 // Cart state
@@ -38,7 +38,6 @@ function getCartTotal() {
     return cart.reduce((total, item) => total + (parseFloat(item.price) * item.quantity), 0);
 }
 
-// Display cart items
 // Display cart items
 function displayCartItems() {
     const cart = getCart();
@@ -83,7 +82,6 @@ function displayCartItems() {
 
     updateTotals();
 }
-
 
 // Change quantity
 function changeQuantity(index, change) {
@@ -167,7 +165,6 @@ function proceedToCheckout() {
     window.location.href = 'checkout.html';
 }
 
-
 // Update cart count in header
 function updateCartCount() {
     const cart = getCart();
@@ -186,34 +183,88 @@ function updateCartCount() {
     }
 }
 
-// Mobile menu setup
+// FIXED: Mobile menu setup
 function setupMobileMenu() {
     const hamburger = document.getElementById('hamburger');
     const mobileMenu = document.getElementById('mobileMenu');
     const mobileClose = document.getElementById('mobileClose');
     
-    if (hamburger && mobileMenu) {
-        hamburger.addEventListener('click', () => {
-            mobileMenu.classList.add('open');
-            document.body.classList.add('menu-open');
-        });
-    }
+    console.log('Setting up mobile menu...', { hamburger, mobileMenu, mobileClose });
     
-    if (mobileClose) {
-        mobileClose.addEventListener('click', () => {
-            mobileMenu.classList.remove('open');
-            document.body.classList.remove('menu-open');
-        });
+    if (!hamburger || !mobileMenu || !mobileClose) {
+        console.error('Mobile menu elements not found');
+        return;
     }
-    
-    if (mobileMenu) {
-        mobileMenu.addEventListener('click', (e) => {
-            if (e.target === mobileMenu) {
-                mobileMenu.classList.remove('open');
-                document.body.classList.remove('menu-open');
-            }
-        });
+
+    let isMenuOpen = false;
+
+    function openMenu() {
+        console.log('Opening menu');
+        isMenuOpen = true;
+        hamburger.classList.add('active');
+        mobileMenu.classList.add('open');
+        document.body.classList.add('menu-open');
     }
+
+    function closeMenu() {
+        console.log('Closing menu');
+        isMenuOpen = false;
+        hamburger.classList.remove('active');
+        mobileMenu.classList.remove('open');
+        document.body.classList.remove('menu-open');
+    }
+
+    function toggleMenu() {
+        console.log('Toggle menu - current state:', isMenuOpen);
+        if (isMenuOpen) {
+            closeMenu();
+        } else {
+            openMenu();
+        }
+    }
+
+    // Hamburger click event
+    hamburger.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Hamburger clicked');
+        toggleMenu();
+    });
+
+    // Close button click event
+    mobileClose.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Close button clicked');
+        closeMenu();
+    });
+
+    // Close menu when clicking on menu links
+    const menuLinks = mobileMenu.querySelectorAll('.mobile-menu-content a');
+    menuLinks.forEach(link => {
+        link.addEventListener('click', function() {
+            console.log('Menu link clicked, closing menu');
+            closeMenu();
+        });
+    });
+
+    // Close menu on outside click
+    mobileMenu.addEventListener('click', function(e) {
+        if (e.target === mobileMenu) {
+            console.log('Outside click, closing menu');
+            closeMenu();
+        }
+    });
+
+    // Close menu on escape key
+    document.addEventListener('keydown', function(e) {
+        if (e.key === 'Escape' && isMenuOpen) {
+            console.log('Escape pressed, closing menu');
+            closeMenu();
+        }
+    });
+
+    console.log('Mobile menu setup complete');
 }
 
 // Search functionality

@@ -25,8 +25,7 @@ body {
   scroll-behavior: smooth;
 }
 
-/* Navigation */
-/* Navigation - Feminine Polish */
+/* Navigation - Fixed and Improved */
 .navbar {
   display: flex;
   justify-content: space-between;
@@ -40,6 +39,8 @@ body {
   z-index: 1000;
   backdrop-filter: blur(10px);
   box-shadow: 0 2px 20px rgba(173, 124, 124, 0.1);
+  border: none;
+  outline: none;
 }
 
 .hamburger {
@@ -50,6 +51,8 @@ body {
   z-index: 1001;
   border-radius: 8px;
   transition: all 0.3s ease;
+  border: none;
+  outline: none;
 }
 
 .hamburger:hover {
@@ -93,6 +96,8 @@ body {
   padding: 8px 0;
   position: relative;
   transition: color 0.3s ease;
+  border: none;
+  outline: none;
 }
 
 .desktop-nav a:hover {
@@ -137,7 +142,9 @@ body {
   gap: 20px;
 }
 
+/* Fixed: Consistent styling for all nav action buttons */
 .search-btn,
+.login-btn,
 .cart-icon-link a {
   position: relative;
   cursor: pointer;
@@ -147,6 +154,7 @@ body {
   border-radius: 6px;
   background: none;
   border: none;
+  outline: none;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -156,6 +164,7 @@ body {
 }
 
 .search-btn:hover,
+.login-btn:hover,
 .cart-icon-link:hover a {
   color: var(--btn);
   background: rgba(173, 124, 124, 0.08);
@@ -208,9 +217,9 @@ body {
   }
 }
 
-/* Hide user icon on mobile */
+/* Hide login icon on mobile - it's in the mobile menu instead */
 @media (max-width: 768px) {
-  .user-btn {
+  .login-btn {
     display: none;
   }
   
@@ -231,6 +240,8 @@ body {
   transform: translateX(-100%);
   transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
   overflow-y: auto;
+  border: none;
+  outline: none;
 }
 
 .mobile-menu.open {
@@ -254,6 +265,7 @@ body {
 .mobile-close {
   background: none;
   border: none;
+  outline: none;
   font-size: 30px;
   color: var(--text);
   cursor: pointer;
@@ -282,6 +294,8 @@ body {
   border-bottom: 1px solid #f0f0f0;
   letter-spacing: 0.5px;
   transition: color 0.3s ease;
+  border: none;
+  outline: none;
 }
 
 .mobile-menu-content a:hover {
@@ -303,6 +317,8 @@ body {
   letter-spacing: 0.5px;
   transition: all 0.3s ease;
   box-shadow: 0 4px 15px rgba(173, 124, 124, 0.3);
+  border: none;
+  outline: none;
 }
 
 .mobile-login:hover {
@@ -324,6 +340,8 @@ body {
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
+  border: none;
+  outline: none;
 }
 
 .search-overlay.open {
@@ -338,6 +356,8 @@ body {
   background: white;
   margin: 80px 20px 0;
   border-radius: 12px;
+  border: none;
+  outline: none;
 }
 
 .search-container input {
@@ -355,6 +375,7 @@ body {
   color: #666;
   background: none;
   border: none;
+  outline: none;
   cursor: pointer;
 }
 
@@ -364,6 +385,8 @@ body {
   border-radius: 12px;
   max-height: 60vh;
   overflow-y: auto;
+  border: none;
+  outline: none;
 }
 
 /* Hero Section - FIXED for full-width on desktop */
@@ -391,8 +414,7 @@ body {
   object-position: center;
   opacity: 0;
   transition: opacity 1.5s ease-in-out;
-    background-color: #000; /* adds a black background instead of white gaps */
-
+  background-color: #000;
 }
 
 .slide-img.active {
@@ -406,7 +428,7 @@ body {
   }
   
   .slide-img {
-    object-fit: cover; /* Changed from contain to cover */
+    object-fit: cover;
     object-position: center;
   }
 }
@@ -435,6 +457,7 @@ body {
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
   border: none;
+  outline: none;
 }
 
 .shop-now-btn:hover {
@@ -560,7 +583,7 @@ body {
   max-width: 360px;
 }
 
-/* Footer - Compact & Aesthetic */
+/* Footer - FIXED: Removed outlines and adjusted social icons */
 footer {
   padding: 25px 24px 20px;
   display: flex;
@@ -572,6 +595,8 @@ footer {
   backdrop-filter: blur(10px);
   position: relative;
   overflow: hidden;
+  border: none;
+  outline: none;
 }
 
 footer::before {
@@ -584,10 +609,12 @@ footer::before {
   background: linear-gradient(90deg, transparent, rgba(173, 124, 124, 0.3), transparent);
 }
 
+/* FIXED: Social icons closer together */
 .footer-content {
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 15px; /* Reduced from default to bring icons closer */
   width: 100%;
 }
 
@@ -603,7 +630,9 @@ footer::before {
   background: rgba(173, 124, 124, 0.1);
   position: relative;
   overflow: hidden;
-  margin: 0 auto;
+  text-decoration: none;
+  border: none;
+  outline: none;
 }
 
 .footer-icon-link::before {
@@ -650,6 +679,8 @@ footer::before {
   border-radius: 15px;
   font-weight: 500;
   opacity: 0.8;
+  border: none;
+  outline: none;
 }
 
 .footer-link:hover {
@@ -731,6 +762,7 @@ body.menu-open {
     display: none;
   }
 }
+
 /* Contact Page */
 .contact-page {
   margin-top: 80px;
@@ -774,6 +806,7 @@ body.menu-open {
   border-radius: 8px;
   font-family: var(--font);
   font-size: 1rem;
+  outline: none;
 }
 
 .contact-form input:focus,
@@ -787,6 +820,7 @@ body.menu-open {
   color: white;
   padding: 14px 30px;
   border: none;
+  outline: none;
   border-radius: 25px;
   font-size: 1rem;
   font-weight: 600;
@@ -807,11 +841,13 @@ body.menu-open {
 .contact-info a {
   color: var(--btn);
   text-decoration: none;
+  outline: none;
 }
 
 .contact-info a:hover {
   text-decoration: underline;
 }
+
 /* Policy Section */
 .policy-section {
   max-width: 800px;
@@ -868,38 +904,10 @@ body.menu-open {
   text-decoration: none;
   font-weight: 600;
   transition: 0.3s;
+  border: none;
+  outline: none;
 }
 
 .policy-btn:hover {
   background: #a38568;
-}
-/* Add this CSS to your style.css file for the login link */
-
-.desktop-nav .login-link {
-  background: var(--btn);
-  color: white !important;
-  padding: 8px 16px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  transition: all 0.3s ease;
-  margin-left: 10px;
-}
-
-.desktop-nav .login-link:hover {
-  background: var(--btn-hover);
-  color: white !important;
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(173, 124, 124, 0.3);
-}
-
-.desktop-nav .login-link::after {
-  display: none; /* Remove the underline effect for login button */
-}
-
-/* Adjust desktop nav spacing */
-@media (min-width: 769px) {
-  .desktop-nav {
-    gap: 25px; /* Slightly reduce gap to accommodate login button */
-  }
 }
