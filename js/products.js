@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Load products from database ONLY
+// REPLACE your loadProductsFromDatabase function in js/products.js:
+
 async function loadProductsFromDatabase() {
   const loadingState = document.getElementById('loadingState');
   const productsGrid = document.getElementById('productsGrid');
@@ -57,7 +59,8 @@ async function loadProductsFromDatabase() {
       throw error;
     }
     
-    console.log('Products fetched:', products?.length || 0);
+    console.log('Raw products from database:', products);
+    console.log('Products fetched count:', products?.length || 0);
     
     if (!products || products.length === 0) {
       // No products in database
@@ -73,23 +76,27 @@ async function loadProductsFromDatabase() {
     }
     
     // Convert database products to display format
-    allProducts = products.map(product => ({
-      id: product.id,
-      name: product.name || 'Untitled Product',
-      price: product.price || 0,
-      originalPrice: product.original_price || null,
-      image: (product.images && product.images.length > 0) ? product.images[0] : null,
-      images: product.images || [],
-      category: product.category || 'uncategorized',
-      badge: getBadge(product),
-      description: product.description || 'No description available',
-      dateAdded: product.created_at || new Date().toISOString(),
-      stock: product.stock || {}
-    }));
+    allProducts = products.map(product => {
+      console.log('Processing product:', product.name, 'ID:', product.id);
+      return {
+        id: product.id, // Keep original integer ID
+        name: product.name || 'Untitled Product',
+        price: product.price || 0,
+        originalPrice: product.original_price || null,
+        image: (product.images && Array.isArray(product.images) && product.images.length > 0) ? product.images[0] : null,
+        images: Array.isArray(product.images) ? product.images : [],
+        category: product.category || 'uncategorized',
+        badge: getBadge(product),
+        description: product.description || 'No description available',
+        dateAdded: product.created_at || new Date().toISOString(),
+        stock: product.stock || {}
+      };
+    });
     
     currentProducts = [...allProducts];
     
-    console.log('Products processed:', allProducts.length);
+    console.log('Products processed successfully:', allProducts.length);
+    console.log('Sample processed product:', allProducts[0]);
     
     // Hide loading and show products
     if (loadingState) loadingState.style.display = 'none';
@@ -107,7 +114,8 @@ async function loadProductsFromDatabase() {
       noProducts.style.display = 'block';
       noProducts.innerHTML = `
         <h3>Error Loading Products</h3>
-        <p>Unable to connect to database. Please try refreshing the page.</p>
+        <p>Database Error: ${error.message}</p>
+        <p>Please check the console for details and try refreshing the page.</p>
       `;
     }
     if (productsGrid) productsGrid.style.display = 'none';
@@ -207,7 +215,7 @@ function renderProducts(products) {
 
 function createProductCard(product) {
   let priceHTML;
-  if (product.originalPrice) {
+  if (product.originalPrice && product.originalPrice > product.price) {
     priceHTML = `
       <p class="price-sale">
         <span class="current-price">${product.price} EGP</span>
@@ -221,7 +229,7 @@ function createProductCard(product) {
   const imageUrl = product.image || 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjEyNSIgeT0iMTI1IiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
 
   return `
-    <div class="product-item" onclick="goToProduct('${product.id}')">
+    <div class="product-item" onclick="goToProduct(${product.id})">
       <img src="${imageUrl}" alt="${product.name}" 
            onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjUwIiBoZWlnaHQ9IjI1MCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjEyNSIgeT0iMTI1IiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4='">
       <p>${product.name}</p>
@@ -259,9 +267,9 @@ function setupProductInteractions() {
   });
 }
 
-// Navigate to product page (uses your existing product.html)
 function goToProduct(productId) {
-  console.log('Navigating to product:', productId);
+  console.log('Products page - Navigating to product ID:', productId, 'Type:', typeof productId);
+  // Keep the ID as is, don't convert to string
   window.location.href = `product.html?product=${encodeURIComponent(productId)}`;
 }
 

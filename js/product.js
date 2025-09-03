@@ -161,6 +161,10 @@ function getBadge(product) {
     return null;
 }
 
+// REPLACE your existing renderProduct() function with this enhanced version:
+
+let currentImageIndex = 0; // Add this variable at the top with your other state variables
+
 function renderProduct() {
     console.log('Rendering product:', currentProduct.name);
     
@@ -180,6 +184,11 @@ function renderProduct() {
                 <div class="main-image-container">
                     <img id="product-image" src="" alt="Product Image" />
                     <span id="product-badge" class="product-badge" style="display: none;"></span>
+                    <div class="image-navigation" id="imageNavigation" style="display: none;">
+                        <button class="nav-arrow nav-prev" onclick="changeImage(-1)" aria-label="Previous image">‹</button>
+                        <button class="nav-arrow nav-next" onclick="changeImage(1)" aria-label="Next image">›</button>
+                    </div>
+                    <div class="image-dots" id="imageDots" style="display: none;"></div>
                 </div>
                 <div class="thumbnail-container" id="thumbnail-container" style="display: none;"></div>
             </div>
@@ -221,14 +230,28 @@ function renderProduct() {
     updateElement('product-description', currentProduct.description);
     updateElement('product-price', `${currentProduct.price} EGP`);
 
-    // Update original price
-    const originalPrice = document.getElementById('original-price');
-    if (currentProduct.originalPrice && originalPrice) {
-        originalPrice.textContent = `${currentProduct.originalPrice} EGP`;
-        originalPrice.style.display = 'inline';
-    } else if (originalPrice) {
-        originalPrice.style.display = 'none';
+   const currentPriceEl = document.getElementById('product-price');
+const originalPriceEl = document.getElementById('original-price');
+
+if (currentPriceEl) {
+    currentPriceEl.textContent = `${currentProduct.price} EGP`;
+    
+    // If there's a sale, add sale styling and show original price
+    if (currentProduct.originalPrice && currentProduct.originalPrice > currentProduct.price) {
+        currentPriceEl.classList.add('on-sale');
+        
+        if (originalPriceEl) {
+            originalPriceEl.textContent = `${currentProduct.originalPrice} EGP`;
+            originalPriceEl.style.display = 'inline';
+            console.log('Showing sale price:', currentProduct.price, 'was:', currentProduct.originalPrice);
+        }
+    } else {
+        currentPriceEl.classList.remove('on-sale');
+        if (originalPriceEl) {
+            originalPriceEl.style.display = 'none';
+        }
     }
+}
 
     // Update badge
     const badge = document.getElementById('product-badge');
@@ -241,26 +264,16 @@ function renderProduct() {
         }
     }
 
-    // Update main image
-    const mainImage = document.getElementById('product-image');
-    if (mainImage) {
-        if (currentProduct.images && currentProduct.images.length > 0) {
-            mainImage.src = currentProduct.images[0];
-            mainImage.alt = currentProduct.name;
-            
-            mainImage.onerror = function() {
-                this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LXNpemU9IjE2Ij5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+PC9zdmc+';
-            };
-        }
-    }
+    // Setup image gallery (NEW!)
+    setupImageGallery();
 
-    // Update features
+    // Update features - now using database features if available
     const featuresList = document.getElementById('features-list');
     if (featuresList && currentProduct.features) {
         featuresList.innerHTML = currentProduct.features.map(feature => `<li>${feature}</li>`).join('');
     }
 
-    // Update size selector with S-M and M-L
+    // Update size selector
     const sizeSelect = document.getElementById('size');
     if (sizeSelect) {
         sizeSelect.innerHTML = `
@@ -273,6 +286,118 @@ function renderProduct() {
     }
 
     console.log('Product rendering complete');
+}
+
+// ADD these NEW functions after your existing functions:
+
+// Enhanced Image Gallery Setup
+function setupImageGallery() {
+    const mainImage = document.getElementById('product-image');
+    const imageNavigation = document.getElementById('imageNavigation');
+    const imageDots = document.getElementById('imageDots');
+    const thumbnailContainer = document.getElementById('thumbnail-container');
+    
+    console.log('=== SETUP IMAGE GALLERY ===');
+    console.log('mainImage element:', mainImage);
+    console.log('currentProduct:', currentProduct);
+    console.log('currentProduct.images:', currentProduct.images);
+    
+    if (!mainImage || !currentProduct.images) {
+        console.log('Missing mainImage or currentProduct.images');
+        return;
+    }
+    
+    const images = currentProduct.images.filter(img => img && img.trim());
+    console.log('Filtered images:', images);
+    console.log('Images count:', images.length);
+    
+    if (images.length === 0) {
+        console.log('No valid images found, using placeholder');
+        mainImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LXNpemU9IjE2Ij5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+PC9zdmc>';
+        return;
+    }
+    
+    // Set first image
+    currentImageIndex = 0;
+    mainImage.src = images[currentImageIndex];
+    mainImage.alt = currentProduct.name;
+    console.log('Setting main image to:', images[currentImageIndex]);
+    
+    // Show navigation only if multiple images
+    if (images.length > 1) {
+        console.log('Multiple images detected, showing navigation');
+        if (imageNavigation) imageNavigation.style.display = 'block';
+        if (imageDots) {
+            imageDots.style.display = 'flex';
+            imageDots.innerHTML = images.map((_, index) => 
+                `<button class="dot ${index === 0 ? 'active' : ''}" onclick="goToImage(${index})"></button>`
+            ).join('');
+        }
+        
+        // Setup thumbnails
+        if (thumbnailContainer) {
+            thumbnailContainer.style.display = 'flex';
+            thumbnailContainer.innerHTML = images.map((img, index) => 
+                `<img src="${img}" alt="Thumbnail ${index + 1}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="goToImage(${index})" loading="lazy">`
+            ).join('');
+        }
+    } else {
+        console.log('Only one image, hiding navigation');
+    }
+    
+    // Handle image load errors with logging
+    mainImage.onerror = function() {
+        console.error('Failed to load image:', this.src);
+        this.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNDAwIiBoZWlnaHQ9IjQwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjIwMCIgeT0iMjAwIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5IiBmb250LXNpemU9IjE2Ij5JbWFnZSBOb3QgRm91bmQ8L3RleHQ+PC9zdmc>';
+    };
+    
+    mainImage.onload = function() {
+        console.log('Image loaded successfully:', this.src);
+    };
+}
+
+// Image Navigation Functions
+function changeImage(direction) {
+    if (!currentProduct?.images || currentProduct.images.length <= 1) return;
+    
+    const images = currentProduct.images.filter(img => img && img.trim());
+    currentImageIndex = (currentImageIndex + direction + images.length) % images.length;
+    
+    const mainImage = document.getElementById('product-image');
+    if (mainImage) {
+        mainImage.src = images[currentImageIndex];
+    }
+    
+    updateImageIndicators();
+}
+
+function goToImage(index) {
+    if (!currentProduct?.images) return;
+    
+    const images = currentProduct.images.filter(img => img && img.trim());
+    if (index < 0 || index >= images.length) return;
+    
+    currentImageIndex = index;
+    const mainImage = document.getElementById('product-image');
+    if (mainImage) {
+        mainImage.src = images[currentImageIndex];
+    }
+    
+    updateImageIndicators();
+}
+
+function updateImageIndicators() {
+    // Update dots
+    const dots = document.querySelectorAll('.dot');
+    dots.forEach((dot, index) => {
+        dot.classList.toggle('active', index === currentImageIndex);
+    });
+    
+    // Update thumbnails
+    const thumbnails = document.querySelectorAll('.thumbnail');
+    thumbnails.forEach((thumb, index) => {
+        thumb.classList.toggle('active', index === currentImageIndex);
+    });
 }
 
 function updateElement(id, content) {
@@ -309,6 +434,8 @@ function changeQuantity(change) {
 }
 
 // Add to cart function
+// REPLACE your existing addToCart() function with this enhanced version:
+
 function addToCart() {
     console.log('Add to cart clicked');
     
@@ -317,14 +444,12 @@ function addToCart() {
         return;
     }
     
-    // Get current selections
     const sizeSelect = document.getElementById('size');
     const quantityInput = document.getElementById('quantity-input');
     
     const selectedSize = sizeSelect ? sizeSelect.value : 'S-M';
     const selectedQuantity = quantityInput ? parseInt(quantityInput.value) : 1;
     
-    // Create cart item
     const cartItem = {
         id: currentProduct.id,
         name: currentProduct.name,
@@ -336,10 +461,7 @@ function addToCart() {
         addedAt: Date.now()
     };
     
-    // Get existing cart
     const cart = getCart();
-    
-    // Check if item with same ID and size already exists
     const existingIndex = cart.findIndex(item => 
         item.id === cartItem.id && item.size === cartItem.size
     );
@@ -350,16 +472,72 @@ function addToCart() {
         cart.push(cartItem);
     }
     
-    // Save cart
     saveCart(cart);
     
-    // Show success message and redirect to cart
-    showNotification(`${currentProduct.name} (${selectedSize}) added to cart!`);
+    // Enhanced success notification
+    showEnhancedNotification(
+        `✓ ${currentProduct.name} (${selectedSize}) added to cart!`,
+        'success'
+    );
     
-    // Redirect to cart page after a short delay
+    // Optional: Brief visual feedback on button
+    const btn = document.getElementById('buy-button');
+    if (btn) {
+        const originalText = btn.textContent;
+        btn.textContent = 'Added! ✓';
+        btn.style.background = '#27ae60';
+        
+        setTimeout(() => {
+            btn.textContent = originalText;
+            btn.style.background = '';
+        }, 1500);
+    }
+}
+
+function showEnhancedNotification(message, type = 'success') {
+    // Remove existing notifications
+    const existing = document.querySelectorAll('.enhanced-notification');
+    existing.forEach(notif => notif.remove());
+
+    const notification = document.createElement('div');
+    notification.className = `enhanced-notification ${type}`;
+    notification.innerHTML = `
+        <div class="notification-content">
+            <span class="notification-message">${message}</span>
+            <button class="notification-close" onclick="this.parentElement.parentElement.remove()">×</button>
+        </div>
+        <div class="notification-actions">
+            <button onclick="window.location.href='cart.html'" class="view-cart-btn">View Cart</button>
+            <button onclick="window.location.href='products.html'" class="continue-shopping-btn">Continue Shopping</button>
+        </div>
+    `;
+
+    const styles = {
+        position: 'fixed',
+        top: '80px',
+        right: '20px',
+        background: type === 'success' ? '#27ae60' : '#e74c3c',
+        color: 'white',
+        borderRadius: '12px',
+        zIndex: '10000',
+        minWidth: '320px',
+        maxWidth: '400px',
+        boxShadow: '0 8px 32px rgba(0,0,0,0.2)',
+        animation: 'slideInRight 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
+        fontFamily: 'var(--font)',
+        overflow: 'hidden'
+    };
+
+    Object.assign(notification.style, styles);
+    document.body.appendChild(notification);
+
+    // Auto remove after 5 seconds
     setTimeout(() => {
-        window.location.href = 'cart.html';
-    }, 1500);
+        if (notification.parentNode) {
+            notification.style.animation = 'slideOutRight 0.4s ease';
+            setTimeout(() => notification.remove(), 400);
+        }
+    }, 5000);
 }
 
 function showNotification(message) {

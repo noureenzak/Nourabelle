@@ -329,3 +329,243 @@
     max-width: none;
   }
 }
+/* ADD this CSS to the bottom of your product.css file */
+
+/* Image Navigation Arrows */
+.image-navigation {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 10px;
+    pointer-events: none;
+}
+
+.nav-arrow {
+    background: rgba(255, 255, 255, 0.9);
+    border: none;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--btn);
+    cursor: pointer;
+    transition: all 0.3s ease;
+    pointer-events: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+}
+
+.nav-arrow:hover {
+    background: white;
+    transform: scale(1.1);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* Image Dots */
+.image-dots {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 15px;
+}
+
+.dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: none;
+    background: #ddd;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.dot.active {
+    background: var(--btn);
+    transform: scale(1.2);
+}
+
+.dot:hover {
+    background: var(--btn-hover);
+}
+
+/* Enhanced Thumbnails */
+.thumbnail-container {
+    justify-content: center;
+    padding: 15px 0;
+}
+
+.thumbnail.active {
+    border-color: var(--btn);
+    box-shadow: 0 0 0 2px rgba(173, 124, 124, 0.3);
+}
+
+/* Enhanced Notifications */
+.enhanced-notification {
+    backdrop-filter: blur(10px);
+}
+
+.notification-content {
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.notification-message {
+    font-weight: 500;
+    font-size: 0.95rem;
+}
+
+.notification-close {
+    background: none;
+    border: none;
+    color: white;
+    font-size: 18px;
+    cursor: pointer;
+    padding: 0;
+    margin-left: 10px;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+
+.notification-close:hover {
+    opacity: 1;
+}
+
+.notification-actions {
+    padding: 0 20px 16px;
+    display: flex;
+    gap: 10px;
+}
+
+.view-cart-btn,
+.continue-shopping-btn {
+    padding: 8px 16px;
+    border: 1px solid rgba(255,255,255,0.3);
+    background: rgba(255,255,255,0.1);
+    color: white;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    text-decoration: none;
+    display: inline-block;
+}
+
+.view-cart-btn:hover,
+.continue-shopping-btn:hover {
+    background: rgba(255,255,255,0.2);
+    transform: translateY(-1px);
+}
+
+/* Animations */
+@keyframes slideInRight {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideOutRight {
+    from {
+        transform: translateX(0);
+        opacity: 1;
+    }
+    to {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .enhanced-notification {
+        right: 10px;
+        left: 10px;
+        min-width: auto;
+        max-width: none;
+    }
+    
+    .nav-arrow {
+        width: 35px;
+        height: 35px;
+        font-size: 16px;
+    }
+    
+    .notification-actions {
+        flex-direction: column;
+    }
+}
+/* ADD this CSS to your product.css file to properly style sale prices */
+
+.product-price-section {
+    margin: 1.5rem 0;
+    display: flex;
+    align-items: baseline;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+}
+
+.current-price {
+    font-size: 1.4rem;
+    font-weight: 600;
+    color: var(--btn);
+}
+
+/* When there's a sale, make the current price red and more prominent */
+.current-price.on-sale {
+    color: #e74c3c;
+    font-size: 1.6rem;
+}
+
+.original-price {
+    font-size: 1.2rem;
+    color: #999;
+    text-decoration: line-through;
+    font-weight: 400;
+    position: relative;
+}
+
+/* Add a "WAS" label before crossed out price */
+.original-price::before {
+    content: "was ";
+    font-size: 0.9rem;
+    color: #666;
+    font-weight: 400;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    text-decoration: none;
+}
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .product-price-section {
+        flex-direction: column;
+        gap: 0.25rem;
+        align-items: flex-start;
+    }
+    
+    .current-price {
+        font-size: 1.3rem;
+    }
+    
+    .current-price.on-sale {
+        font-size: 1.4rem;
+    }
+    
+    .original-price {
+        font-size: 1rem;
+    }
+}

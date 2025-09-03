@@ -569,7 +569,13 @@ function fillProductForm(product) {
         }
     });
     
-    // Handle images separately
+    // Handle features
+    const featuresTextarea = document.getElementById('productFeatures');
+    if (featuresTextarea && product.features && Array.isArray(product.features)) {
+        featuresTextarea.value = product.features.join('\n');
+    }
+    
+    // Handle images
     const hiddenInput = document.getElementById('productImages');
     if (hiddenInput && product.images && Array.isArray(product.images)) {
         hiddenInput.value = JSON.stringify(product.images);
@@ -584,7 +590,7 @@ function fillProductForm(product) {
     if (featuredCheckbox) featuredCheckbox.checked = product.featured;
 }
 
-// Reset product form
+// Add this to the resetProductForm function (replace the existing one)
 function resetProductForm() {
     const form = document.getElementById('productForm');
     if (form) form.reset();
@@ -596,12 +602,129 @@ function resetProductForm() {
     const hiddenInput = document.getElementById('productImages');
     if (hiddenInput) hiddenInput.value = '';
     
+    // Reset features
+    const featuresTextarea = document.getElementById('productFeatures');
+    if (featuresTextarea) featuresTextarea.value = '';
+    
     const activeCheckbox = document.getElementById('productActive');
     if (activeCheckbox) activeCheckbox.checked = true;
     
     const featuredCheckbox = document.getElementById('productFeatured');
     if (featuredCheckbox) featuredCheckbox.checked = false;
 }
+
+// Add this to the saveProduct function - replace the existing formData creation
+async function saveProduct(e) {
+    e.preventDefault();
+    
+    try {
+        showLoading(true);
+        
+        // Get images from hidden input
+        let images = [];
+        const imagesInput = document.getElementById('productImages');
+        if (imagesInput && imagesInput.value) {
+            try {
+                images = JSON.parse(imagesInput.value);
+                console.log('Images to save:', images);
+            } catch (e) {
+                console.warn('Could not parse images JSON:', e);
+                images = [];
+            }
+        }
+        
+        // Get features from textarea
+        let features = [];
+        const featuresInput = document.getElementById('productFeatures');
+        if (featuresInput && featuresInput.value.trim()) {
+            features = featuresInput.value
+                .split('\n')
+                .map(feature => feature.trim())
+                .filter(feature => feature.length > 0);
+        } else {
+            // Default features if none provided
+            features = [
+                'High-quality materials',
+                'Comfortable fit',
+                'Elegant design',
+                'Perfect for daily wear',
+                'Easy care instructions'
+            ];
+        }
+        
+        const formData = {
+            name: document.getElementById('productName')?.value?.trim() || '',
+            category: document.getElementById('productCategory')?.value || '',
+            description: document.getElementById('productDescription')?.value?.trim() || '',
+            price: parseFloat(document.getElementById('productPrice')?.value || 0),
+            original_price: document.getElementById('productOriginalPrice')?.value ? 
+                parseFloat(document.getElementById('productOriginalPrice').value) : null,
+            images: images, // Array of URLs
+            features: features, // Array of feature strings
+            stock: {
+                'S-M': parseInt(document.getElementById('stockSM')?.value || 0),
+                'M-L': parseInt(document.getElementById('stockML')?.value || 0)
+            },
+            is_active: document.getElementById('productActive')?.checked || false,
+            featured: document.getElementById('productFeatured')?.checked || false
+        };
+        
+        console.log('Form data to save:', formData);
+        
+        // Validation
+        if (!formData.name) {
+            throw new Error('Product name is required');
+        }
+        
+        if (!formData.category) {
+            throw new Error('Product category is required');
+        }
+        
+        if (formData.price <= 0) {
+            throw new Error('Product price must be greater than 0');
+        }
+        
+        if (currentEditingProduct) {
+            // Update existing product
+            console.log('Updating product:', currentEditingProduct);
+            const { error } = await supabase
+                .from('products')
+                .update({ ...formData, updated_at: new Date().toISOString() })
+                .eq('id', currentEditingProduct);
+            
+            if (error) {
+                console.error('Update error:', error);
+                throw error;
+            }
+            showMessage('Product updated successfully', 'success');
+        } else {
+            // Create new product
+            console.log('Creating new product');
+            const { data, error } = await supabase
+                .from('products')
+                .insert([{ ...formData, created_at: new Date().toISOString() }])
+                .select();
+            
+            if (error) {
+                console.error('Insert error:', error);
+                throw error;
+            }
+            
+            console.log('Product created:', data);
+            showMessage('Product created successfully', 'success');
+        }
+        
+        closeProductModal();
+        await loadProducts(); // Reload products
+        
+    } catch (error) {
+        console.error('Error saving product:', error);
+        showMessage('Error saving product: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
 
 // Image upload functionality
 async function uploadProductImages(files) {
@@ -810,97 +933,6 @@ function removeImage(index) {
     displayImagePreviews(urls);
 }
 
-// Save product (FIXED for S-M/M-L)
-async function saveProduct(e) {
-    e.preventDefault();
-    
-    try {
-        showLoading(true);
-        
-        // Get images from hidden input
-        let images = [];
-        const imagesInput = document.getElementById('productImages');
-        if (imagesInput && imagesInput.value) {
-            try {
-                images = JSON.parse(imagesInput.value);
-                console.log('Images to save:', images);
-            } catch (e) {
-                console.warn('Could not parse images JSON:', e);
-                images = [];
-            }
-        }
-        
-        const formData = {
-            name: document.getElementById('productName')?.value?.trim() || '',
-            category: document.getElementById('productCategory')?.value || '',
-            description: document.getElementById('productDescription')?.value?.trim() || '',
-            price: parseFloat(document.getElementById('productPrice')?.value || 0),
-            original_price: document.getElementById('productOriginalPrice')?.value ? 
-                parseFloat(document.getElementById('productOriginalPrice').value) : null,
-            images: images, // Array of URLs
-            stock: {
-                'S-M': parseInt(document.getElementById('stockSM')?.value || 0),
-                'M-L': parseInt(document.getElementById('stockML')?.value || 0)
-            },
-            is_active: document.getElementById('productActive')?.checked || false,
-            featured: document.getElementById('productFeatured')?.checked || false
-        };
-        
-        console.log('Form data to save:', formData);
-        
-        // Validation
-        if (!formData.name) {
-            throw new Error('Product name is required');
-        }
-        
-        if (!formData.category) {
-            throw new Error('Product category is required');
-        }
-        
-        if (formData.price <= 0) {
-            throw new Error('Product price must be greater than 0');
-        }
-        
-        if (currentEditingProduct) {
-            // Update existing product
-            console.log('Updating product:', currentEditingProduct);
-            const { error } = await supabase
-                .from('products')
-                .update({ ...formData, updated_at: new Date().toISOString() })
-                .eq('id', currentEditingProduct);
-            
-            if (error) {
-                console.error('Update error:', error);
-                throw error;
-            }
-            showMessage('Product updated successfully', 'success');
-        } else {
-            // Create new product
-            console.log('Creating new product');
-            const { data, error } = await supabase
-                .from('products')
-                .insert([{ ...formData, created_at: new Date().toISOString() }])
-                .select(); // Get the created product back
-            
-            if (error) {
-                console.error('Insert error:', error);
-                throw error;
-            }
-            
-            console.log('Product created:', data);
-            showMessage('Product created successfully', 'success');
-        }
-        
-        closeProductModal();
-        await loadProducts(); // Reload products
-        
-    } catch (error) {
-        console.error('Error saving product:', error);
-        showMessage('Error saving product: ' + error.message, 'error');
-    } finally {
-        showLoading(false);
-    }
-}
 
 // Delete product (FIXED and simplified)
 async function deleteProduct(productId) {
@@ -937,6 +969,7 @@ async function deleteProduct(productId) {
         showLoading(false);
     }
 }
+
 // admin.js - Complete Clean Admin Dashboard Script - PART 5 (Final Functions & Exports)
 
 // Utility Functions

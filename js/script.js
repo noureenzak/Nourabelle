@@ -421,10 +421,9 @@ function scrollToProducts() {
 
 // ========== GLOBAL FUNCTIONS ==========
 window.goToProduct = function(productId) {
-  const product = PRODUCTS.find(p => p.id == productId);
-  if (product) {
-    window.location.href = `pages/product.html?product=${encodeURIComponent(productId)}`;
-  }
+  console.log('Navigating to product ID:', productId);
+  // Don't convert to string, keep original ID format
+  window.location.href = `pages/product.html?product=${encodeURIComponent(productId)}`;
 };
 
 window.addToCart = addToCart;
