@@ -156,7 +156,14 @@
   </footer>
 
 <!-- Add this before your existing script tag -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="js/script.js"></script>
+
+  <!-- Add this before your existing script tag -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <!-- Step 1: Load the shared config file FIRST -->
+  <script src="js/config.js"></script>
+  
+  <!-- Step 2: Load the script for the homepage -->
+  <script src="js/script.js"></script>
 </body>
 </html>

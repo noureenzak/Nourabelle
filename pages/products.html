@@ -153,7 +153,13 @@
     </div>
   </footer>
 <!-- Add this before your existing script tag -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-<script src="../js/script.js"></script>
+<!-- Add this before your existing script tag -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  
+  <!-- Step 1: Load the shared config file FIRST -->
+  <script src="../js/config.js"></script>
+  
+  <!-- Step 2: Load ONLY the script for THIS page -->
+  <script defer src="../js/products.js"></script>
 </body>
 </html>
