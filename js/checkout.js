@@ -71,9 +71,14 @@ function displayOrderSummary() {
     `).join('');
 
     // Display totals
-    if (summarySubtotal) summarySubtotal.textContent = `${(checkoutData.subtotal || 0).toFixed(2)} EGP`;
-    if (summaryShipping) summaryShipping.textContent = `${(checkoutData.shipping || 0).toFixed(2)} EGP`;
-    if (summaryTotal) summaryTotal.textContent = `${(checkoutData.total || 0).toFixed(2)} EGP`;
+if (summarySubtotal) summarySubtotal.textContent = `${(checkoutData.subtotal || 0).toFixed(2)} EGP`;
+if (summaryShipping) {
+    const shippingText = checkoutData.shippingLocationText ? 
+        `${(checkoutData.shipping || 0).toFixed(2)} EGP (${checkoutData.shippingLocationText})` : 
+        `${(checkoutData.shipping || 0).toFixed(2)} EGP`;
+    summaryShipping.textContent = shippingText;
+}
+if (summaryTotal) summaryTotal.textContent = `${(checkoutData.total || 0).toFixed(2)} EGP`;
 }
 
 // Generate order number - MOVED UP and made accessible
@@ -516,6 +521,7 @@ function confirmPayment() {
 }
 
 // Place order - MAIN FUNCTION - FIXED EmailJS
+// FIXED: Place order - Complete with city selection
 async function placeOrder() {
     console.log('=== PLACING ORDER ===');
 
@@ -525,7 +531,6 @@ async function placeOrder() {
         return;
     }
 
-    // Validate Instapay payment
     if (selectedPayment === 'instapay' && !screenshotVerified) {
         showNotification('Please complete Instapay payment verification first', 'error');
         openInstapayModal();
@@ -539,22 +544,18 @@ async function placeOrder() {
     }
 
     try {
-        // Disable button and show loading
         btn.disabled = true;
         btn.textContent = 'Processing Order...';
 
         const formData = new FormData(form);
         
-        // Use existing order number or generate new one
         const orderNumber = currentOrderNumber || generateOrderNumber();
-        currentOrderNumber = orderNumber; // Store globally
+        currentOrderNumber = orderNumber;
 
-        // Ensure total is calculated
         checkoutData.subtotal = Number(checkoutData.subtotal || 0);
         checkoutData.shipping = Number(checkoutData.shipping || 0);
         checkoutData.total = Number(checkoutData.total || (checkoutData.subtotal + checkoutData.shipping));
 
-        // Build shipping address
         const shippingAddressObj = {
             street_address: formData.get('address'),
             building_info: formData.get('building') || null,
@@ -564,21 +565,28 @@ async function placeOrder() {
             postal_code: formData.get('postalCode') || null
         };
 
+        // FIXED: Get shipping city from checkoutData
+        const shippingCity = checkoutData.shippingLocationText || 'Not specified';
+
+        // FIXED: Match your actual Supabase table columns + include shipping city
         const orderData = {
             order_number: orderNumber,
             customer_name: `${formData.get('firstName')} ${formData.get('lastName')}`,
             customer_email: formData.get('email'),
             customer_phone: formData.get('phone'),
             shipping_address: shippingAddressObj,
+            shipping_city: shippingCity, // ADDED: Save the selected city
             payment_method: selectedPayment || 'cod',
             payment_screenshot: uploadedScreenshot || null,
-            notes: formData.get('orderNotes') || null,
+            order_notes: formData.get('orderNotes') || null,
             items: checkoutData.items || [],
             subtotal: checkoutData.subtotal,
             shipping_cost: checkoutData.shipping,
             total_amount: checkoutData.total,
             status: selectedPayment === 'instapay' ? 'payment_pending' : 'pending',
-            payment_status: selectedPayment === 'instapay' ? 'pending' : 'completed'
+            payment_status: selectedPayment === 'instapay' ? 'pending' : 'completed',
+            subtotal_amount: checkoutData.subtotal,
+            shipping_amount: checkoutData.shipping
         };
 
         console.log('Order data prepared:', orderData);
@@ -597,7 +605,7 @@ async function placeOrder() {
 
         console.log('Order inserted successfully:', insertedOrder);
 
-        // ===== FIXED EMAIL NOTIFICATIONS =====
+        // Email notifications
         emailjs.init('el1mZUzjUjqjdWKbF');
 
         try {
@@ -627,9 +635,9 @@ async function placeOrder() {
                 return methods[method] || method;
             }
 
-            // Owner Notification - FIXED: Added to_email parameter
+            // Owner Notification
             const ownerParams = {
-                to_email: 'nourabellebynour@gmail.com', // FIXED: Added recipient
+                to_email: 'nourabellebynour@gmail.com',
                 customer_name: orderData.customer_name,
                 customer_email: orderData.customer_email,
                 customer_phone: orderData.customer_phone,
@@ -638,16 +646,17 @@ async function placeOrder() {
                 total_amount: orderData.total_amount.toFixed(2) + " EGP",
                 items_list: buildItemsList(orderData.items),
                 full_address: buildFullAddress(orderData.shipping_address),
+                shipping_city: shippingCity, // ADDED: Include city in email
                 payment_screenshot_url: orderData.payment_screenshot || 'No screenshot provided',
-                order_notes: orderData.notes || 'No special notes'
+                order_notes: orderData.order_notes || 'No special notes'
             };
 
             await emailjs.send("service_cigidea", "template_pkp5jrk", ownerParams);
             console.log("Owner notification sent successfully");
 
-            // Customer Notification - FIXED: Added to_email parameter
+            // Customer Notification
             const customerParams = {
-                to_email: orderData.customer_email, // FIXED: Added recipient
+                to_email: orderData.customer_email,
                 customer_name: orderData.customer_name,
                 order_number: orderData.order_number,
                 order_date: new Date().toLocaleString(),
@@ -655,6 +664,7 @@ async function placeOrder() {
                 total_amount: orderData.total_amount.toFixed(2) + " EGP",
                 items_list: buildItemsList(orderData.items),
                 full_address: buildFullAddress(orderData.shipping_address),
+                shipping_city: shippingCity, // ADDED: Include city in customer email
                 store_email: 'nourabellebynour@gmail.com',
                 store_instagram: '@nourabellebynour'
             };
@@ -680,6 +690,7 @@ async function placeOrder() {
         btn.textContent = 'Place Order';
     }
 }
+
 
 // Show success message
 function showSuccessMessage(orderNumber) {

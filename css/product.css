@@ -74,45 +74,118 @@
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
-.main-image-container,
+/* FIXED: Thumbnail container - prevent cut-off */
 .thumbnail-container {
-  width: 100%;
-  overflow: hidden; /* prevents images from overflowing container */
+    display: flex;
+    gap: 0.8rem;
+    overflow-x: auto;
+    padding: 0.5rem 0;
+    justify-content: flex-start; /* Changed from center to flex-start */
+    align-items: center;
+    /* Add padding to ensure first item is fully visible */
+    padding-left: 0.5rem;
+    padding-right: 0.5rem;
+    box-sizing: border-box;
 }
-
-.main-image-container img,
-.thumbnail-container img {
-  width: 100%;
-  height: auto; /* keep aspect ratio */
-  object-fit: contain; /* ensure the whole image fits inside container */
-  display: block;
-}
-/* Thumbnail container */
-.thumbnail-container {
-  display: flex;
-  gap: 0.8rem;
-  overflow-x: auto;
-  padding: 0.5rem 0;
-    justify-content: center;
-   
-}
-
 
 .thumbnail {
-  width: 60px;
-  height: 60px;
-  object-fit: cover;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  border: 2px solid transparent;
-  flex-shrink: 0;
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 2px solid transparent;
+    flex-shrink: 0; /* Prevent shrinking */
+    border-radius: 4px;
+    /* Ensure minimum width */
+    min-width: 60px;
 }
 
 .thumbnail:hover,
 .thumbnail.active {
-  border-color: var(--btn);
-  transform: scale(1.05);
+    border-color: var(--btn);
+    transform: scale(1.05);
+    box-shadow: 0 0 0 2px rgba(173, 124, 124, 0.3);
 }
+
+/* Mobile adjustments */
+@media (max-width: 768px) {
+    .thumbnail-container {
+        padding: 0.5rem;
+        gap: 0.6rem;
+        justify-content: flex-start; /* Keep aligned to start */
+    }
+    
+    .thumbnail {
+        width: 50px;
+        height: 50px;
+        min-width: 50px;
+    }
+}
+
+/* Enhanced Mobile Scrollbar Styling */
+@media (max-width: 768px) {
+    .thumbnail-container {
+        /* For Webkit browsers (Chrome, Safari, Edge) */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(173, 124, 124, 0.6) rgba(240, 227, 218, 0.3);
+    }
+
+    .thumbnail-container::-webkit-scrollbar {
+        height: 8px; /* Make it more visible on mobile */
+    }
+
+    .thumbnail-container::-webkit-scrollbar-track {
+        background: rgba(240, 227, 218, 0.4); /* Light beige track */
+        border-radius: 10px;
+        margin: 0 4px; /* Add margin to track */
+    }
+
+    .thumbnail-container::-webkit-scrollbar-thumb {
+        background: rgba(173, 124, 124, 0.7); /* More visible pink */
+        border-radius: 10px;
+        transition: background 0.3s ease;
+        border: 1px solid rgba(240, 227, 218, 0.3); /* Add border for definition */
+    }
+
+    .thumbnail-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(173, 124, 124, 0.9); /* Darker on hover */
+    }
+
+    /* Also apply to any other horizontal scrolling containers */
+    .product-scroll,
+    .image-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(173, 124, 124, 0.6) rgba(240, 227, 218, 0.3);
+    }
+
+    .product-scroll::-webkit-scrollbar,
+    .image-scroll::-webkit-scrollbar {
+        height: 8px;
+    }
+
+    .product-scroll::-webkit-scrollbar-track,
+    .image-scroll::-webkit-scrollbar-track {
+        background: rgba(240, 227, 218, 0.4);
+        border-radius: 10px;
+        margin: 0 4px;
+    }
+
+    .product-scroll::-webkit-scrollbar-thumb,
+    .image-scroll::-webkit-scrollbar-thumb {
+        background: rgba(173, 124, 124, 0.7);
+        border-radius: 10px;
+        transition: background 0.3s ease;
+        border: 1px solid rgba(240, 227, 218, 0.3);
+    }
+
+    .product-scroll::-webkit-scrollbar-thumb:hover,
+    .image-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(173, 124, 124, 0.9);
+    }
+}
+
+
 
 /* Product info section - simple like index */
 .product-info {
@@ -578,62 +651,7 @@
 /* Add this CSS to your product.css file */
 
 /* Mobile scrollbar styling for thumbnail container */
-@media (max-width: 768px) {
-    .thumbnail-container {
-        /* For Webkit browsers (Chrome, Safari, Edge) */
-        scrollbar-width: thin;
-        scrollbar-color: rgba(173, 124, 124, 0.4) transparent;
-    }
 
-    .thumbnail-container::-webkit-scrollbar {
-        height: 6px; /* Thin scrollbar */
-    }
-
-    .thumbnail-container::-webkit-scrollbar-track {
-        background: rgba(240, 227, 218, 0.3); /* Light beige track */
-        border-radius: 10px;
-    }
-
-    .thumbnail-container::-webkit-scrollbar-thumb {
-        background: rgba(173, 124, 124, 0.5); /* Light pink thumb */
-        border-radius: 10px;
-        transition: background 0.3s ease;
-    }
-
-    .thumbnail-container::-webkit-scrollbar-thumb:hover {
-        background: rgba(173, 124, 124, 0.7); /* Slightly darker on hover */
-    }
-
-    /* Also apply to any other horizontal scrolling containers on product page */
-    .product-scroll,
-    .image-scroll {
-        scrollbar-width: thin;
-        scrollbar-color: rgba(173, 124, 124, 0.4) transparent;
-    }
-
-    .product-scroll::-webkit-scrollbar,
-    .image-scroll::-webkit-scrollbar {
-        height: 6px;
-    }
-
-    .product-scroll::-webkit-scrollbar-track,
-    .image-scroll::-webkit-scrollbar-track {
-        background: rgba(240, 227, 218, 0.3);
-        border-radius: 10px;
-    }
-
-    .product-scroll::-webkit-scrollbar-thumb,
-    .image-scroll::-webkit-scrollbar-thumb {
-        background: rgba(173, 124, 124, 0.5);
-        border-radius: 10px;
-        transition: background 0.3s ease;
-    }
-
-    .product-scroll::-webkit-scrollbar-thumb:hover,
-    .image-scroll::-webkit-scrollbar-thumb:hover {
-        background: rgba(173, 124, 124, 0.7);
-    }
-}
 
 /* For very small mobile devices */
 @media (max-width: 480px) {

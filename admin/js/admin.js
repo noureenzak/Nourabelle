@@ -1814,8 +1814,7 @@ async function viewOrderDetails(orderId) {
     }
 }
 
-// Show enhanced order details modal
-// FIXED: Enhanced order details modal without print option
+// FIXED: Enhanced order details modal - Copy & Paste this function
 function showOrderDetailsModal(order) {
     const modal = document.getElementById('orderModal');
     const orderDetails = document.getElementById('orderDetails');
@@ -1967,7 +1966,7 @@ function showOrderDetailsModal(order) {
                 </div>
             ` : ''}
 
-            <!-- FIXED: Quick Actions without print -->
+            <!-- Quick Actions -->
             <div class="detail-section">
                 <h3>Quick Actions</h3>
                 <div class="action-buttons">
@@ -2132,6 +2131,14 @@ function showOrderDetailsModal(order) {
     
     orderDetails.innerHTML = orderHtml;
     modal.classList.add('show');
+    
+    // FIXED: Setup close button functionality after modal is shown
+    setTimeout(() => {
+        const closeBtn = document.querySelector('#orderModal .close-btn');
+        if (closeBtn) {
+            closeBtn.onclick = closeOrderModal;
+        }
+    }, 100);
 }
 
 // NEW: Update order status from modal

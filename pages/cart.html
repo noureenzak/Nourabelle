@@ -120,14 +120,40 @@
           <span id="subtotal">0 EGP</span>
         </div>
 
-        <div class="summary-line">
+  <div class="summary-line">
           <span>Shipping:</span>
           <select id="shippingSelect" class="shipping-select" onchange="updateShipping()">
-            <option value="">Select city</option>
-            <option value="cairo">Cairo (50 EGP)</option>
-            <option value="alexandria">Alexandria (60 EGP)</option>
-            <option value="giza">Giza (55 EGP)</option>
-            <option value="other">Other (80 EGP)</option>
+            <option value="">Select shipping location</option>
+            <optgroup label="24 Hours Delivery">
+              <option value="cairo-giza">Cairo (85 EGP)</option>
+              <option value="cairo-giza">Giza (85 EGP)</option>
+              <option value="cairo-giza">New Administrative Capital (85 EGP)</option>
+              <option value="cairo-giza">New Cairo (85 EGP)</option>
+              <option value="cairo-giza">6th of October (85 EGP)</option>
+              <option value="alexandria">Alexandria (65 EGP)</option>
+            </optgroup>
+            <optgroup label="3-5 Days Delivery">
+              <option value="delta">Damietta (85 EGP)</option>
+              <option value="delta">Menoufia (85 EGP)</option>
+              <option value="delta">Dakahlia (85 EGP)</option>
+              <option value="delta">Gharbia (85 EGP)</option>
+              <option value="delta">Kafr El Sheikh (85 EGP)</option>
+              <option value="canal">Suez (85 EGP)</option>
+              <option value="canal">Ismailia (85 EGP)</option>
+              <option value="canal">Port Said (85 EGP)</option>
+              <option value="beheira">Beheira (95 EGP)</option>
+              <option value="upper1">Beni Suef (95 EGP)</option>
+              <option value="upper1">Fayoum (95 EGP)</option>
+              <option value="upper1">Assiut (95 EGP)</option>
+              <option value="upper1">Minya (95 EGP)</option>
+              <option value="upper2">Sohag (125 EGP)</option>
+              <option value="upper2">Qena (125 EGP)</option>
+              <option value="upper2">Hurghada (125 EGP)</option>
+              <option value="upper2">El Gouna (125 EGP)</option>
+              <option value="upper3">Luxor (135 EGP)</option>
+              <option value="upper3">Aswan (135 EGP)</option>
+              <option value="upper3">Red Sea (135 EGP)</option>
+            </optgroup>
           </select>
         </div>
 

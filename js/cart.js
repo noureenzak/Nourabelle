@@ -174,15 +174,19 @@ function updateShipping() {
     const select = document.getElementById('shippingSelect');
     if (!select) return;
     
-    const shippingCosts = { 
-        cairo: 50, 
-        alexandria: 60, 
-        giza: 55, 
-        other: 80 
+    const shippingCosts = {
+        'cairo-giza': 85,
+        'alexandria': 65,
+        'delta': 85,
+        'canal': 85,
+        'beheira': 95,
+        'upper1': 95,
+        'upper2': 125,
+        'upper3': 135,
     };
     
     currentShipping = shippingCosts[select.value] || 0;
-    updateTotals();
+      updateTotals();
 }
 
 // Update totals
@@ -226,13 +230,17 @@ function proceedToCheckout() {
         return;
     }
 
+    // Get shipping location details
+    const shippingLocationText = shippingSelect.options[shippingSelect.selectedIndex].text;
+    
     // Save checkout data for checkout page
     const checkoutData = {
         items: cart,
         subtotal: getCartTotal(),
         shipping: currentShipping,
         total: getCartTotal() + currentShipping,
-        shippingLocation: shippingSelect.value
+        shippingLocation: shippingSelect.value,
+        shippingLocationText: shippingLocationText
     };
     
     try {
