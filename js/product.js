@@ -161,38 +161,47 @@ function updateProductInfo() {
 
 // Update product images - FIXED to prevent flash
 // UPDATED: Enhanced updateProductImages function with Out of Stock badge
+// FIXED: Enhanced updateProductImages function with proper thumbnail order
 function updateProductImages() {
     const mainImage = document.getElementById('product-image');
+    const imagePlaceholder = document.getElementById('image-placeholder');
     const thumbnailContainer = document.getElementById('thumbnail-container');
     const productBadge = document.getElementById('product-badge');
     
     console.log('🖼️ Updating images. Found images:', productImages.length);
     
     if (productImages.length === 0) {
-        console.warn('⚠️ No images found, using placeholder');
-        if (mainImage) {
-            mainImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
-            mainImage.alt = currentProduct.name;
-            mainImage.style.display = 'block';
+        console.warn('⚠️ No images found, hiding image section');
+        if (imagePlaceholder) {
+            imagePlaceholder.innerHTML = '<div style="padding: 2rem; text-align: center; color: #999;">No images available</div>';
         }
+        if (mainImage) mainImage.style.display = 'none';
         if (thumbnailContainer) thumbnailContainer.style.display = 'none';
         return;
     }
     
-    // Set main image to FIRST product image from database
-    if (mainImage) {
-        mainImage.src = productImages[0];
-        mainImage.alt = currentProduct.name;
-        mainImage.style.display = 'block';
+    // FIXED: Preload main image and show loading state
+    if (mainImage && imagePlaceholder) {
+        const preloadImg = new Image();
+        preloadImg.onload = function() {
+            mainImage.src = productImages[0];
+            mainImage.alt = currentProduct.name;
+            mainImage.style.display = 'block';
+            imagePlaceholder.style.display = 'none';
+            
+            // Apply grayscale filter if out of stock
+            if (currentProduct.out_of_stock) {
+                mainImage.style.filter = 'grayscale(50%)';
+            } else {
+                mainImage.style.filter = 'none';
+            }
+        };
+        preloadImg.onerror = function() {
+            imagePlaceholder.innerHTML = '<div style="padding: 2rem; text-align: center; color: #999;">Image failed to load</div>';
+        };
+        preloadImg.src = productImages[0];
         
-        // Apply grayscale filter if out of stock
-        if (currentProduct.out_of_stock) {
-            mainImage.style.filter = 'grayscale(50%)';
-        } else {
-            mainImage.style.filter = 'none';
-        }
-        
-        console.log('🖼️ Main image set to:', productImages[0]);
+        console.log('🖼️ Loading main image:', productImages[0]);
     }
     
     // Show appropriate badge
@@ -215,21 +224,26 @@ function updateProductImages() {
         }
     }
     
-    // Setup thumbnails if multiple images
+    // FIXED: Setup thumbnails starting from image 2 (if more than 1 image)
     if (productImages.length > 1 && thumbnailContainer) {
-        const thumbnailsHtml = productImages.map((image, index) => 
-            `<img src="${image}" alt="${currentProduct.name}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})" style="cursor: pointer; ${currentProduct.out_of_stock ? 'filter: grayscale(50%);' : ''}">`
-        ).join('');
+        // Only show images 2, 3, 4, etc. in thumbnails (skip the first one)
+        const thumbnailImages = productImages.slice(1);
+        
+        const thumbnailsHtml = thumbnailImages.map((image, index) => {
+            // Preload thumbnail images for faster loading
+            const preloadThumb = new Image();
+            preloadThumb.src = image;
+            
+            return `<img src="${image}" alt="${currentProduct.name}" class="thumbnail" onclick="changeMainImage(${index + 1})" style="cursor: pointer; ${currentProduct.out_of_stock ? 'filter: grayscale(50%);' : ''}" loading="lazy">`;
+        }).join('');
         
         thumbnailContainer.innerHTML = thumbnailsHtml;
         thumbnailContainer.style.display = 'flex';
-        console.log(`🖼️ Created ${productImages.length} thumbnails`);
+        console.log(`🖼️ Created ${thumbnailImages.length} thumbnails starting from image 2`);
     } else if (thumbnailContainer) {
         thumbnailContainer.style.display = 'none';
     }
 }
-
-
 
 // Update product pricing
 function updateProductPricing() {
