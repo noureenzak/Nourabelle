@@ -158,11 +158,22 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
-  padding-right: 10px; /* Add padding to avoid overlap with X button */
- padding-top: 120px; /* Add padding to avoid overlap with X button */
-
-
+  padding-right: 10px;
+  padding-top: 80px; /* default for desktop */
+   padding-right: 10px; /* optional */
+  margin-left: auto; /* pushes it to the right */
 }
+
+/* For screens smaller than 768px */
+@media (max-width: 768px) {
+  .quantity-controls {
+    padding-top: 10px; /* adjust for mobile */
+     margin-left: 0; /* optional, if you want it centered or full-width */
+    justify-content: flex-end; /* keeps it on the right if needed */
+    gap: 0.3rem; /* smaller gap for mobile */
+  }
+}
+
 
 .quantity-btn {
   width: 32px;
@@ -342,4 +353,4 @@
     height: 28px;
     font-size: 0.9rem;
   }
-}
+  
