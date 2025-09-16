@@ -1,5 +1,4 @@
-// Complete Checkout System - checkout.js
-
+// Updated checkout.js with enhanced order handling
 'use strict';
 
 // Supabase Configuration
@@ -42,7 +41,7 @@ function loadCheckoutData() {
     }
 }
 
-// Display order summary
+// Enhanced display order summary with better item details
 function displayOrderSummary() {
     const orderItems = document.getElementById('orderItems');
     const summarySubtotal = document.getElementById('summarySubtotal');
@@ -54,18 +53,23 @@ function displayOrderSummary() {
         return;
     }
 
-    // Display items
-    orderItems.innerHTML = checkoutData.items.map(item => `
-        <div class="order-item">
-            <img src="${item.image || '../assets/images/placeholder.jpg'}" alt="${item.name}" class="item-image" 
-                 onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNmNWY1ZjUiLz48dGV4dCB4PSIzMCIgeT0iMzAiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5OTkiIGZvbnQtc2l6ZT0iOCI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'">
-            <div class="item-details">
-                <h4>${item.name || 'Product'}</h4>
-                <p>Size: ${item.size || 'S-M'} | Qty: ${item.quantity || 1}</p>
+    // Display items with enhanced information
+    orderItems.innerHTML = checkoutData.items.map(item => {
+        const itemTotal = ((item.price || 0) * (item.quantity || 1)).toFixed(2);
+        
+        return `
+            <div class="order-item">
+                <img src="${item.image || '../assets/images/placeholder.jpg'}" alt="${item.name}" class="item-image" 
+                     onerror="this.src='data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIGZpbGw9IiNmNWY1ZjUiLz48dGV4dCB4PSIzMCIgeT0iMzAiIGRvbWluYW50LWJhc2VsaW5lPSJtaWRkbGUiIHRleHQtYW5jaG9yPSJtaWRkbGUiIGZpbGw9IiM5OTkiIGZvbnQtc2l6ZT0iOCI+Tm8gSW1hZ2U8L3RleHQ+PC9zdmc+'">
+                <div class="item-details">
+                    <h4>${item.name || 'Product'}</h4>
+                    <p>Size: ${item.size || 'N/A'} | Qty: ${item.quantity || 1}</p>
+                    <p class="item-unit-price">${(item.price || 0).toFixed(2)} EGP each</p>
+                </div>
+                <div class="item-price">${itemTotal} EGP</div>
             </div>
-            <div class="item-price">${((item.price || 0) * (item.quantity || 1)).toFixed(2)} EGP</div>
-        </div>
-    `).join('');
+        `;
+    }).join('');
 
     // Display totals
     if (summarySubtotal) summarySubtotal.textContent = `${(checkoutData.subtotal || 0).toFixed(2)} EGP`;
@@ -104,7 +108,7 @@ function generateOrderNumber() {
     return `NB${year}${month}${day}${random}`;
 }
 
-// Place order - MAIN FUNCTION
+// Enhanced place order function with better error handling
 async function placeOrder() {
     console.log('=== PLACING ORDER ===');
     
@@ -128,7 +132,7 @@ async function placeOrder() {
         const formData = new FormData(form);
         const orderNumber = generateOrderNumber();
         
-        // Prepare order data for database
+        // Enhanced order data with flexible sizing support
         const orderData = {
             order_number: orderNumber,
             customer_name: `${formData.get('firstName')} ${formData.get('lastName')}`,
@@ -139,15 +143,32 @@ async function placeOrder() {
             postal_code: formData.get('postalCode'),
             payment_method: selectedPayment,
             order_notes: formData.get('orderNotes') || null,
-            items: checkoutData.items,
+            
+            // Enhanced items data
+            items: checkoutData.items.map(item => ({
+                id: item.id,
+                name: item.name,
+                price: item.price,
+                size: item.size,
+                quantity: item.quantity,
+                image: item.image,
+                category: item.category || 'Product',
+                item_total: (item.price * item.quantity).toFixed(2)
+            })),
+            
             subtotal_amount: checkoutData.subtotal || 0,
             shipping_amount: checkoutData.shipping || 0,
             total_amount: checkoutData.total || 0,
             status: 'pending',
-            created_at: new Date().toISOString()
+            created_at: new Date().toISOString(),
+            
+            // Additional metadata
+            shipping_location: checkoutData.shippingLocation || 'Unknown',
+            item_count: checkoutData.items.length,
+            total_quantity: checkoutData.items.reduce((sum, item) => sum + (item.quantity || 1), 0)
         };
 
-        console.log('Order data prepared:', orderData);
+        console.log('Enhanced order data prepared:', orderData);
 
         // Insert order into Supabase
         const { data: insertedOrder, error } = await supabase
@@ -189,9 +210,8 @@ async function placeOrder() {
     }
 }
 
-// Send order confirmation email (using Supabase Edge Functions or external service)
+// Enhanced email notification function
 async function sendOrderConfirmationEmail(orderData) {
-    // Option 1: Use Supabase Edge Functions (recommended)
     try {
         const { data, error } = await supabase.functions.invoke('send-order-email', {
             body: {
@@ -199,7 +219,9 @@ async function sendOrderConfirmationEmail(orderData) {
                 orderNumber: orderData.order_number,
                 customerName: orderData.customer_name,
                 items: orderData.items,
-                total: orderData.total_amount
+                total: orderData.total_amount,
+                shippingAddress: orderData.shipping_address,
+                paymentMethod: orderData.payment_method
             }
         });
 
@@ -222,7 +244,7 @@ function showSuccessMessage(orderNumber) {
     if (orderNumberEl) orderNumberEl.textContent = `Order #${orderNumber}`;
 }
 
-// Show error message
+// Enhanced error message function
 function showError(message) {
     // Remove existing notifications
     document.querySelectorAll('.notification').forEach(notif => notif.remove());
@@ -317,6 +339,23 @@ if (!document.getElementById('checkout-animations')) {
             from { transform: translateX(0); opacity: 1; }
             to { transform: translateX(100%); opacity: 0; }
         }
+        
+        .item-unit-price {
+            font-size: 0.8rem;
+            color: #888;
+            font-style: italic;
+        }
+        
+        .order-item {
+            border-bottom: 1px solid #f0f0f0;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .order-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+        }
     `;
     document.head.appendChild(style);
 }
@@ -325,4 +364,4 @@ if (!document.getElementById('checkout-animations')) {
 window.selectPayment = selectPayment;
 window.placeOrder = placeOrder;
 
-console.log('Checkout system loaded successfully');
+console.log('Enhanced checkout system loaded successfully');

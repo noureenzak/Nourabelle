@@ -1260,3 +1260,115 @@ tbody tr:hover {
     border: 1px solid #ddd;
   }
 }
+.size-stock-container {
+    position: relative;
+    min-height: 120px;
+}
+
+.size-stock-grid {
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--light-gray) 0%, rgba(248, 249, 250, 0.7) 100%);
+    border-radius: 16px;
+    border: 2px solid var(--medium-gray);
+    transition: all 0.3s ease;
+}
+
+.standard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+.combined-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.size-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+    transition: var(--transition);
+}
+/* Sizing System Selector */
+.sizing-system-selector {
+    margin-bottom: 1rem;
+    padding: 1rem;
+    background: linear-gradient(135deg, var(--light-gray) 0%, rgba(248, 249, 250, 0.7) 100%);
+    border-radius: 12px;
+    border: 2px solid var(--medium-gray);
+}
+
+.radio-group {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+}
+
+.radio-label {
+    display: flex !important;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    font-weight: 500 !important;
+    padding: 0.75rem 1rem;
+    background: var(--white);
+    border-radius: 8px;
+    transition: var(--transition);
+    border: 2px solid transparent;
+}
+
+.size-stock-container {
+    position: relative;
+    min-height: 120px;
+}
+
+.size-stock-grid {
+    padding: 2rem;
+    background: linear-gradient(135deg, var(--light-gray) 0%, rgba(248, 249, 250, 0.7) 100%);
+    border-radius: 16px;
+    border: 2px solid var(--medium-gray);
+    transition: all 0.3s ease;
+}
+
+.standard-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.5rem;
+}
+
+.combined-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+}
+
+.size-item {
+    text-align: center;
+    padding: 1.5rem;
+    background: var(--white);
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+}
+
+.size-item label {
+    display: block;
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: var(--btn);
+    text-transform: uppercase;
+}
+
+.size-item input {
+    width: 100%;
+    padding: 12px;
+    text-align: center;
+    border: 2px solid var(--medium-gray);
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 600;
+}

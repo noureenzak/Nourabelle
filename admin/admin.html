@@ -245,19 +245,60 @@
                 </div>
             </div>
             
-            <div class="form-group">
-                <label>Sizes & Stock</label>
-                <div class="size-stock-grid">
-                    <div class="size-item">
-                        <label>S-M</label>
-                        <input type="number" id="stockSM" min="0" value="0">
-                    </div>
-                    <div class="size-item">
-                        <label>M-L</label>
-                        <input type="number" id="stockML" min="0" value="0">
-                    </div>
-                </div>
+           <!-- Add this radio button section BEFORE the stock section in your modal -->
+<div class="form-group">
+    <label>Sizing System</label>
+    <div class="sizing-system-selector">
+        <div class="radio-group">
+            <label class="radio-label">
+                <input type="radio" name="sizingSystem" value="standard" checked onchange="updateSizingSystem()">
+                <span>Standard (S, M, L, XL)</span>
+            </label>
+            <label class="radio-label">
+                <input type="radio" name="sizingSystem" value="combined" onchange="updateSizingSystem()">
+                <span>Combined (S-M, M-L)</span>
+            </label>
+        </div>
+    </div>
+</div>
+<!-- Add this AFTER the sizing system radio buttons -->
+<!-- Dynamic Size & Stock Grid -->
+<div class="form-group">
+    <label>Sizes & Stock</label>
+    <div class="size-stock-container">
+        <!-- Standard sizing (S, M, L, XL) -->
+        <div id="standardSizing" class="size-stock-grid standard-grid">
+            <div class="size-item">
+                <label>S</label>
+                <input type="number" id="stockS" min="0" value="0">
             </div>
+            <div class="size-item">
+                <label>M</label>
+                <input type="number" id="stockM" min="0" value="0">
+            </div>
+            <div class="size-item">
+                <label>L</label>
+                <input type="number" id="stockL" min="0" value="0">
+            </div>
+            <div class="size-item">
+                <label>XL</label>
+                <input type="number" id="stockXL" min="0" value="0">
+            </div>
+        </div>
+        
+        <!-- Combined sizing (S-M, M-L) -->
+        <div id="combinedSizing" class="size-stock-grid combined-grid" style="display: none;">
+            <div class="size-item">
+                <label>S-M</label>
+                <input type="number" id="stockSM" min="0" value="0">
+            </div>
+            <div class="size-item">
+                <label>M-L</label>
+                <input type="number" id="stockML" min="0" value="0">
+            </div>
+        </div>
+    </div>
+</div>
             
             <!-- NEW: Product Features Section -->
             <div class="form-group">
@@ -286,8 +327,8 @@
                 </div>
                 <div class="form-group">
                     <label class="checkbox-label">
-                        <input type="checkbox" id="productFeatured">
-                        Featured
+                        <input type="checkbox" id="productBestseller">
+                        Bestseller
                     </label>
                 </div>
             </div>

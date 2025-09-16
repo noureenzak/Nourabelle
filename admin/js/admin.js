@@ -1,4 +1,4 @@
-// admin.js - Complete Clean Admin Dashboard Script - PART 1
+// admin.js - Complete Fixed Admin Dashboard Script - PART 1
 
 'use strict';
 
@@ -193,7 +193,7 @@ async function loadInitialData() {
         showLoading(false);
     }
 }
-// admin.js - Complete Clean Admin Dashboard Script - PART 2 (Data Loading Functions)
+// admin.js - Complete Fixed Admin Dashboard Script - PART 2 (Data Loading Functions)
 
 // Load overview data
 async function loadOverviewData() {
@@ -269,7 +269,7 @@ async function loadProducts() {
     }
 }
 
-// Render products (Fixed for S-M/M-L sizing)
+// Render products (FIXED to show Bestseller and flexible sizing)
 function renderProducts(products) {
     const container = document.getElementById('productsGrid');
     if (!container) return;
@@ -295,14 +295,19 @@ function renderProducts(products) {
             '<div style="padding: 50px; text-align: center; color: #999; background: #f5f5f5; border-radius: 8px;">📦<br>No Image</div>';
         
         const badges = [];
-        if (product.featured) badges.push('<span class="badge featured">Featured</span>');
+        if (product.featured) badges.push('<span class="badge featured">Bestseller</span>'); // Changed to Bestseller
         if (product.original_price && product.price < product.original_price) badges.push('<span class="badge sale">Sale</span>');
         if (!product.is_active) badges.push('<span class="badge inactive">Inactive</span>');
         
-        // Fixed for S-M/M-L sizes
-        const stock = product.stock ? 
-            `S-M: ${product.stock['S-M'] || 0}, M-L: ${product.stock['M-L'] || 0}` :
-            'No stock data';
+        // Show stock info with flexible sizing
+        let stockInfo = 'No stock data';
+        if (product.stock && typeof product.stock === 'object') {
+            const stockEntries = Object.entries(product.stock);
+stockInfo = stockEntries.map(([size, qty]) => {
+    if (qty === 0) return `${size}: Out of Stock`;
+    if (qty < 2) return `${size}: Low Stock`;
+    return `${size}: In Stock`;
+}).join(', ');        }
         
         return `
             <div class="product-card" data-id="${product.id}">
@@ -313,11 +318,11 @@ function renderProducts(products) {
                     </div>
                     <div class="product-badges">${badges.join('')}</div>
                     <div class="product-price">
-                        $${product.price || '0.00'}
-                        ${product.original_price ? `<span class="product-original-price">$${product.original_price}</span>` : ''}
+                        ${product.price || '0.00'} EGP
+                        ${product.original_price ? `<span class="product-original-price">${product.original_price} EGP</span>` : ''}
                     </div>
                     <div class="product-category">${product.category || 'Uncategorized'}</div>
-                    <div class="product-stock">${stock}</div>
+                    <div class="product-stock">${stockInfo}</div>
                     <div class="product-actions">
                         <button class="edit-btn" onclick="openProductModal(${product.id})">Edit</button>
                         <button class="danger-btn" onclick="deleteProduct(${product.id})">Delete</button>
@@ -395,7 +400,7 @@ function renderOrders(orders) {
                 <div><strong>${order.customer_name || 'Unknown'}</strong></div>
                 <div style="font-size: 0.9rem; color: #666;">${order.customer_email || 'N/A'}</div>
             </td>
-            <td>$${order.total_amount || '0.00'}</td>
+            <td>${order.total_amount || '0.00'} EGP</td>
             <td><span class="status-badge status-${order.status || 'pending'}">${order.status || 'pending'}</span></td>
             <td>${order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</td>
             <td>
@@ -437,7 +442,7 @@ function filterOrders() {
     
     renderOrders(filtered);
 }
-// admin.js - Complete Clean Admin Dashboard Script - PART 3 (Category Management)
+// admin.js - Complete Fixed Admin Dashboard Script - PART 3 (Category & Sizing Functions)
 
 // Load categories
 async function loadCategories() {
@@ -498,41 +503,160 @@ function updateCategoryFilters() {
     categoryFilter.innerHTML = '<option value="">All Categories</option>' + options;
 }
 
-// Load categories into product select (FIXED)
+// FIXED: Load categories into product select
 function loadCategoriesIntoProductSelect() {
     const select = document.getElementById('productCategory');
-    if (!select) return;
+    if (!select) {
+        console.warn('Product category select not found');
+        return;
+    }
+    
+    console.log('Loading categories into select. Categories found:', allCategories.length);
     
     const options = allCategories.map(cat => 
         `<option value="${cat.name}">${cat.name}</option>`
     ).join('');
     
     select.innerHTML = '<option value="">Select Category</option>' + options;
-    console.log('Categories loaded into select:', allCategories.length);
+    console.log('Categories loaded into select successfully');
 }
 
-// Product Modal Functions
+// FIXED: Function to update sizing system display
+function updateSizingSystem() {
+    const standardSizing = document.getElementById('standardSizing');
+    const combinedSizing = document.getElementById('combinedSizing');
+    const selectedRadio = document.querySelector('input[name="sizingSystem"]:checked');
+    
+    if (!selectedRadio) return;
+    
+    const selectedSystem = selectedRadio.value;
+    
+    if (selectedSystem === 'standard') {
+        // Show S, M, L, XL inputs and hide S-M, M-L
+        if (standardSizing) standardSizing.style.display = 'grid';
+        if (combinedSizing) combinedSizing.style.display = 'none';
+        
+        // Clear combined sizing inputs when switching to standard
+        ['stockSM', 'stockML'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) input.value = 0;
+        });
+        
+    } else if (selectedSystem === 'combined') {
+        // Show S-M, M-L inputs and hide S, M, L, XL
+        if (standardSizing) standardSizing.style.display = 'none';
+        if (combinedSizing) combinedSizing.style.display = 'grid';
+        
+        // Clear standard sizing inputs when switching to combined
+        ['stockS', 'stockM', 'stockL', 'stockXL'].forEach(id => {
+            const input = document.getElementById(id);
+            if (input) input.value = 0;
+        });
+    }
+}
+// NEW: Handle product sizing detection
+function handleProductSizing(stock) {
+    if (!stock || typeof stock !== 'object') {
+        console.log('No stock data, defaulting to standard sizing');
+        setStandardSizing();
+        return;
+    }
+    
+    const stockKeys = Object.keys(stock);
+    console.log('Stock keys found:', stockKeys);
+    
+    // Determine sizing system based on stock keys
+    const hasStandardSizes = stockKeys.some(key => ['S', 'M', 'L', 'XL'].includes(key));
+    const hasCombinedSizes = stockKeys.some(key => ['S-M', 'M-L'].includes(key));
+    
+    if (hasCombinedSizes) {
+        setCombinedSizing(stock);
+    } else if (hasStandardSizes) {
+        setStandardSizing(stock);
+    } else {
+        // Default to standard if unknown
+        console.log('Unknown sizing system, defaulting to standard');
+        setStandardSizing();
+    }
+}
+
+// NEW: Set standard sizing system
+function setStandardSizing(stock = {}) {
+    console.log('Setting standard sizing system');
+    
+    // Select standard radio button
+    const standardRadio = document.querySelector('input[name="sizingSystem"][value="standard"]');
+    if (standardRadio) {
+        standardRadio.checked = true;
+        updateSizingSystem();
+    }
+    
+    // Fill stock values
+    const standardSizes = ['S', 'M', 'L', 'XL'];
+    standardSizes.forEach(size => {
+        const input = document.getElementById(`stock${size}`);
+        if (input) {
+            input.value = stock[size] || 0;
+        }
+    });
+}
+
+// NEW: Set combined sizing system
+function setCombinedSizing(stock = {}) {
+    console.log('Setting combined sizing system');
+    
+    // Select combined radio button
+    const combinedRadio = document.querySelector('input[name="sizingSystem"][value="combined"]');
+    if (combinedRadio) {
+        combinedRadio.checked = true;
+        updateSizingSystem();
+    }
+    
+    // Fill stock values
+    const combinedSizes = [
+        { key: 'S-M', id: 'stockSM' },
+        { key: 'M-L', id: 'stockML' }
+    ];
+    
+    combinedSizes.forEach(({ key, id }) => {
+        const input = document.getElementById(id);
+        if (input) {
+            input.value = stock[key] || 0;
+        }
+    });
+}
+
+// FIXED: Product Modal Functions
 function openProductModal(productId = null) {
     currentEditingProduct = productId;
     const modal = document.getElementById('productModal');
     const title = document.getElementById('modalTitle');
     
+    console.log('Opening product modal for ID:', productId);
+    
     // Update form with image upload FIRST
     updateProductForm();
     
-    // ALWAYS load categories into select
+    // ALWAYS load categories into select - FIXED
     loadCategoriesIntoProductSelect();
+    
+    // Initialize sizing system - FIXED
+    setTimeout(() => {
+        updateSizingSystem();
+    }, 100);
     
     if (productId) {
         const product = allProducts.find(p => p.id === productId);
         if (product) {
+            console.log('Found product for editing:', product);
             // Use setTimeout to ensure form is updated first
             setTimeout(() => {
                 fillProductForm(product);
-            }, 100);
+            }, 200);
             if (title) title.textContent = 'Edit Product';
         }
     } else {
+        console.log('Creating new product');
         resetProductForm();
         if (title) title.textContent = 'Add New Product';
     }
@@ -547,18 +671,17 @@ function closeProductModal() {
     resetProductForm();
 }
 
-// Fill product form (FIXED for S-M/M-L)
+// FIXED: Enhanced fillProductForm function for flexible sizing
 function fillProductForm(product) {
     console.log('Filling form for product:', product);
     
+    // Basic product info
     const fields = {
         'productName': product.name || '',
         'productCategory': product.category || '',
         'productDescription': product.description || '',
         'productPrice': product.price || '',
-        'productOriginalPrice': product.original_price || '',
-        'stockSM': product.stock?.['S-M'] || 0,
-        'stockML': product.stock?.['M-L'] || 0
+        'productOriginalPrice': product.original_price || ''
     };
     
     Object.entries(fields).forEach(([id, value]) => {
@@ -583,14 +706,18 @@ function fillProductForm(product) {
         console.log('Images set:', product.images);
     }
     
+    // FIXED: Handle flexible sizing system
+    handleProductSizing(product.stock);
+    
+    // Handle checkboxes - FIXED to use "Bestseller"
     const activeCheckbox = document.getElementById('productActive');
     if (activeCheckbox) activeCheckbox.checked = product.is_active;
     
-    const featuredCheckbox = document.getElementById('productFeatured');
-    if (featuredCheckbox) featuredCheckbox.checked = product.featured;
+    const bestsellerCheckbox = document.getElementById('productBestseller');
+    if (bestsellerCheckbox) bestsellerCheckbox.checked = product.featured; // featured = bestseller
 }
 
-// Add this to the resetProductForm function (replace the existing one)
+// FIXED: Enhanced resetProductForm function
 function resetProductForm() {
     const form = document.getElementById('productForm');
     if (form) form.reset();
@@ -606,14 +733,33 @@ function resetProductForm() {
     const featuresTextarea = document.getElementById('productFeatures');
     if (featuresTextarea) featuresTextarea.value = '';
     
+    // Reset to standard sizing
+    const standardRadio = document.querySelector('input[name="sizingSystem"][value="standard"]');
+    if (standardRadio) {
+        standardRadio.checked = true;
+        updateSizingSystem();
+    }
+    
+    // Reset all stock inputs
+    ['S', 'M', 'L', 'XL'].forEach(size => {
+        const input = document.getElementById(`stock${size}`);
+        if (input) input.value = 0;
+    });
+    
+    ['SM', 'ML'].forEach(size => {
+        const input = document.getElementById(`stock${size}`);
+        if (input) input.value = 0;
+    });
+    
     const activeCheckbox = document.getElementById('productActive');
     if (activeCheckbox) activeCheckbox.checked = true;
     
-    const featuredCheckbox = document.getElementById('productFeatured');
-    if (featuredCheckbox) featuredCheckbox.checked = false;
+    const bestsellerCheckbox = document.getElementById('productBestseller');
+    if (bestsellerCheckbox) bestsellerCheckbox.checked = false;
 }
+// admin.js - Complete Fixed Admin Dashboard Script - PART 4 (Save Product & Image Functions)
 
-// Add this to the saveProduct function - replace the existing formData creation
+// FIXED: Enhanced saveProduct function with flexible sizing
 async function saveProduct(e) {
     e.preventDefault();
     
@@ -652,6 +798,27 @@ async function saveProduct(e) {
             ];
         }
         
+        // FIXED: Get sizing system and stock
+        const sizingSystemRadio = document.querySelector('input[name="sizingSystem"]:checked');
+        const sizingSystem = sizingSystemRadio ? sizingSystemRadio.value : 'standard';
+        let stock = {};
+        
+        if (sizingSystem === 'combined') {
+            // Combined sizing (S-M, M-L)
+            stock = {
+                'S-M': parseInt(document.getElementById('stockSM')?.value || 0),
+                'M-L': parseInt(document.getElementById('stockML')?.value || 0)
+            };
+        } else {
+            // Standard sizing (S, M, L, XL)
+            stock = {
+                'S': parseInt(document.getElementById('stockS')?.value || 0),
+                'M': parseInt(document.getElementById('stockM')?.value || 0),
+                'L': parseInt(document.getElementById('stockL')?.value || 0),
+                'XL': parseInt(document.getElementById('stockXL')?.value || 0)
+            };
+        }
+        
         const formData = {
             name: document.getElementById('productName')?.value?.trim() || '',
             category: document.getElementById('productCategory')?.value || '',
@@ -661,15 +828,14 @@ async function saveProduct(e) {
                 parseFloat(document.getElementById('productOriginalPrice').value) : null,
             images: images, // Array of URLs
             features: features, // Array of feature strings
-            stock: {
-                'S-M': parseInt(document.getElementById('stockSM')?.value || 0),
-                'M-L': parseInt(document.getElementById('stockML')?.value || 0)
-            },
+            stock: stock, // Object with flexible sizing
             is_active: document.getElementById('productActive')?.checked || false,
-            featured: document.getElementById('productFeatured')?.checked || false
+            featured: document.getElementById('productBestseller')?.checked || false // featured = bestseller
         };
         
         console.log('Form data to save:', formData);
+        console.log('Sizing system used:', sizingSystem);
+        console.log('Stock data:', stock);
         
         // Validation
         if (!formData.name) {
@@ -682,6 +848,12 @@ async function saveProduct(e) {
         
         if (formData.price <= 0) {
             throw new Error('Product price must be greater than 0');
+        }
+        
+        // Check if at least one size has stock
+        const hasStock = Object.values(stock).some(qty => qty > 0);
+        if (!hasStock) {
+            throw new Error('Please add stock for at least one size');
         }
         
         if (currentEditingProduct) {
@@ -724,7 +896,6 @@ async function saveProduct(e) {
         showLoading(false);
     }
 }
-
 
 // Image upload functionality
 async function uploadProductImages(files) {
@@ -832,7 +1003,6 @@ function updateProductForm() {
         }
     });
 }
-// admin.js - Complete Clean Admin Dashboard Script - PART 4 (Image Handling & Save Functions)
 
 // Handle multiple image selection and upload
 async function handleMultipleImageSelection() {
@@ -883,8 +1053,7 @@ async function handleMultipleImageSelection() {
     }
 }
 
-
-// Display image previews (FIXED)
+// Display image previews
 function displayImagePreviews(urls) {
     const imagePreview = document.getElementById('imagePreview');
     
@@ -933,8 +1102,7 @@ function removeImage(index) {
     displayImagePreviews(urls);
 }
 
-
-// Delete product (FIXED and simplified)
+// Delete product
 async function deleteProduct(productId) {
     if (!confirm('Are you sure you want to delete this product? This action cannot be undone.')) {
         return;
@@ -969,8 +1137,7 @@ async function deleteProduct(productId) {
         showLoading(false);
     }
 }
-
-// admin.js - Complete Clean Admin Dashboard Script - PART 5 (Final Functions & Exports)
+// admin.js - Complete Fixed Admin Dashboard Script - PART 5 (Final Functions & Utilities)
 
 // Utility Functions
 function showLoading(show) {
@@ -1005,11 +1172,37 @@ function saveSettings() {
     showMessage('Settings saved successfully', 'success');
 }
 
-// Category management functions (stubs for now)
-function addCategory() {
+// Category management functions (placeholder implementations)
+// Replace the placeholder addCategory function with this:
+async function addCategory() {
     const name = prompt('Enter category name:');
-    if (name) {
-        showMessage('Category management coming soon', 'info');
+    if (!name || !name.trim()) return;
+    
+    const description = prompt('Enter category description (optional):') || '';
+    
+    try {
+        showLoading(true);
+        
+        const { data, error } = await supabase
+            .from('categories')
+            .insert([{
+                name: name.trim().toLowerCase(),
+                description: description.trim(),
+                is_active: true,
+                created_at: new Date().toISOString()
+            }])
+            .select();
+        
+        if (error) throw error;
+        
+        showMessage('Category created successfully', 'success');
+        await loadCategories(); // Reload categories
+        
+    } catch (error) {
+        console.error('Error creating category:', error);
+        showMessage('Error creating category: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
     }
 }
 
@@ -1023,15 +1216,71 @@ function deleteCategory(id) {
     }
 }
 
-// Order management functions (stubs for now)
-function updateOrderStatus(id, status) {
-    if (status) {
-        showMessage('Order status update coming soon', 'info');
+// Order management functions (placeholder implementations)
+async function updateOrderStatus(id, status) {
+    if (!status) return;
+    
+    try {
+        showLoading(true);
+        
+        const { error } = await supabase
+            .from('orders')
+            .update({ status: status, updated_at: new Date().toISOString() })
+            .eq('id', id);
+        
+        if (error) {
+            throw error;
+        }
+        
+        showMessage(`Order status updated to ${status}`, 'success');
+        await loadOrders(); // Reload orders
+        
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        showMessage('Error updating order status: ' + error.message, 'error');
+    } finally {
+        showLoading(false);
     }
 }
 
-function viewOrder(id) {
-    showMessage('Order viewing coming soon', 'info');
+async function viewOrder(id) {
+    try {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('id', id)
+            .single();
+        
+        if (error) {
+            throw error;
+        }
+        
+        // Show order details in modal (simplified for now)
+        const orderModal = document.getElementById('orderModal');
+        const orderDetails = document.getElementById('orderDetails');
+        
+        if (orderDetails) {
+            orderDetails.innerHTML = `
+                <div style="padding: 2rem;">
+                    <h3>Order #${data.order_number}</h3>
+                    <p><strong>Customer:</strong> ${data.customer_name}</p>
+                    <p><strong>Email:</strong> ${data.customer_email}</p>
+                    <p><strong>Phone:</strong> ${data.customer_phone}</p>
+                    <p><strong>Address:</strong> ${data.shipping_address}</p>
+                    <p><strong>Total:</strong> ${data.total_amount} EGP</p>
+                    <p><strong>Status:</strong> ${data.status}</p>
+                    <p><strong>Date:</strong> ${new Date(data.created_at).toLocaleDateString()}</p>
+                    ${data.order_notes ? `<p><strong>Notes:</strong> ${data.order_notes}</p>` : ''}
+                </div>
+            `;
+        }
+        
+        if (orderModal) orderModal.classList.add('show');
+        
+    } catch (error) {
+        console.error('Error viewing order:', error);
+        showMessage('Error loading order details: ' + error.message, 'error');
+    }
 }
 
 function closeOrderModal() {
@@ -1058,6 +1307,20 @@ async function debugProducts() {
     }
 }
 
+// Debug function to check categories
+async function debugCategories() {
+    console.log('=== DEBUG: Categories in Database ===');
+    try {
+        const { data, error } = await supabase.from('categories').select('*');
+        console.log('Categories found:', data?.length || 0);
+        console.log('Categories data:', data);
+        if (error) console.error('Error:', error);
+        return data;
+    } catch (error) {
+        console.error('Debug error:', error);
+    }
+}
+
 // Make functions globally available for onclick handlers
 window.openProductModal = openProductModal;
 window.deleteProduct = deleteProduct;
@@ -1068,5 +1331,28 @@ window.deleteCategory = deleteCategory;
 window.removeImage = removeImage;
 window.handleMultipleImageSelection = handleMultipleImageSelection;
 window.debugProducts = debugProducts;
+window.debugCategories = debugCategories;
+window.updateSizingSystem = updateSizingSystem;
+window.handleProductSizing = handleProductSizing;
+window.setStandardSizing = setStandardSizing;
+window.setCombinedSizing = setCombinedSizing;
 
-console.log('Nourabelle Admin Dashboard script loaded successfully');
+console.log('Nourabelle Admin Dashboard script loaded successfully - All functions available');
+
+// Initialize sizing system on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Make sure sizing system is initialized
+    setTimeout(() => {
+        const sizingRadios = document.querySelectorAll('input[name="sizingSystem"]');
+        sizingRadios.forEach(radio => {
+            radio.addEventListener('change', updateSizingSystem);
+        });
+        
+        // Set default to standard
+        const standardRadio = document.querySelector('input[name="sizingSystem"][value="standard"]');
+        if (standardRadio && !document.querySelector('input[name="sizingSystem"]:checked')) {
+            standardRadio.checked = true;
+            updateSizingSystem();
+        }
+    }, 500);
+});

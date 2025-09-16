@@ -1,9 +1,5 @@
-// js/product.js - FIXED Individual Product JavaScript using config.js
+// js/product.js - FIXED Product JavaScript with no flash and flexible sizing
 'use strict';
-
-// ===============================================================================
-// PRODUCT PAGE JAVASCRIPT - Uses shared config.js for Supabase & utilities
-// ===============================================================================
 
 // Global state
 let currentProduct = null;
@@ -11,10 +7,7 @@ let currentImageIndex = 0;
 let productImages = [];
 let cart = [];
 
-// ===============================================================================
-// INITIALIZATION
-// ===============================================================================
-
+// Initialize when DOM loads
 document.addEventListener('DOMContentLoaded', function() {
     console.log('🚀 Product page initializing...');
     initializeProductPage();
@@ -50,20 +43,10 @@ async function initializeProductPage() {
     }
 }
 
-// ===============================================================================
-// URL & DATABASE FUNCTIONS
-// ===============================================================================
-
 // Get product ID from URL parameters
 function getProductIdFromURL() {
     const urlParams = new URLSearchParams(window.location.search);
-    const productId = urlParams.get('id');
-    
-    console.log('URL:', window.location.href);
-    console.log('Search params:', window.location.search);
-    console.log('Extracted product ID:', productId);
-    
-    return productId;
+    return urlParams.get('id');
 }
 
 // Load specific product from Supabase database
@@ -107,10 +90,6 @@ async function loadProductFromDatabase(productId) {
     }
 }
 
-// ===============================================================================
-// PRODUCT PARSING & DISPLAY
-// ===============================================================================
-
 // Parse product data and display on page
 function parseAndDisplayProduct() {
     if (!currentProduct) return;
@@ -119,10 +98,9 @@ function parseAndDisplayProduct() {
     
     // Parse PostgreSQL arrays using config.js function
     productImages = parsePostgreSQLArray(currentProduct.images);
-    const productSizes = parsePostgreSQLArray(currentProduct.sizes);
     const productFeatures = parsePostgreSQLArray(currentProduct.features);
     
-    // Parse stock object
+    // Parse stock object for sizing
     let productStock = {};
     try {
         if (typeof currentProduct.stock === 'string') {
@@ -137,22 +115,33 @@ function parseAndDisplayProduct() {
     
     console.log('📊 Parsed data:');
     console.log('- Images:', productImages);
-    console.log('- Sizes:', productSizes);
     console.log('- Stock:', productStock);
     console.log('- Features:', productFeatures);
     
     // Update page title
     document.title = `${currentProduct.name} - Nourabelle`;
     
+    // Show product layout and hide loading
+    showProductContent();
+    
     // Update all product elements
     updateProductInfo();
     updateProductImages();
     updateProductPricing();
-    updateProductSizes(productSizes, productStock);
+    updateProductSizes(productStock);
     updateProductFeatures(productFeatures);
     setupQuantityControls();
     
     console.log('✅ Product display complete');
+}
+
+// Show product content and hide loading
+function showProductContent() {
+    const loading = document.getElementById('productLoading');
+    const layout = document.getElementById('productLayout');
+    
+    if (loading) loading.style.display = 'none';
+    if (layout) layout.style.display = 'block';
 }
 
 // Update basic product information
@@ -162,7 +151,7 @@ function updateProductInfo() {
     updateElementText('product-description', currentProduct.description || 'No description available');
 }
 
-// Update product images - REMOVE ALL HARDCODING
+// Update product images - FIXED to prevent flash
 function updateProductImages() {
     const mainImage = document.getElementById('product-image');
     const thumbnailContainer = document.getElementById('thumbnail-container');
@@ -175,6 +164,7 @@ function updateProductImages() {
         if (mainImage) {
             mainImage.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
             mainImage.alt = currentProduct.name;
+            mainImage.style.display = 'block';
         }
         if (thumbnailContainer) thumbnailContainer.style.display = 'none';
         return;
@@ -184,6 +174,7 @@ function updateProductImages() {
     if (mainImage) {
         mainImage.src = productImages[0];
         mainImage.alt = currentProduct.name;
+        mainImage.style.display = 'block';
         console.log('🖼️ Main image set to:', productImages[0]);
     }
     
@@ -238,38 +229,60 @@ function updateProductPricing() {
         }
     }
 }
+// Add this function to products.js
+async function loadCategoryFilters() {
+    try {
+        const { data: categories } = await supabase
+            .from('categories')
+            .select('*')
+            .eq('is_active', true)
+            .order('name');
+        
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter && categories) {
+            const options = categories.map(cat => 
+                `<option value="${cat.name}">${cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}</option>`
+            ).join('');
+            
+            categoryFilter.innerHTML = `
+                <option value="all">All Categories</option>
+                ${options}
+                <option value="sale">Sale Items</option>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading category filters:', error);
+    }
+}
 
-// OPTION 3: Smart sizing system - use sizes array OR stock keys
-function updateProductSizes(sizes, stock) {
+// FLEXIBLE SIZING SYSTEM - supports both S/M/L and S-M/M-L
+function updateProductSizes(stock) {
     const sizeSelect = document.getElementById('size');
     if (!sizeSelect) return;
     
-    console.log('👗 Updating sizes:', sizes, 'Stock:', stock);
+    console.log('👗 Updating sizes with stock:', stock);
     
-    // OPTION 3 IMPLEMENTATION: Smart sizing
-    let availableSizes = [];
-    
-    if (sizes && sizes.length > 0) {
-        // Use defined sizes array
-        availableSizes = sizes;
-        console.log('📏 Using defined sizes array:', availableSizes);
-    } else {
-        // Fall back to stock keys
-        availableSizes = Object.keys(stock);
-        console.log('📏 Using stock keys as sizes:', availableSizes);
-    }
+    // Get available sizes from stock keys
+    const availableSizes = Object.keys(stock);
     
     // Clear existing options
     sizeSelect.innerHTML = '';
     
     let hasStock = false;
     
+    // Add default option
+    const defaultOption = document.createElement('option');
+    defaultOption.value = '';
+    defaultOption.textContent = 'Select Size';
+    sizeSelect.appendChild(defaultOption);
+    
     availableSizes.forEach(size => {
         const stockCount = stock[size] || 0;
         const option = document.createElement('option');
         option.value = size;
-        option.textContent = stockCount > 0 ? `${size} (${stockCount} available)` : `${size} (Out of stock)`;
-        option.disabled = stockCount === 0;
+option.textContent = stockCount > 0 ? 
+    (stockCount < 2 ? `${size} (Low Stock)` : `${size}`) : 
+    `${size} (Out of stock)`;        option.disabled = stockCount === 0;
         
         if (stockCount > 0) hasStock = true;
         
@@ -283,7 +296,7 @@ function updateProductSizes(sizes, stock) {
         buyButton.textContent = hasStock ? 'Add to Cart' : 'Out of Stock';
     }
     
-    console.log('👗 Sizes updated. Has stock:', hasStock);
+    console.log('👗 Sizes updated. Available sizes:', availableSizes, 'Has stock:', hasStock);
 }
 
 // Update product features
@@ -300,10 +313,6 @@ function updateProductFeatures(features) {
     const featuresHtml = features.map(feature => `<li>${feature}</li>`).join('');
     featuresList.innerHTML = featuresHtml;
 }
-
-// ===============================================================================
-// INTERACTION FUNCTIONS
-// ===============================================================================
 
 // Change main image (for thumbnails)
 window.changeMainImage = function(index) {
@@ -383,7 +392,8 @@ window.addToCart = function() {
             price: parseFloat(currentProduct.price),
             size: selectedSize,
             quantity: quantity,
-            image: mainImage
+            image: mainImage,
+            category: currentProduct.category
         });
     }
     
@@ -394,10 +404,6 @@ window.addToCart = function() {
     showNotification(`${currentProduct.name} added to cart!`);
     console.log('✅ Added to cart successfully');
 };
-
-// ===============================================================================
-// UTILITY FUNCTIONS
-// ===============================================================================
 
 // Update element text content safely
 function updateElementText(id, content) {
@@ -412,15 +418,22 @@ function updateElementText(id, content) {
 // Show error message
 function showError(message) {
     console.error('❌ Showing error:', message);
+    const loading = document.getElementById('productLoading');
+    const layout = document.getElementById('productLayout');
+    
+    if (loading) loading.style.display = 'none';
+    if (layout) layout.style.display = 'none';
+    
     const productDetail = document.querySelector('.product-detail');
     if (productDetail) {
-        productDetail.innerHTML = `
-            <div style="text-align: center; padding: 4rem 2rem;">
-                <h2 style="color: #e74c3c; margin-bottom: 1rem;">Error</h2>
-                <p style="color: #666; margin-bottom: 2rem;">${message}</p>
-                <a href="products.html" style="display: inline-block; padding: 12px 30px; background: var(--btn); color: white; text-decoration: none; border-radius: 25px;">Browse Products</a>
-            </div>
+        const errorDiv = document.createElement('div');
+        errorDiv.style.cssText = 'text-align: center; padding: 4rem 2rem;';
+        errorDiv.innerHTML = `
+            <h2 style="color: #e74c3c; margin-bottom: 1rem;">Error</h2>
+            <p style="color: #666; margin-bottom: 2rem;">${message}</p>
+            <a href="products.html" style="display: inline-block; padding: 12px 30px; background: var(--btn); color: white; text-decoration: none; border-radius: 25px;">Browse Products</a>
         `;
+        productDetail.appendChild(errorDiv);
     }
 }
 
@@ -454,10 +467,7 @@ function showNotification(message) {
     }, 3000);
 }
 
-// ===============================================================================
-// CART FUNCTIONS
-// ===============================================================================
-
+// Cart functions
 function loadCartFromStorage() {
     try {
         const cartData = localStorage.getItem('nourabelle_cart');
@@ -485,10 +495,7 @@ function updateCartCount() {
     cartCount.classList.toggle('visible', totalItems > 0);
 }
 
-// ===============================================================================
-// MOBILE MENU & SEARCH
-// ===============================================================================
-
+// Mobile menu setup
 function setupMobileMenu() {
     const hamburger = document.getElementById('hamburger');
     const mobileMenu = document.getElementById('mobileMenu');
@@ -522,29 +529,26 @@ function setupSearch() {
     
     if (searchBtn) {
         searchBtn.addEventListener('click', () => {
-            // Redirect to products page for search
             window.location.href = 'products.html';
         });
     }
 }
 
-// ===============================================================================
-// DEBUG FUNCTIONS
-// ===============================================================================
-
-window.debugProduct = function() {
-    console.log('=== PRODUCT DEBUG ===');
-    console.log('Current product:', currentProduct);
-    console.log('Product images:', productImages);
-    console.log('URL:', window.location.href);
-    console.log('Product ID from URL:', getProductIdFromURL());
-    
-    return {
-        product: currentProduct,
-        images: productImages,
-        url: window.location.href,
-        id: getProductIdFromURL()
-    };
-};
+// Add CSS animations
+if (!document.getElementById('product-animations')) {
+    const style = document.createElement('style');
+    style.id = 'product-animations';
+    style.textContent = `
+        @keyframes slideIn {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+        @keyframes slideOut {
+            from { transform: translateX(0); opacity: 1; }
+            to { transform: translateX(100%); opacity: 0; }
+        }
+    `;
+    document.head.appendChild(style);
+}
 
 console.log('✅ Product page script loaded');

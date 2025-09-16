@@ -94,7 +94,7 @@ function updateHomepageProducts() {
     }
 
     // Get featured products, fallback to first 8
-    const featuredProducts = PRODUCTS.filter(p => p.featured === true).slice(0, 8);
+const featuredProducts = PRODUCTS.filter(p => p.featured === true && p.is_active === true).slice(0, 8);
     const displayProducts = featuredProducts.length > 0 ? featuredProducts : PRODUCTS.slice(0, 8);
 
     console.log(`🎨 Displaying ${displayProducts.length} products on homepage`);

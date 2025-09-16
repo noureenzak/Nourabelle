@@ -538,16 +538,6 @@
     position: relative;
 }
 
-/* Add a "WAS" label before crossed out price */
-.original-price::before {
-    content: "was ";
-    font-size: 0.9rem;
-    color: #666;
-    font-weight: 400;
-    text-transform: uppercase;
-    letter-spacing: 0.5px;
-    text-decoration: none;
-}
 
 /* Mobile adjustments */
 @media (max-width: 768px) {
