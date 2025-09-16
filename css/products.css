@@ -219,3 +219,72 @@
     gap: 2rem;
   }
 }
+/* Add this CSS to your products.css file */
+
+/* Out of Stock Badge Styling for Products Page */
+.out-of-stock-badge {
+    position: absolute !important;
+    top: 10px !important;
+    left: 10px !important;
+    background: #6c757d !important;
+    color: white !important;
+    padding: 4px 8px !important;
+    font-size: 0.75rem !important;
+    font-weight: 600 !important;
+    border-radius: 4px !important;
+    z-index: 2 !important;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+}
+
+/* Out of Stock Product Styling */
+.out-of-stock-product {
+    opacity: 0.8;
+    position: relative;
+}
+
+.out-of-stock-product .main-image {
+    filter: grayscale(50%) !important;
+}
+
+.out-of-stock-product p {
+    color: #6c757d !important;
+}
+
+.out-of-stock-product:hover .main-image {
+    filter: grayscale(30%) !important;
+}
+
+/* Disable hover image for out of stock products */
+.out-of-stock-product .hover-image {
+    display: none !important;
+}
+
+/* Badge priority - Out of Stock should always be visible */
+.product-image-container .out-of-stock-badge {
+    z-index: 10 !important;
+}
+
+.product-image-container .sale-badge {
+    z-index: 5 !important;
+}
+
+/* Animation for out of stock badge */
+.out-of-stock-badge {
+    animation: pulse-subtle 2s infinite;
+}
+
+@keyframes pulse-subtle {
+    0% { opacity: 1; }
+    50% { opacity: 0.8; }
+    100% { opacity: 1; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .out-of-stock-badge {
+        font-size: 0.7rem !important;
+        padding: 3px 6px !important;
+    }
+}

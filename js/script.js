@@ -1,4 +1,4 @@
-// js/script.js - FIXED Homepage JavaScript using config.js
+// js/script.js - FIXED Homepage JavaScript with Out of Stock Support
 'use strict';
 
 // ===============================================================================
@@ -7,7 +7,7 @@
 
 // Global state
 let PRODUCTS = [];
-let cart = [];
+let homepageCart = [];
 let currentSlide = 0;
 
 // ===============================================================================
@@ -47,6 +47,7 @@ async function loadProducts() {
             description: product.description || '',
             featured: product.featured || false,
             is_active: product.is_active,
+            out_of_stock: product.out_of_stock || false, // ADDED: out_of_stock field
             // Parse PostgreSQL arrays using config.js function
             images: parsePostgreSQLArray(product.images),
             features: parsePostgreSQLArray(product.features),
@@ -94,12 +95,12 @@ function updateHomepageProducts() {
     }
 
     // Get featured products, fallback to first 8
-const featuredProducts = PRODUCTS.filter(p => p.featured === true && p.is_active === true).slice(0, 8);
+    const featuredProducts = PRODUCTS.filter(p => p.featured === true && p.is_active === true).slice(0, 8);
     const displayProducts = featuredProducts.length > 0 ? featuredProducts : PRODUCTS.slice(0, 8);
 
     console.log(`🎨 Displaying ${displayProducts.length} products on homepage`);
 
-    // Create product cards
+    // Create product cards with OUT OF STOCK support
     productContainer.innerHTML = displayProducts.map(product => {
         const mainImage = product.images.length > 0 ? product.images[0] : 'assets/images/placeholder.jpg';
         const secondImage = product.images.length > 1 ? product.images[1] : null;
@@ -119,16 +120,26 @@ const featuredProducts = PRODUCTS.filter(p => p.featured === true && p.is_active
             priceHtml = `<p class="price">${product.price} EGP</p>`;
         }
 
+        // FIXED: Badge logic - Out of Stock takes ABSOLUTE priority
+        let badgeHtml = '';
+        if (product.out_of_stock) {
+            // If out of stock, ONLY show out of stock badge (no sale badge)
+            badgeHtml = '<span class="out-of-stock-badge" style="position: absolute; top: 10px; left: 10px; background: #6c757d; color: white; padding: 4px 8px; font-size: 0.75rem; font-weight: 600; border-radius: 4px; z-index: 1; text-transform: uppercase;">OUT OF STOCK</span>';
+        } else if (hasOriginalPrice) {
+            // If not out of stock and has sale price, show sale badge
+            badgeHtml = '<span class="sale-badge" style="position: absolute; top: 10px; left: 10px; background: #e74c3c; color: white; padding: 4px 8px; font-size: 0.75rem; font-weight: 600; border-radius: 4px;">SALE</span>';
+        }
+
         return `
-            <div class="product" onclick="goToProduct(${product.id})" data-product-id="${product.id}" style="cursor: pointer;">
+            <div class="product ${product.out_of_stock ? 'out-of-stock-product' : ''}" onclick="goToProduct(${product.id})" data-product-id="${product.id}" style="cursor: pointer;">
                 <div class="product-image-container" style="position: relative;">
                     <img id="product-${product.id}" src="${mainImage}" alt="${product.name}" 
-                         class="main-image" style="width: 100%; height: auto; display: block;"
+                         class="main-image" style="width: 100%; height: auto; display: block; ${product.out_of_stock ? 'filter: grayscale(50%);' : ''}"
                          onerror="this.src='assets/images/placeholder.jpg'">
-                    ${secondImage ? `<img src="${secondImage}" alt="${product.name}" class="hover-image" style="position: absolute; top: 0; left: 0; width: 100%; height: auto; opacity: 0; transition: opacity 0.3s ease;">` : ''}
-                    ${hasOriginalPrice ? '<span class="sale-badge" style="position: absolute; top: 10px; left: 10px; background: #e74c3c; color: white; padding: 4px 8px; font-size: 0.75rem; font-weight: 600; border-radius: 4px;">SALE</span>' : ''}
+                    ${secondImage && !product.out_of_stock ? `<img src="${secondImage}" alt="${product.name}" class="hover-image" style="position: absolute; top: 0; left: 0; width: 100%; height: auto; opacity: 0; transition: opacity 0.3s ease;">` : ''}
+                    ${badgeHtml}
                 </div>
-                <p style="margin-top: 0.5rem; font-weight: 600; text-align: center;">${product.name}</p>
+                <p style="margin-top: 0.5rem; font-weight: 600; text-align: center; ${product.out_of_stock ? 'color: #6c757d;' : ''}">${product.name}</p>
                 ${priceHtml}
             </div>
         `;
@@ -371,17 +382,17 @@ function initCartSystem() {
 function loadCartFromStorage() {
     try {
         const cartData = localStorage.getItem('nourabelle_cart');
-        cart = cartData ? JSON.parse(cartData) : [];
-        console.log(`🛒 Loaded cart with ${cart.length} items`);
+        homepageCart = cartData ? JSON.parse(cartData) : [];
+        console.log(`🛒 Loaded cart with ${homepageCart.length} items`);
     } catch (error) {
         console.error('Error loading cart:', error);
-        cart = [];
+        homepageCart = [];
     }
 }
 
 function saveCartToStorage() {
     try {
-        localStorage.setItem('nourabelle_cart', JSON.stringify(cart));
+        localStorage.setItem('nourabelle_cart', JSON.stringify(homepageCart));
         updateCartCount();
     } catch (error) {
         console.error('Error saving cart:', error);
@@ -392,7 +403,7 @@ function updateCartCount() {
     const cartCount = document.getElementById('cart-count');
     if (!cartCount) return;
     
-    const totalItems = cart.reduce((sum, item) => sum + (item.quantity || 1), 0);
+    const totalItems = homepageCart.reduce((sum, item) => sum + (item.quantity || 1), 0);
     cartCount.textContent = totalItems;
     cartCount.classList.toggle('visible', totalItems > 0);
     
@@ -411,16 +422,16 @@ window.addToCart = function(productId, size, quantity = 1) {
         return false;
     }
     
-    const existingItemIndex = cart.findIndex(item => 
+    const existingItemIndex = homepageCart.findIndex(item => 
         item.id === productId && item.size === size
     );
     
     const mainImage = product.images.length > 0 ? product.images[0] : 'assets/images/placeholder.jpg';
     
     if (existingItemIndex > -1) {
-        cart[existingItemIndex].quantity += quantity;
+        homepageCart[existingItemIndex].quantity += quantity;
     } else {
-        cart.push({
+        homepageCart.push({
             id: productId,
             name: product.name,
             price: product.price,
@@ -543,6 +554,45 @@ document.addEventListener('DOMContentLoaded', async function() {
                 flex-direction: column;
                 gap: 2px;
                 text-align: center;
+            }
+            /* Out of Stock Badge Styling for Homepage */
+            .out-of-stock-badge {
+                position: absolute !important;
+                top: 10px !important;
+                left: 10px !important;
+                background: #6c757d !important;
+                color: white !important;
+                padding: 4px 8px !important;
+                font-size: 0.75rem !important;
+                font-weight: 600 !important;
+                border-radius: 4px !important;
+                z-index: 2 !important;
+                text-transform: uppercase;
+                letter-spacing: 0.5px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+            }
+            
+            /* Out of Stock Product Styling */
+            .out-of-stock-product {
+                opacity: 0.8;
+                position: relative;
+            }
+            
+            .out-of-stock-product .main-image {
+                filter: grayscale(50%) !important;
+            }
+            
+            .out-of-stock-product p {
+                color: #6c757d !important;
+            }
+            
+            .out-of-stock-product:hover .main-image {
+                filter: grayscale(30%) !important;
+            }
+            
+            /* Disable hover image for out of stock products */
+            .out-of-stock-product .hover-image {
+                display: none !important;
             }
         `;
         document.head.appendChild(style);

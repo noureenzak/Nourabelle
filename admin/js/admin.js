@@ -310,19 +310,38 @@ function renderProducts(products) {
             '<div style="padding: 50px; text-align: center; color: #999; background: #f5f5f5; border-radius: 8px;">📦<br>No Image</div>';
         
         const badges = [];
-        if (product.featured) badges.push('<span class="badge featured">Bestseller</span>'); // Changed to Bestseller
-        if (product.original_price && product.price < product.original_price) badges.push('<span class="badge sale">Sale</span>');
+        
+        // NEW: Out of Stock badge takes priority
+        if (product.out_of_stock) {
+            badges.push('<span class="badge out-of-stock">Out of Stock</span>');
+        } else {
+            // Only show other badges if not out of stock
+            if (product.featured) badges.push('<span class="badge featured">Bestseller</span>');
+            if (product.original_price && product.price < product.original_price) badges.push('<span class="badge sale">Sale</span>');
+        }
+        
         if (!product.is_active) badges.push('<span class="badge inactive">Inactive</span>');
         
-        // Show stock info with flexible sizing
+        // Show stock info with flexible sizing - enhanced for Free Size
         let stockInfo = 'No stock data';
-        if (product.stock && typeof product.stock === 'object') {
+        if (product.out_of_stock) {
+            stockInfo = 'Product is out of stock';
+        } else if (product.stock && typeof product.stock === 'object') {
             const stockEntries = Object.entries(product.stock);
-stockInfo = stockEntries.map(([size, qty]) => {
-    if (qty === 0) return `${size}: Out of Stock`;
-    if (qty < 2) return `${size}: Low Stock`;
-    return `${size}: In Stock`;
-}).join(', ');        }
+            stockInfo = stockEntries.map(([size, qty]) => {
+                // Handle Free Size display
+                if (size === 'Free Size' || size === 'freesize') {
+                    if (qty === 0) return 'Free Size: Out of Stock';
+                    if (qty < 2) return 'Free Size: Low Stock';
+                    return 'Free Size: In Stock';
+                }
+                
+                // Handle regular sizes
+                if (qty === 0) return `${size}: Out of Stock`;
+                if (qty < 2) return `${size}: Low Stock`;
+                return `${size}: In Stock`;
+            }).join(', ');
+        }
         
         return `
             <div class="product-card" data-id="${product.id}">
@@ -539,36 +558,103 @@ function loadCategoriesIntoProductSelect() {
 function updateSizingSystem() {
     const standardSizing = document.getElementById('standardSizing');
     const combinedSizing = document.getElementById('combinedSizing');
+    const freeSizing = document.getElementById('freeSizing');
     const selectedRadio = document.querySelector('input[name="sizingSystem"]:checked');
     
     if (!selectedRadio) return;
     
     const selectedSystem = selectedRadio.value;
+    console.log('🎛️ Switching to sizing system:', selectedSystem);
     
-    if (selectedSystem === 'standard') {
-        // Show S, M, L, XL inputs and hide S-M, M-L
-        if (standardSizing) standardSizing.style.display = 'grid';
-        if (combinedSizing) combinedSizing.style.display = 'none';
-        
-        // Clear combined sizing inputs when switching to standard
-        ['stockSM', 'stockML'].forEach(id => {
-            const input = document.getElementById(id);
-            if (input) input.value = 0;
-        });
-        
-    } else if (selectedSystem === 'combined') {
-        // Show S-M, M-L inputs and hide S, M, L, XL
-        if (standardSizing) standardSizing.style.display = 'none';
-        if (combinedSizing) combinedSizing.style.display = 'grid';
-        
-        // Clear standard sizing inputs when switching to combined
-        ['stockS', 'stockM', 'stockL', 'stockXL'].forEach(id => {
-            const input = document.getElementById(id);
-            if (input) input.value = 0;
-        });
+    // Hide all sizing grids first
+    if (standardSizing) standardSizing.style.display = 'none';
+    if (combinedSizing) combinedSizing.style.display = 'none';
+    if (freeSizing) freeSizing.style.display = 'none';
+    
+    // Clear all inputs when switching systems
+    clearAllSizeInputs();
+    
+    // Show the selected system
+    switch (selectedSystem) {
+        case 'standard':
+            if (standardSizing) standardSizing.style.display = 'grid';
+            console.log('📏 Standard sizing (S, M, L, XL) activated');
+            break;
+            
+        case 'combined':
+            if (combinedSizing) combinedSizing.style.display = 'grid';
+            console.log('📏 Combined sizing (S-M, L-XL) activated');
+            break;
+            
+        case 'freesize':
+            if (freeSizing) freeSizing.style.display = 'grid';
+            console.log('📏 Free Size activated');
+            break;
+            
+        default:
+            console.warn('⚠️ Unknown sizing system:', selectedSystem);
+            if (standardSizing) standardSizing.style.display = 'grid';
     }
 }
-// NEW: Handle product sizing detection
+// Add this function to your admin.js file (you can add it after the updateSizingSystem function)
+
+// NEW: Handle Out of Stock toggle
+function handleOutOfStockToggle() {
+    const outOfStockCheckbox = document.getElementById('productOutOfStock');
+    const sizeStockContainer = document.querySelector('.size-stock-container');
+    const sizingSystemRadios = document.querySelectorAll('input[name="sizingSystem"]');
+    
+    if (!outOfStockCheckbox) return;
+    
+    const isOutOfStock = outOfStockCheckbox.checked;
+    console.log('🚫 Out of Stock toggle:', isOutOfStock);
+    
+    if (isOutOfStock) {
+        // Disable sizing system and stock inputs
+        if (sizeStockContainer) {
+            sizeStockContainer.classList.add('disabled');
+        }
+        
+        // Disable sizing system radios
+        sizingSystemRadios.forEach(radio => {
+            radio.disabled = true;
+        });
+        
+        // Clear all stock inputs
+        clearAllSizeInputs();
+        
+        console.log('🚫 Product marked as out of stock - sizing disabled');
+        
+    } else {
+        // Enable sizing system and stock inputs
+        if (sizeStockContainer) {
+            sizeStockContainer.classList.remove('disabled');
+        }
+        
+        // Enable sizing system radios
+        sizingSystemRadios.forEach(radio => {
+            radio.disabled = false;
+        });
+        
+        console.log('✅ Product unmarked as out of stock - sizing enabled');
+    }
+}
+
+// NEW: Clear all size inputs when switching systems
+function clearAllSizeInputs() {
+    const allSizeInputs = [
+        'stockS', 'stockM', 'stockL', 'stockXL', // Standard
+        'stockSM', 'stockLXL', // Combined
+        'stockFreeSize' // Free Size
+    ];
+    
+    allSizeInputs.forEach(id => {
+        const input = document.getElementById(id);
+        if (input) input.value = 0;
+    });
+}
+
+// UPDATED: Enhanced product sizing detection with Free Size support
 function handleProductSizing(stock) {
     if (!stock || typeof stock !== 'object') {
         console.log('No stock data, defaulting to standard sizing');
@@ -581,9 +667,12 @@ function handleProductSizing(stock) {
     
     // Determine sizing system based on stock keys
     const hasStandardSizes = stockKeys.some(key => ['S', 'M', 'L', 'XL'].includes(key));
-    const hasCombinedSizes = stockKeys.some(key => ['S-M', 'M-L'].includes(key));
+    const hasCombinedSizes = stockKeys.some(key => ['S-M', 'L-XL'].includes(key));
+    const hasFreeSize = stockKeys.some(key => ['Free Size', 'freesize', 'FREESIZE'].includes(key));
     
-    if (hasCombinedSizes) {
+    if (hasFreeSize) {
+        setFreeSizing(stock);
+    } else if (hasCombinedSizes) {
         setCombinedSizing(stock);
     } else if (hasStandardSizes) {
         setStandardSizing(stock);
@@ -593,8 +682,36 @@ function handleProductSizing(stock) {
         setStandardSizing();
     }
 }
+// NEW: Set free sizing system
+function setFreeSizing(stock = {}) {
+    console.log('Setting free sizing system');
+    
+    // Select free size radio button
+    const freesizeRadio = document.querySelector('input[name="sizingSystem"][value="freesize"]');
+    if (freesizeRadio) {
+        freesizeRadio.checked = true;
+        updateSizingSystem();
+    }
+    
+    // Fill stock value
+    const freeSizeKeys = ['Free Size', 'freesize', 'FREESIZE'];
+    let freeSizeStock = 0;
+    
+    for (const key of freeSizeKeys) {
+        if (stock[key] !== undefined) {
+            freeSizeStock = stock[key];
+            break;
+        }
+    }
+    
+    const input = document.getElementById('stockFreeSize');
+    if (input) {
+        input.value = freeSizeStock || 0;
+    }
+}
 
 // NEW: Set standard sizing system
+// UPDATED: Enhanced setStandardSizing function
 function setStandardSizing(stock = {}) {
     console.log('Setting standard sizing system');
     
@@ -616,6 +733,7 @@ function setStandardSizing(stock = {}) {
 }
 
 // NEW: Set combined sizing system
+// UPDATED: Enhanced setCombinedSizing function
 function setCombinedSizing(stock = {}) {
     console.log('Setting combined sizing system');
     
@@ -629,7 +747,7 @@ function setCombinedSizing(stock = {}) {
     // Fill stock values
     const combinedSizes = [
         { key: 'S-M', id: 'stockSM' },
-        { key: 'M-L', id: 'stockML' }
+        { key: 'L-XL', id: 'stockLXL' }
     ];
     
     combinedSizes.forEach(({ key, id }) => {
@@ -639,7 +757,6 @@ function setCombinedSizing(stock = {}) {
         }
     });
 }
-
 // FIXED: Product Modal Functions
 function openProductModal(productId = null) {
     currentEditingProduct = productId;
@@ -686,6 +803,7 @@ function closeProductModal() {
 }
 
 // FIXED: Enhanced fillProductForm function for flexible sizing
+// UPDATED: Enhanced fillProductForm function with Out of Stock support
 function fillProductForm(product) {
     console.log('Filling form for product:', product);
     
@@ -720,17 +838,25 @@ function fillProductForm(product) {
         console.log('Images set:', product.images);
     }
     
-    // FIXED: Handle flexible sizing system
-    handleProductSizing(product.stock);
-    
-    // Handle checkboxes - FIXED to use "Bestseller"
+    // Handle checkboxes
     const activeCheckbox = document.getElementById('productActive');
     if (activeCheckbox) activeCheckbox.checked = product.is_active;
     
     const bestsellerCheckbox = document.getElementById('productBestseller');
-    if (bestsellerCheckbox) bestsellerCheckbox.checked = product.featured; // featured = bestseller
+    if (bestsellerCheckbox) bestsellerCheckbox.checked = product.featured;
+    
+    // NEW: Handle out of stock checkbox
+    const outOfStockCheckbox = document.getElementById('productOutOfStock');
+    if (outOfStockCheckbox) {
+        outOfStockCheckbox.checked = product.out_of_stock || false;
+        handleOutOfStockToggle(); // Apply the toggle effects
+    }
+    
+    // Handle flexible sizing system - only if not out of stock
+    if (!product.out_of_stock) {
+        handleProductSizing(product.stock);
+    }
 }
-
 // FIXED: Enhanced resetProductForm function
 function resetProductForm() {
     const form = document.getElementById('productForm');
@@ -755,21 +881,20 @@ function resetProductForm() {
     }
     
     // Reset all stock inputs
-    ['S', 'M', 'L', 'XL'].forEach(size => {
-        const input = document.getElementById(`stock${size}`);
-        if (input) input.value = 0;
-    });
+    clearAllSizeInputs();
     
-    ['SM', 'ML'].forEach(size => {
-        const input = document.getElementById(`stock${size}`);
-        if (input) input.value = 0;
-    });
-    
+    // Reset checkboxes
     const activeCheckbox = document.getElementById('productActive');
     if (activeCheckbox) activeCheckbox.checked = true;
     
     const bestsellerCheckbox = document.getElementById('productBestseller');
     if (bestsellerCheckbox) bestsellerCheckbox.checked = false;
+    
+    const outOfStockCheckbox = document.getElementById('productOutOfStock');
+    if (outOfStockCheckbox) {
+        outOfStockCheckbox.checked = false;
+        handleOutOfStockToggle(); // Reset the toggle effects
+    }
 }
 // admin.js - Complete Fixed Admin Dashboard Script - PART 4 (Save Product & Image Functions)
 
@@ -779,6 +904,9 @@ async function saveProduct(e) {
     
     try {
         showLoading(true);
+        
+        // Get out of stock status first
+        const isOutOfStock = document.getElementById('productOutOfStock')?.checked || false;
         
         // Get images from hidden input
         let images = [];
@@ -812,25 +940,41 @@ async function saveProduct(e) {
             ];
         }
         
-        // FIXED: Get sizing system and stock
-        const sizingSystemRadio = document.querySelector('input[name="sizingSystem"]:checked');
-        const sizingSystem = sizingSystemRadio ? sizingSystemRadio.value : 'standard';
+        // Get sizing system and stock - ENHANCED with Free Size support
         let stock = {};
         
-        if (sizingSystem === 'combined') {
-            // Combined sizing (S-M, M-L)
-            stock = {
-                'S-M': parseInt(document.getElementById('stockSM')?.value || 0),
-                'M-L': parseInt(document.getElementById('stockML')?.value || 0)
-            };
+        if (isOutOfStock) {
+            // If out of stock, set stock to empty or zero values
+            stock = { 'out_of_stock': true };
+            console.log('📦 Product marked as out of stock, no stock data needed');
         } else {
-            // Standard sizing (S, M, L, XL)
-            stock = {
-                'S': parseInt(document.getElementById('stockS')?.value || 0),
-                'M': parseInt(document.getElementById('stockM')?.value || 0),
-                'L': parseInt(document.getElementById('stockL')?.value || 0),
-                'XL': parseInt(document.getElementById('stockXL')?.value || 0)
-            };
+            const sizingSystemRadio = document.querySelector('input[name="sizingSystem"]:checked');
+            const sizingSystem = sizingSystemRadio ? sizingSystemRadio.value : 'standard';
+            
+            switch (sizingSystem) {
+                case 'freesize':
+                    stock = {
+                        'Free Size': parseInt(document.getElementById('stockFreeSize')?.value || 0)
+                    };
+                    break;
+                    
+                case 'combined':
+                    stock = {
+                        'S-M': parseInt(document.getElementById('stockSM')?.value || 0),
+                        'L-XL': parseInt(document.getElementById('stockLXL')?.value || 0)
+                    };
+                    break;
+                    
+                case 'standard':
+                default:
+                    stock = {
+                        'S': parseInt(document.getElementById('stockS')?.value || 0),
+                        'M': parseInt(document.getElementById('stockM')?.value || 0),
+                        'L': parseInt(document.getElementById('stockL')?.value || 0),
+                        'XL': parseInt(document.getElementById('stockXL')?.value || 0)
+                    };
+                    break;
+            }
         }
         
         const formData = {
@@ -840,16 +984,17 @@ async function saveProduct(e) {
             price: parseFloat(document.getElementById('productPrice')?.value || 0),
             original_price: document.getElementById('productOriginalPrice')?.value ? 
                 parseFloat(document.getElementById('productOriginalPrice').value) : null,
-            images: images, // Array of URLs
-            features: features, // Array of feature strings
-            stock: stock, // Object with flexible sizing
+            images: images,
+            features: features,
+            stock: stock,
             is_active: document.getElementById('productActive')?.checked || false,
-            featured: document.getElementById('productBestseller')?.checked || false // featured = bestseller
+            featured: document.getElementById('productBestseller')?.checked || false,
+            out_of_stock: isOutOfStock // NEW: Add out of stock field
         };
         
         console.log('Form data to save:', formData);
-        console.log('Sizing system used:', sizingSystem);
         console.log('Stock data:', stock);
+        console.log('Out of stock:', isOutOfStock);
         
         // Validation
         if (!formData.name) {
@@ -864,10 +1009,12 @@ async function saveProduct(e) {
             throw new Error('Product price must be greater than 0');
         }
         
-        // Check if at least one size has stock
-        const hasStock = Object.values(stock).some(qty => qty > 0);
-        if (!hasStock) {
-            throw new Error('Please add stock for at least one size');
+        // Stock validation - skip if out of stock
+        if (!isOutOfStock) {
+            const hasStock = Object.values(stock).some(qty => qty > 0);
+            if (!hasStock) {
+                throw new Error('Please add stock for at least one size, or mark the product as out of stock');
+            }
         }
         
         if (currentEditingProduct) {
@@ -2156,12 +2303,7 @@ function closeOrderModal() {
     if (modal) modal.classList.remove('show');
 }
 
-// Make functions globally available
-window.viewOrderDetails = viewOrderDetails;
-window.updateOrderStatus = updateOrderStatus;
-window.printOrder = printOrder;
-window.sendOrderUpdate = sendOrderUpdate;
-window.closeOrderModal = closeOrderModal;
+
 
 // Replace the existing loadOrders function in your admin.js with loadOrdersEnhanced
 // Also update the switchTab function to call loadOrdersEnhanced instead of loadOrders
@@ -2170,6 +2312,8 @@ console.log('Enhanced admin orders management loaded successfully');
 
 
 // Make functions globally available for onclick handlers
+window.viewOrderDetails = viewOrderDetails;
+window.printOrder = printOrder;
 window.openProductModal = openProductModal;
 window.deleteProduct = deleteProduct;
 window.updateOrderStatus = updateOrderStatus;
@@ -2190,6 +2334,9 @@ window.closeOrderModal = closeOrderModal;
 window.addCategory = addCategory;
 window.renderCategories = renderCategories;
 window.renderOrdersEnhanced = renderOrdersEnhanced;
+window.handleOutOfStockToggle = handleOutOfStockToggle;
+window.clearAllSizeInputs = clearAllSizeInputs;
+window.setFreeSizing = setFreeSizing;
 
 console.log('Nourabelle Admin Dashboard script loaded successfully - All functions available');
 

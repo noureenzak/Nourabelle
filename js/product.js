@@ -96,27 +96,35 @@ function parseAndDisplayProduct() {
     
     console.log('🎨 Parsing and displaying product...');
     
+    // Check if product is out of stock first
+    if (currentProduct.out_of_stock) {
+        console.log('🚫 Product is marked as out of stock');
+    }
+    
     // Parse PostgreSQL arrays using config.js function
     productImages = parsePostgreSQLArray(currentProduct.images);
     const productFeatures = parsePostgreSQLArray(currentProduct.features);
     
-    // Parse stock object for sizing
+    // Parse stock object for sizing - only if not out of stock
     let productStock = {};
-    try {
-        if (typeof currentProduct.stock === 'string') {
-            productStock = JSON.parse(currentProduct.stock);
-        } else {
-            productStock = currentProduct.stock || {};
+    if (!currentProduct.out_of_stock) {
+        try {
+            if (typeof currentProduct.stock === 'string') {
+                productStock = JSON.parse(currentProduct.stock);
+            } else {
+                productStock = currentProduct.stock || {};
+            }
+        } catch (e) {
+            console.warn('Could not parse stock:', currentProduct.stock);
+            productStock = {};
         }
-    } catch (e) {
-        console.warn('Could not parse stock:', currentProduct.stock);
-        productStock = {};
     }
     
     console.log('📊 Parsed data:');
     console.log('- Images:', productImages);
     console.log('- Stock:', productStock);
     console.log('- Features:', productFeatures);
+    console.log('- Out of Stock:', currentProduct.out_of_stock);
     
     // Update page title
     document.title = `${currentProduct.name} - Nourabelle`;
@@ -128,7 +136,7 @@ function parseAndDisplayProduct() {
     updateProductInfo();
     updateProductImages();
     updateProductPricing();
-    updateProductSizes(productStock);
+    updateProductSizes(productStock); // This now handles out of stock
     updateProductFeatures(productFeatures);
     setupQuantityControls();
     
@@ -152,6 +160,7 @@ function updateProductInfo() {
 }
 
 // Update product images - FIXED to prevent flash
+// UPDATED: Enhanced updateProductImages function with Out of Stock badge
 function updateProductImages() {
     const mainImage = document.getElementById('product-image');
     const thumbnailContainer = document.getElementById('thumbnail-container');
@@ -175,20 +184,41 @@ function updateProductImages() {
         mainImage.src = productImages[0];
         mainImage.alt = currentProduct.name;
         mainImage.style.display = 'block';
+        
+        // Apply grayscale filter if out of stock
+        if (currentProduct.out_of_stock) {
+            mainImage.style.filter = 'grayscale(50%)';
+        } else {
+            mainImage.style.filter = 'none';
+        }
+        
         console.log('🖼️ Main image set to:', productImages[0]);
     }
     
-    // Show sale badge if applicable
-    const hasOriginalPrice = currentProduct.original_price && parseFloat(currentProduct.original_price) > parseFloat(currentProduct.price);
-    if (productBadge && hasOriginalPrice) {
-        productBadge.textContent = 'SALE';
-        productBadge.style.display = 'block';
+    // Show appropriate badge
+    if (productBadge) {
+        if (currentProduct.out_of_stock) {
+            productBadge.textContent = 'OUT OF STOCK';
+            productBadge.style.display = 'block';
+            productBadge.style.background = '#6c757d';
+            productBadge.style.color = 'white';
+        } else {
+            const hasOriginalPrice = currentProduct.original_price && parseFloat(currentProduct.original_price) > parseFloat(currentProduct.price);
+            if (hasOriginalPrice) {
+                productBadge.textContent = 'SALE';
+                productBadge.style.display = 'block';
+                productBadge.style.background = '#e74c3c';
+                productBadge.style.color = 'white';
+            } else {
+                productBadge.style.display = 'none';
+            }
+        }
     }
     
     // Setup thumbnails if multiple images
     if (productImages.length > 1 && thumbnailContainer) {
         const thumbnailsHtml = productImages.map((image, index) => 
-            `<img src="${image}" alt="${currentProduct.name}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})" style="cursor: pointer;">`
+            `<img src="${image}" alt="${currentProduct.name}" class="thumbnail ${index === 0 ? 'active' : ''}" onclick="changeMainImage(${index})" style="cursor: pointer; ${currentProduct.out_of_stock ? 'filter: grayscale(50%);' : ''}">`
         ).join('');
         
         thumbnailContainer.innerHTML = thumbnailsHtml;
@@ -198,6 +228,8 @@ function updateProductImages() {
         thumbnailContainer.style.display = 'none';
     }
 }
+
+
 
 // Update product pricing
 function updateProductPricing() {
@@ -314,21 +346,96 @@ async function initializeProductsPage() {
         showNoProducts('Error loading products. Please refresh the page.');
     }
 }
-
-// FLEXIBLE SIZING SYSTEM - supports both S/M/L and S-M/M-L
+// NEW: Handle Out of Stock toggle
+function handleOutOfStockToggle() {
+    const outOfStockCheckbox = document.getElementById('productOutOfStock');
+    const sizeStockContainer = document.querySelector('.size-stock-container');
+    const sizingSystemRadios = document.querySelectorAll('input[name="sizingSystem"]');
+    
+    if (!outOfStockCheckbox) return;
+    
+    const isOutOfStock = outOfStockCheckbox.checked;
+    console.log('🚫 Out of Stock toggle:', isOutOfStock);
+    
+    if (isOutOfStock) {
+        // Disable sizing system and stock inputs
+        if (sizeStockContainer) {
+            sizeStockContainer.classList.add('disabled');
+        }
+        
+        // Disable sizing system radios
+        sizingSystemRadios.forEach(radio => {
+            radio.disabled = true;
+        });
+        
+        // Clear all stock inputs
+        clearAllSizeInputs();
+        
+        console.log('🚫 Product marked as out of stock - sizing disabled');
+        
+    } else {
+        // Enable sizing system and stock inputs
+        if (sizeStockContainer) {
+            sizeStockContainer.classList.remove('disabled');
+        }
+        
+        // Enable sizing system radios
+        sizingSystemRadios.forEach(radio => {
+            radio.disabled = false;
+        });
+        
+        console.log('✅ Product unmarked as out of stock - sizing enabled');
+    }
+}
+// FLEXIBLE SIZING SYSTEM - supports both S/M/L and S-M/L-XL
 // In your product.js file, replace the updateProductSizes function with this:
 
+// UPDATED: Enhanced updateProductSizes function with Free Size support
 function updateProductSizes(stock) {
     const sizeSelect = document.getElementById('size');
     if (!sizeSelect) return;
     
     console.log('👗 Updating sizes with stock:', stock);
     
+    // Check if product is out of stock
+    if (currentProduct && currentProduct.out_of_stock) {
+        sizeSelect.innerHTML = '<option value="">Out of Stock</option>';
+        sizeSelect.disabled = true;
+        
+        const buyButton = document.getElementById('buy-button');
+        if (buyButton) {
+            buyButton.disabled = true;
+            buyButton.textContent = 'Out of Stock';
+            buyButton.style.background = '#6c757d';
+            buyButton.style.cursor = 'not-allowed';
+        }
+        
+        console.log('🚫 Product is out of stock - no size selection available');
+        return;
+    }
+    
     // Get available sizes from stock keys
     const availableSizes = Object.keys(stock);
     
+    // Check if this is Free Size system
+    const hasFreeSize = availableSizes.some(size => 
+        size === 'Free Size' || size === 'freesize' || size === 'FREESIZE'
+    );
+    
+    if (hasFreeSize) {
+        console.log('📏 Free Size system detected');
+        handleFreeSizeSystem(stock);
+        return;
+    }
+    
+    // Handle regular sizing systems (Standard or Combined)
+    handleRegularSizingSystem(stock, availableSizes);
+}
+function handleRegularSizingSystem(stock, availableSizes) {
+    const sizeSelect = document.getElementById('size');
+    
     // Define size order for proper sorting
-    const sizeOrder = ['XS', 'S', 'S-M', 'M', 'M-L', 'L'];
+    const sizeOrder = ['XS', 'S', 'S-M', 'M', 'L', 'L-XL', 'XL'];
     
     // Sort sizes according to the defined order
     const sortedSizes = availableSizes.sort((a, b) => {
@@ -373,9 +480,72 @@ function updateProductSizes(stock) {
     if (buyButton) {
         buyButton.disabled = !hasStock;
         buyButton.textContent = hasStock ? 'Add to Cart' : 'Out of Stock';
+        
+        if (!hasStock) {
+            buyButton.style.background = '#6c757d';
+            buyButton.style.cursor = 'not-allowed';
+        } else {
+            buyButton.style.background = ''; // Reset to default
+            buyButton.style.cursor = 'pointer';
+        }
     }
     
-    console.log('👗 Sizes updated in order:', sortedSizes, 'Has stock:', hasStock);
+    console.log('👗 Regular sizes updated in order:', sortedSizes, 'Has stock:', hasStock);
+}
+
+// NEW: Handle Free Size system
+function handleFreeSizeSystem(stock) {
+    const sizeSelect = document.getElementById('size');
+    
+    // Find the free size stock
+    let freeSizeStock = 0;
+    const freeSizeKeys = ['Free Size', 'freesize', 'FREESIZE'];
+    
+    for (const key of freeSizeKeys) {
+        if (stock[key] !== undefined) {
+            freeSizeStock = stock[key];
+            break;
+        }
+    }
+    
+    // Clear existing options
+    sizeSelect.innerHTML = '';
+    
+    // Add Free Size option
+    const option = document.createElement('option');
+    option.value = 'Free Size';
+    
+    if (freeSizeStock > 0) {
+        option.textContent = freeSizeStock < 2 ? 'Free Size (Low Stock)' : 'Free Size';
+        option.disabled = false;
+    } else {
+        option.textContent = 'Free Size (Out of stock)';
+        option.disabled = true;
+    }
+    
+    sizeSelect.appendChild(option);
+    
+    // Auto-select if in stock
+    if (freeSizeStock > 0) {
+        sizeSelect.value = 'Free Size';
+    }
+    
+    // Update buy button
+    const buyButton = document.getElementById('buy-button');
+    if (buyButton) {
+        buyButton.disabled = freeSizeStock === 0;
+        buyButton.textContent = freeSizeStock > 0 ? 'Add to Cart' : 'Out of Stock';
+        
+        if (freeSizeStock === 0) {
+            buyButton.style.background = '#6c757d';
+            buyButton.style.cursor = 'not-allowed';
+        } else {
+            buyButton.style.background = ''; // Reset to default
+            buyButton.style.cursor = 'pointer';
+        }
+    }
+    
+    console.log('📏 Free Size configured - Stock:', freeSizeStock);
 }
 
 // Update product features
@@ -437,6 +607,12 @@ window.changeQuantity = function(delta) {
 window.addToCart = function() {
     if (!currentProduct) {
         alert('Product not loaded');
+        return;
+    }
+    
+    // Check if product is out of stock
+    if (currentProduct.out_of_stock) {
+        alert('This product is currently out of stock');
         return;
     }
     

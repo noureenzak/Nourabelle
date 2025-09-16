@@ -621,7 +621,7 @@ tbody tr:hover {
   line-height: 1.6;
 }
 
-/* Updated Size Stock Grid - S-M and M-L */
+/* Updated Size Stock Grid - S-M and L-XL */
 .size-stock-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -1978,4 +1978,124 @@ tbody tr:hover {
 .primary-btn:active::before {
     width: 300px;
     height: 300px;
+}
+/* Add this CSS to your admin-dashboard.css file */
+
+/* Out of Stock Badge Styling */
+.badge.out-of-stock {
+    background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+    color: white;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    box-shadow: 0 2px 8px rgba(108, 117, 125, 0.3);
+}
+
+/* Enhanced badge container for better spacing */
+.product-badges {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1rem;
+    flex-wrap: wrap;
+    align-items: center;
+}
+
+/* Ensure out of stock badge is prominent */
+.badge.out-of-stock {
+    order: -1; /* Always show first */
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
+
+/* Product card styling when out of stock */
+.product-card:has(.badge.out-of-stock) {
+    opacity: 0.8;
+    position: relative;
+}
+
+.product-card:has(.badge.out-of-stock)::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(108, 117, 125, 0.1);
+    pointer-events: none;
+    border-radius: var(--border-radius);
+}
+
+/* Enhanced product grid styling for out of stock items */
+.product-card .product-image {
+    position: relative;
+    overflow: hidden;
+}
+
+.product-card:has(.badge.out-of-stock) .product-image img {
+    filter: grayscale(30%);
+    transition: filter 0.3s ease;
+}
+
+.product-card:has(.badge.out-of-stock):hover .product-image img {
+    filter: grayscale(0%);
+}
+
+/* Out of Stock styling in product form */
+.checkbox-label:has(input[type="checkbox"]#productOutOfStock:checked) {
+    background: rgba(108, 117, 125, 0.1);
+    border: 1px solid rgba(108, 117, 125, 0.3);
+    color: #495057;
+}
+
+/* Size stock container disabled styling */
+.size-stock-container.disabled {
+    opacity: 0.5;
+    pointer-events: none;
+    position: relative;
+}
+
+.size-stock-container.disabled::before {
+    content: 'Out of Stock - Size selection disabled';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: rgba(108, 117, 125, 0.9);
+    color: white;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    z-index: 10;
+    white-space: nowrap;
+}
+
+.size-stock-container.disabled .size-item {
+    background: #f8f9fa !important;
+    border-color: #dee2e6 !important;
+}
+
+.size-stock-container.disabled input {
+    background: #e9ecef !important;
+    color: #6c757d !important;
+    cursor: not-allowed;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .size-stock-container.disabled::before {
+        font-size: 0.8rem;
+        padding: 6px 12px;
+    }
+    
+    .badge.out-of-stock {
+        font-size: 0.7rem;
+        padding: 3px 6px;
+    }
 }

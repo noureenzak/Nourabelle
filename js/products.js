@@ -5,10 +5,10 @@
 // PRODUCTS PAGE JAVASCRIPT - Uses shared config.js for Supabase & utilities
 // ===============================================================================
 
-// Global state
-let allProducts = [];
+// Global state - FIXED: Check if variables already exist
+let productsPageProducts = [];
 let filteredProducts = [];
-let cart = [];
+let productsPageCart = [];
 
 // ===============================================================================
 // INITIALIZATION
@@ -101,6 +101,7 @@ async function loadCategoryFilters() {
         }
     }
 }
+
 // ===============================================================================
 // DATABASE FUNCTIONS
 // ===============================================================================
@@ -125,14 +126,14 @@ async function loadAllProductsFromDatabase() {
         
         if (!data || data.length === 0) {
             console.warn('⚠️ No products found in database');
-            allProducts = [];
+            productsPageProducts = [];
             filteredProducts = [];
             showNoProducts('No products available at the moment.');
             return;
         }
         
         // Parse products using config.js utility
-        allProducts = data.map(product => ({
+        productsPageProducts = data.map(product => ({
             id: product.id,
             name: product.name,
             price: parseFloat(product.price) || 0,
@@ -142,6 +143,7 @@ async function loadAllProductsFromDatabase() {
             featured: product.featured || false,
             is_active: product.is_active,
             created_at: product.created_at,
+            out_of_stock: product.out_of_stock || false, // ADDED: out_of_stock field
             // Parse PostgreSQL arrays using config.js function
             images: parsePostgreSQLArray(product.images),
             features: parsePostgreSQLArray(product.features),
@@ -149,14 +151,14 @@ async function loadAllProductsFromDatabase() {
             stock: product.stock || {}
         }));
         
-        filteredProducts = [...allProducts];
+        filteredProducts = [...productsPageProducts];
         
-        console.log(`✅ Loaded ${allProducts.length} products from database`);
+        console.log(`✅ Loaded ${productsPageProducts.length} products from database`);
         
         // Log sample product for debugging
-        if (allProducts.length > 0) {
-            console.log('📦 Sample product:', allProducts[0]);
-            console.log('🖼️ Sample images:', allProducts[0].images);
+        if (productsPageProducts.length > 0) {
+            console.log('📦 Sample product:', productsPageProducts[0]);
+            console.log('🖼️ Sample images:', productsPageProducts[0].images);
         }
         
         // Apply initial filters and render
@@ -245,7 +247,7 @@ function applyFilters() {
     console.log(`🔍 Applying filters - Category: ${selectedCategory}, Sort: ${selectedSort}`);
     
     // Filter by category
-    filteredProducts = allProducts.filter(product => {
+    filteredProducts = productsPageProducts.filter(product => {
         if (selectedCategory === 'all') return true;
         if (selectedCategory === 'sale') {
             return product.original_price && product.original_price > product.price;
@@ -311,7 +313,7 @@ function renderProducts() {
     console.log(`✅ Rendered ${filteredProducts.length} products successfully`);
 }
 
-// Create product card HTML
+// FIXED: Create product card HTML with Out of Stock priority
 function createProductCard(product) {
     // Get images using parsed array
     const mainImage = product.images.length > 0 ? product.images[0] : 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2Y1ZjVmNSIvPjx0ZXh0IHg9IjEwMCIgeT0iMTAwIiBkb21pbmFudC1iYXNlbGluZT0ibWlkZGxlIiB0ZXh0LWFuY2hvcj0ibWlkZGxlIiBmaWxsPSIjOTk5Ij5ObyBJbWFnZTwvdGV4dD48L3N2Zz4=';
@@ -332,14 +334,24 @@ function createProductCard(product) {
         priceHtml = `<div class="price">${product.price} EGP</div>`;
     }
     
+    // FIXED: Badge logic - Out of Stock takes ABSOLUTE priority
+    let badgeHtml = '';
+    if (product.out_of_stock) {
+        // If out of stock, ONLY show out of stock badge (no sale badge)
+        badgeHtml = '<span class="out-of-stock-badge" style="position: absolute; top: 10px; left: 10px; background: #6c757d; color: white; padding: 4px 8px; font-size: 0.75rem; font-weight: 600; border-radius: 4px; z-index: 1; text-transform: uppercase;">OUT OF STOCK</span>';
+    } else if (hasOriginalPrice) {
+        // If not out of stock and has sale price, show sale badge
+        badgeHtml = '<span class="sale-badge" style="position: absolute; top: 10px; left: 10px; background: #e74c3c; color: white; padding: 4px 8px; font-size: 0.75rem; font-weight: 600; border-radius: 4px; z-index: 1;">SALE</span>';
+    }
+    
     return `
-        <div class="product-item" onclick="goToProduct(${product.id})" data-product-id="${product.id}" style="cursor: pointer;">
+        <div class="product-item ${product.out_of_stock ? 'out-of-stock-product' : ''}" onclick="goToProduct(${product.id})" data-product-id="${product.id}" style="cursor: pointer;">
             <div class="product-image-container" style="position: relative;">
-                <img src="${mainImage}" alt="${product.name}" class="main-image" style="width: 100%; height: auto; display: block; transition: opacity 0.3s ease;">
-                ${secondImage ? `<img src="${secondImage}" alt="${product.name}" class="hover-image" style="position: absolute; top: 0; left: 0; width: 100%; height: auto; opacity: 0; transition: opacity 0.3s ease;">` : ''}
-                ${hasOriginalPrice ? '<span class="sale-badge" style="position: absolute; top: 10px; left: 10px; background: #e74c3c; color: white; padding: 4px 8px; font-size: 0.75rem; font-weight: 600; border-radius: 4px; z-index: 1;">SALE</span>' : ''}
+                <img src="${mainImage}" alt="${product.name}" class="main-image" style="width: 100%; height: auto; display: block; transition: opacity 0.3s ease; ${product.out_of_stock ? 'filter: grayscale(50%);' : ''}">
+                ${secondImage && !product.out_of_stock ? `<img src="${secondImage}" alt="${product.name}" class="hover-image" style="position: absolute; top: 0; left: 0; width: 100%; height: auto; opacity: 0; transition: opacity 0.3s ease;">` : ''}
+                ${badgeHtml}
             </div>
-            <p style="margin-top: 0.75rem; font-weight: 600; color: var(--text); text-align: center;">${product.name}</p>
+            <p style="margin-top: 0.75rem; font-weight: 600; color: var(--text); text-align: center; ${product.out_of_stock ? 'color: #6c757d;' : ''}">${product.name}</p>
             <div class="product-price" style="text-align: center; margin: 0.5rem 0;">
                 ${priceHtml}
             </div>
@@ -384,7 +396,7 @@ window.goToProduct = function(productId) {
     console.log(`🔗 Navigating to product: ${productId}`);
     
     // Find and store the product data
-    const product = allProducts.find(p => p.id == productId);
+    const product = productsPageProducts.find(p => p.id == productId);
     if (product) {
         console.log(`✅ Found product: ${product.name}`);
         sessionStorage.setItem('nourabelle_current_product', JSON.stringify(product));
@@ -435,7 +447,7 @@ function setupSearch() {
             return;
         }
 
-        const results = allProducts.filter(product => 
+        const results = productsPageProducts.filter(product => 
             product.name.toLowerCase().includes(query) ||
             product.category.toLowerCase().includes(query) ||
             (product.description && product.description.toLowerCase().includes(query))
@@ -545,11 +557,11 @@ function setupMobileMenu() {
 function loadCartFromStorage() {
     try {
         const cartData = localStorage.getItem('nourabelle_cart');
-        cart = cartData ? JSON.parse(cartData) : [];
-        console.log(`🛒 Loaded cart with ${cart.length} items`);
+        productsPageCart = cartData ? JSON.parse(cartData) : [];
+        console.log(`🛒 Loaded cart with ${productsPageCart.length} items`);
     } catch (error) {
         console.error('Error loading cart:', error);
-        cart = [];
+        productsPageCart = [];
     }
 }
 
@@ -557,7 +569,7 @@ function updateCartCount() {
     const cartCount = document.getElementById('cart-count');
     if (!cartCount) return;
     
-    const totalItems = cart.reduce((sum, item) => sum + item.quantity, 0);
+    const totalItems = productsPageCart.reduce((sum, item) => sum + item.quantity, 0);
     cartCount.textContent = totalItems;
     cartCount.classList.toggle('visible', totalItems > 0);
 }
@@ -568,7 +580,7 @@ function updateCartCount() {
 
 window.debugProducts = function() {
     console.log('=== PRODUCTS PAGE DEBUG ===');
-    console.log('All products:', allProducts);
+    console.log('All products:', productsPageProducts);
     console.log('Filtered products:', filteredProducts);
     console.log('Products grid element:', document.getElementById('productsGrid'));
     console.log('Loading state element:', document.getElementById('loadingState'));
@@ -580,13 +592,13 @@ window.debugProducts = function() {
     });
     
     // Test navigation
-    if (allProducts.length > 0) {
-        console.log('Testing navigation with first product:', allProducts[0]);
-        console.log('Sample parsed images:', allProducts[0].images);
+    if (productsPageProducts.length > 0) {
+        console.log('Testing navigation with first product:', productsPageProducts[0]);
+        console.log('Sample parsed images:', productsPageProducts[0].images);
     }
     
     return {
-        products: allProducts,
+        products: productsPageProducts,
         filtered: filteredProducts,
         grid: document.getElementById('productsGrid'),
         loading: document.getElementById('loadingState')
