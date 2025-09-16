@@ -166,7 +166,7 @@ function switchTab(tabName) {
             loadProducts();
             break;
         case 'orders':
-            loadOrders();
+            loadOrdersEnhanced();
             break;
         case 'categories':
             loadCategories();
@@ -359,29 +359,7 @@ function filterProducts() {
     renderProducts(filtered);
 }
 
-// Load orders
-async function loadOrders() {
-    try {
-        const { data, error } = await supabase
-            .from('orders')
-            .select('*')
-            .order('created_at', { ascending: false });
-        
-        if (error && error.code !== 'PGRST116') {
-            throw error;
-        }
-        
-        allOrders = data || [];
-        renderOrders(allOrders);
-        
-    } catch (error) {
-        console.error('Error loading orders:', error);
-        const container = document.getElementById('ordersTableBody');
-        if (container) {
-            container.innerHTML = '<tr><td colspan="6">Error loading orders</td></tr>';
-        }
-    }
-}
+
 
 // Render orders
 function renderOrders(orders) {
@@ -1233,7 +1211,7 @@ async function updateOrderStatus(id, status) {
         }
         
         showMessage(`Order status updated to ${status}`, 'success');
-        await loadOrders(); // Reload orders
+        await loadOrdersEnhanced (); // Reload orders
         
     } catch (error) {
         console.error('Error updating order status:', error);
@@ -1320,6 +1298,621 @@ async function debugCategories() {
         console.error('Debug error:', error);
     }
 }
+
+
+//order--------------------------------------
+// Enhanced Admin Orders Management - admin.js UPDATE
+// Add these functions to your existing admin.js file
+
+// Enhanced load orders function with new fields
+async function loadOrdersEnhanced() {
+    try {
+        const { data, error } = await supabase
+            .from('orders')
+            .select('*')
+            .order('created_at', { ascending: false });
+        
+        if (error && error.code !== 'PGRST116') {
+            throw error;
+        }
+        
+        allOrders = data || [];
+        renderOrdersEnhanced(allOrders);
+        
+    } catch (error) {
+        console.error('Error loading orders:', error);
+        const container = document.getElementById('ordersTableBody');
+        if (container) {
+            container.innerHTML = '<tr><td colspan="7">Error loading orders</td></tr>';
+        }
+    }
+}
+
+// Enhanced render orders with new columns
+function renderOrdersEnhanced(orders) {
+    const container = document.getElementById('ordersTableBody');
+    if (!container) return;
+    
+    if (!orders.length) {
+        container.innerHTML = '<tr><td colspan="7">No orders found</td></tr>';
+        return;
+    }
+    
+    const html = orders.map(order => {
+        const statusClass = getStatusClass(order.status);
+        const paymentIcon = getPaymentIcon(order.payment_method);
+        
+        return `
+            <tr data-id="${order.id}">
+                <td>
+                    <strong>#${order.order_number || 'N/A'}</strong>
+                    ${order.payment_screenshot ? '<br><span style="color: var(--info); font-size: 0.8rem;">📷 Screenshot</span>' : ''}
+                </td>
+                <td>
+                    <div><strong>${order.customer_name || 'Unknown'}</strong></div>
+                    <div style="font-size: 0.9rem; color: #666;">${order.customer_email || 'N/A'}</div>
+                    <div style="font-size: 0.8rem; color: #888;">${order.customer_phone || 'N/A'}</div>
+                </td>
+                <td>
+                    <div><strong>${order.total_amount || '0.00'} EGP</strong></div>
+                    <div style="font-size: 0.8rem; color: #666;">${paymentIcon} ${formatPaymentMethod(order.payment_method)}</div>
+                </td>
+                <td>
+                    <span class="status-badge ${statusClass}">${formatStatus(order.status)}</span>
+                </td>
+                <td>
+                    <div>${order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</div>
+                    <div style="font-size: 0.8rem; color: #666;">${order.created_at ? new Date(order.created_at).toLocaleTimeString() : ''}</div>
+                </td>
+                <td>
+                    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
+                        <button class="edit-btn" onclick="viewOrderDetails(${order.id})" style="font-size: 0.8rem; padding: 6px 12px;">View</button>
+                        <select onchange="updateOrderStatus(${order.id}, this.value)" style="font-size: 0.8rem; padding: 4px;">
+                            <option value="">Change Status</option>
+                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                            <option value="payment_pending" ${order.status === 'payment_pending' ? 'selected' : ''}>Payment Pending</option>
+                            <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                            <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                            <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                        </select>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    container.innerHTML = html;
+}
+
+// Helper functions for order display
+function getStatusClass(status) {
+    const statusClasses = {
+        'pending': 'status-pending',
+        'payment_pending': 'status-warning',
+        'confirmed': 'status-confirmed',
+        'processing': 'status-processing',
+        'shipped': 'status-shipped',
+        'delivered': 'status-delivered',
+        'cancelled': 'status-cancelled'
+    };
+    return statusClasses[status] || 'status-pending';
+}
+
+function getPaymentIcon(method) {
+    const icons = {
+        'cod': '💵',
+        'instapay': '📱',
+        'bank': '🏦'
+    };
+    return icons[method] || '💳';
+}
+
+function formatPaymentMethod(method) {
+    const methods = {
+        'cod': 'Cash on Delivery',
+        'instapay': 'Instapay',
+        'bank': 'Bank Transfer'
+    };
+    return methods[method] || method;
+}
+
+function formatStatus(status) {
+    const statuses = {
+        'pending': 'Pending',
+        'payment_pending': 'Payment Pending',
+        'confirmed': 'Confirmed',
+        'processing': 'Processing',
+        'shipped': 'Shipped',
+        'delivered': 'Delivered',
+        'cancelled': 'Cancelled'
+    };
+    return statuses[status] || status;
+}
+
+// Enhanced view order details function
+async function viewOrderDetails(orderId) {
+    try {
+        const { data: order, error } = await supabase
+            .from('orders')
+            .select('*')
+            .eq('id', orderId)
+            .single();
+            
+        if (error) {
+            throw error;
+        }
+        
+        showOrderDetailsModal(order);
+        
+    } catch (error) {
+        console.error('Error loading order details:', error);
+        showMessage('Error loading order details', 'error');
+    }
+}
+
+// Show enhanced order details modal
+function showOrderDetailsModal(order) {
+    const modal = document.getElementById('orderModal');
+    const orderDetails = document.getElementById('orderDetails');
+    
+    if (!modal || !orderDetails) {
+        console.error('Order modal elements not found');
+        return;
+    }
+    
+    // Build comprehensive address string
+    let fullAddress = order.shipping_address || '';
+    if (order.building_info) fullAddress += `\nBuilding: ${order.building_info}`;
+    if (order.floor) fullAddress += `\nFloor: ${order.floor}`;
+    if (order.apartment_number) fullAddress += `\nApartment: ${order.apartment_number}`;
+    if (order.landmark) fullAddress += `\nLandmark: ${order.landmark}`;
+    if (order.shipping_city) fullAddress += `\nCity: ${order.shipping_city}`;
+    if (order.postal_code) fullAddress += `\nPostal Code: ${order.postal_code}`;
+    
+    const orderHtml = `
+        <div class="order-details-content">
+            <!-- Order Header -->
+            <div class="order-header">
+                <div class="order-number">
+                    <h2>Order #${order.order_number || 'N/A'}</h2>
+                    <span class="status-badge ${getStatusClass(order.status)}">${formatStatus(order.status)}</span>
+                </div>
+                <div class="order-date">
+                    <strong>Order Date:</strong> ${order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A'}
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="detail-section">
+                <h3>Customer Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <strong>Name:</strong> ${order.customer_name || 'N/A'}
+                    </div>
+                    <div class="detail-item">
+                        <strong>Email:</strong> ${order.customer_email || 'N/A'}
+                    </div>
+                    <div class="detail-item">
+                        <strong>Phone:</strong> ${order.customer_phone || 'N/A'}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Shipping Information -->
+            <div class="detail-section">
+                <h3>Shipping Information</h3>
+                <div class="address-block">
+                    <pre>${fullAddress}</pre>
+                </div>
+            </div>
+
+            <!-- Payment Information -->
+            <div class="detail-section">
+                <h3>Payment Information</h3>
+                <div class="detail-grid">
+                    <div class="detail-item">
+                        <strong>Method:</strong> ${getPaymentIcon(order.payment_method)} ${formatPaymentMethod(order.payment_method)}
+                    </div>
+                    <div class="detail-item">
+                        <strong>Total Amount:</strong> ${order.total_amount || '0.00'} EGP
+                    </div>
+                    ${order.payment_screenshot ? `
+                        <div class="detail-item full-width">
+                            <strong>Payment Screenshot:</strong>
+                            <div class="screenshot-container">
+                                <img src="${order.payment_screenshot}" alt="Payment Screenshot" 
+                                     style="max-width: 300px; max-height: 400px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); cursor: pointer;"
+                                     onclick="window.open('${order.payment_screenshot}', '_blank')">
+                                <p style="font-size: 0.9rem; color: #666; margin-top: 0.5rem;">Click to view full size</p>
+                            </div>
+                        </div>
+                    ` : ''}
+                </div>
+            </div>
+
+            <!-- Order Items -->
+            <div class="detail-section">
+                <h3>Order Items</h3>
+                <div class="items-table">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead>
+                            <tr style="background: var(--accent); border-bottom: 2px solid var(--medium-gray);">
+                                <th style="padding: 1rem; text-align: left;">Item</th>
+                                <th style="padding: 1rem; text-align: center;">Size</th>
+                                <th style="padding: 1rem; text-align: center;">Qty</th>
+                                <th style="padding: 1rem; text-align: right;">Price</th>
+                                <th style="padding: 1rem; text-align: right;">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${order.items ? order.items.map(item => `
+                                <tr style="border-bottom: 1px solid var(--medium-gray);">
+                                    <td style="padding: 1rem;">
+                                        <div style="display: flex; align-items: center; gap: 1rem;">
+                                            ${item.image ? `<img src="${item.image}" alt="${item.name}" style="width: 50px; height: 50px; object-fit: cover; border-radius: 6px;">` : ''}
+                                            <div>
+                                                <strong>${item.name || 'Product'}</strong>
+                                                ${item.category ? `<br><small style="color: #666;">${item.category}</small>` : ''}
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td style="padding: 1rem; text-align: center;">${item.size || 'N/A'}</td>
+                                    <td style="padding: 1rem; text-align: center;">${item.quantity || 1}</td>
+                                    <td style="padding: 1rem; text-align: right;">${item.price || '0.00'} EGP</td>
+                                    <td style="padding: 1rem; text-align: right;"><strong>${((item.price || 0) * (item.quantity || 1)).toFixed(2)} EGP</strong></td>
+                                </tr>
+                            `).join('') : '<tr><td colspan="5" style="padding: 1rem; text-align: center; color: #666;">No items found</td></tr>'}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Order Summary -->
+            <div class="detail-section">
+                <h3>Order Summary</h3>
+                <div class="summary-table">
+                    <table style="width: 100%; max-width: 400px; margin-left: auto;">
+                        <tr>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid var(--medium-gray);">Subtotal:</td>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid var(--medium-gray); text-align: right;">${order.subtotal_amount || '0.00'} EGP</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid var(--medium-gray);">Shipping:</td>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid var(--medium-gray); text-align: right;">${order.shipping_amount || '0.00'} EGP</td>
+                        </tr>
+                        <tr style="font-weight: 600; font-size: 1.1rem;">
+                            <td style="padding: 1rem 0.5rem 0.5rem; border-top: 2px solid var(--btn);">Total:</td>
+                            <td style="padding: 1rem 0.5rem 0.5rem; border-top: 2px solid var(--btn); text-align: right; color: var(--btn);">${order.total_amount || '0.00'} EGP</td>
+                        </tr>
+                    </table>
+                </div>
+            </div>
+
+            ${order.order_notes ? `
+                <div class="detail-section">
+                    <h3>Order Notes</h3>
+                    <div class="notes-block">
+                        <p style="background: var(--light-gray); padding: 1rem; border-radius: 8px; margin: 0;">${order.order_notes}</p>
+                    </div>
+                </div>
+            ` : ''}
+
+            <!-- Quick Actions -->
+            <div class="detail-section">
+                <h3>Quick Actions</h3>
+                <div class="action-buttons">
+                    <select onchange="updateOrderStatus(${order.id}, this.value)" style="padding: 8px 12px; margin-right: 1rem; border-radius: 6px; border: 2px solid var(--medium-gray);">
+                        <option value="">Update Status</option>
+                        <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                        <option value="payment_pending" ${order.status === 'payment_pending' ? 'selected' : ''}>Payment Pending</option>
+                        <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+                        <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                        <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+                        <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+                        <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                    </select>
+                    <button class="secondary-btn" onclick="printOrder(${order.id})" style="margin-right: 0.5rem;">
+                        🖨️ Print Order
+                    </button>
+                    <button class="primary-btn" onclick="sendOrderUpdate('${order.customer_email}', '${order.order_number}')">
+                        📧 Email Customer
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <style>
+        .order-details-content {
+            max-height: 80vh;
+            overflow-y: auto;
+            padding: 1rem;
+        }
+
+        .order-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--accent);
+        }
+
+        .order-number h2 {
+            margin: 0 0 0.5rem 0;
+            color: var(--text);
+        }
+
+        .order-date {
+            text-align: right;
+            color: var(--dark-gray);
+        }
+
+        .detail-section {
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: var(--light-gray);
+            border-radius: 12px;
+        }
+
+        .detail-section h3 {
+            margin: 0 0 1rem 0;
+            color: var(--btn);
+            font-size: 1.2rem;
+            border-bottom: 1px solid var(--accent);
+            padding-bottom: 0.5rem;
+        }
+
+        .detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+        }
+
+        .detail-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .detail-item.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .address-block {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .address-block pre {
+            margin: 0;
+            font-family: var(--font);
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+
+        .screenshot-container {
+            margin-top: 0.5rem;
+        }
+
+        .items-table, .summary-table {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        .action-buttons {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+
+        @media (max-width: 768px) {
+            .order-header {
+                flex-direction: column;
+                gap: 1rem;
+            }
+
+            .order-date {
+                text-align: left;
+            }
+
+            .detail-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .action-buttons {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .action-buttons select,
+            .action-buttons button {
+                margin: 0.25rem 0;
+            }
+        }
+        </style>
+    `;
+    
+    orderDetails.innerHTML = orderHtml;
+    modal.classList.add('show');
+}
+
+// Enhanced update order status function
+async function updateOrderStatus(orderId, newStatus) {
+    if (!newStatus) return;
+    
+    try {
+        showLoading(true);
+        
+        const { error } = await supabase
+            .from('orders')
+            .update({ 
+                status: newStatus,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', orderId);
+        
+        if (error) {
+            throw error;
+        }
+        
+        showMessage(`Order status updated to ${formatStatus(newStatus)}`, 'success');
+        
+        // Reload orders to reflect changes
+        await loadOrdersEnhanced();
+        
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        showMessage('Error updating order status', 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// Print order function
+function printOrder(orderId) {
+    const order = allOrders.find(o => o.id === orderId);
+    if (!order) {
+        showMessage('Order not found', 'error');
+        return;
+    }
+    
+    // Create printable version
+    const printWindow = window.open('', '_blank');
+    printWindow.document.write(`
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Order #${order.order_number}</title>
+            <style>
+                body { font-family: Arial, sans-serif; margin: 20px; }
+                .header { border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 20px; }
+                .section { margin-bottom: 20px; }
+                .section h3 { background: #f5f5f5; padding: 10px; margin: 0 0 10px 0; }
+                table { width: 100%; border-collapse: collapse; }
+                th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+                th { background: #f5f5f5; }
+                .total { font-weight: bold; }
+            </style>
+        </head>
+        <body>
+            <div class="header">
+                <h1>Nourabelle</h1>
+                <h2>Order #${order.order_number}</h2>
+                <p>Date: ${order.created_at ? new Date(order.created_at).toLocaleString() : 'N/A'}</p>
+            </div>
+            
+            <div class="section">
+                <h3>Customer Information</h3>
+                <p><strong>Name:</strong> ${order.customer_name || 'N/A'}</p>
+                <p><strong>Email:</strong> ${order.customer_email || 'N/A'}</p>
+                <p><strong>Phone:</strong> ${order.customer_phone || 'N/A'}</p>
+            </div>
+            
+            <div class="section">
+                <h3>Shipping Address</h3>
+                <pre>${order.shipping_address || 'N/A'}
+${order.building_info ? 'Building: ' + order.building_info : ''}
+${order.floor ? 'Floor: ' + order.floor : ''}
+${order.apartment_number ? 'Apartment: ' + order.apartment_number : ''}
+${order.landmark ? 'Landmark: ' + order.landmark : ''}
+${order.shipping_city ? 'City: ' + order.shipping_city : ''}
+${order.postal_code ? 'Postal Code: ' + order.postal_code : ''}</pre>
+            </div>
+            
+            <div class="section">
+                <h3>Order Items</h3>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Size</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${order.items ? order.items.map(item => `
+                            <tr>
+                                <td>${item.name || 'Product'}</td>
+                                <td>${item.size || 'N/A'}</td>
+                                <td>${item.quantity || 1}</td>
+                                <td>${item.price || '0.00'} EGP</td>
+                                <td>${((item.price || 0) * (item.quantity || 1)).toFixed(2)} EGP</td>
+                            </tr>
+                        `).join('') : '<tr><td colspan="5">No items</td></tr>'}
+                        <tr class="total">
+                            <td colspan="4">Subtotal:</td>
+                            <td>${order.subtotal_amount || '0.00'} EGP</td>
+                        </tr>
+                        <tr class="total">
+                            <td colspan="4">Shipping:</td>
+                            <td>${order.shipping_amount || '0.00'} EGP</td>
+                        </tr>
+                        <tr class="total">
+                            <td colspan="4"><strong>Total:</strong></td>
+                            <td><strong>${order.total_amount || '0.00'} EGP</strong></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="section">
+                <h3>Payment Information</h3>
+                <p><strong>Method:</strong> ${formatPaymentMethod(order.payment_method)}</p>
+                <p><strong>Status:</strong> ${formatStatus(order.status)}</p>
+            </div>
+            
+            ${order.order_notes ? `
+                <div class="section">
+                    <h3>Order Notes</h3>
+                    <p>${order.order_notes}</p>
+                </div>
+            ` : ''}
+        </body>
+        </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.print();
+}
+
+// Send order update email
+function sendOrderUpdate(customerEmail, orderNumber) {
+    // This would integrate with your email service
+    showMessage(`Email functionality will be implemented soon for ${customerEmail}`, 'info');
+}
+
+// Close order modal
+function closeOrderModal() {
+    const modal = document.getElementById('orderModal');
+    if (modal) modal.classList.remove('show');
+}
+
+// Make functions globally available
+window.viewOrderDetails = viewOrderDetails;
+window.updateOrderStatus = updateOrderStatus;
+window.printOrder = printOrder;
+window.sendOrderUpdate = sendOrderUpdate;
+window.closeOrderModal = closeOrderModal;
+
+// Replace the existing loadOrders function in your admin.js with loadOrdersEnhanced
+// Also update the switchTab function to call loadOrdersEnhanced instead of loadOrders
+
+console.log('Enhanced admin orders management loaded successfully');
+
 
 // Make functions globally available for onclick handlers
 window.openProductModal = openProductModal;

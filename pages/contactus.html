@@ -93,15 +93,18 @@
       <h1>Contact Us</h1>
       <p>If you have any questions about your order, our products, or policies, please fill out the form below and we'll get back to you shortly.</p>
 
-      <form action="https://formspree.io/f/mnqewpja" method="POST" class="contact-form">
-        <label for="email">Your Email</label>
-        <input type="email" name="email" id="email" required placeholder="Enter your email">
+      <form id="contactForm" class="contact-form">
+  <label for="name">Your Name</label>
+  <input type="text" name="name" id="name" placeholder="Enter your name">
 
-        <label for="message">Your Message</label>
-        <textarea name="message" id="message" rows="6" required placeholder="Write your message..."></textarea>
+  <label for="email">Your Email</label>
+  <input type="email" name="email" id="email" required placeholder="Enter your email">
 
-        <button type="submit" class="submit-btn">Send Message</button>
-      </form>
+  <label for="message">Your Message</label>
+  <textarea name="message" id="message" rows="6" required placeholder="Write your message..."></textarea>
+
+  <button type="submit" class="submit-btn">Send Message</button>
+</form>
     </div>
   </section>
 
@@ -218,6 +221,29 @@
 
       console.log('Contact page mobile menu setup complete');
     });
+    document.getElementById('contactForm').addEventListener('submit', async function(e) {
+    e.preventDefault();
+
+    const data = {
+        name: document.getElementById('name').value,
+        email: document.getElementById('email').value,
+        message: document.getElementById('message').value
+    };
+
+    try {
+        const res = await fetch('/api/contact/send', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        alert(result.message || result.error);
+        if(res.ok) this.reset();
+    } catch (err) {
+        alert('Error sending message.');
+        console.error(err);
+    }
+});
   </script>
 </body>
 </html>

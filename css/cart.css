@@ -124,6 +124,7 @@
   flex-direction: column;
   gap: 0.5rem;
   min-width: 0; /* Allow text to wrap */
+  
 }
 
 .item-info h3 {
@@ -157,6 +158,10 @@
   display: flex;
   align-items: center;
   gap: 0.5rem;
+  padding-right: 10px; /* Add padding to avoid overlap with X button */
+ padding-top: 120px; /* Add padding to avoid overlap with X button */
+
+
 }
 
 .quantity-btn {
