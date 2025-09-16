@@ -1,4 +1,4 @@
-// Enhanced Checkout JavaScript - checkout.js
+// Enhanced Checkout JavaScript - checkout.js - COMPLETE FIXED VERSION
 'use strict';
 
 // Supabase Configuration
@@ -13,6 +13,7 @@ let checkoutData = {};
 let selectedPayment = 'cod';
 let uploadedScreenshot = null;
 let screenshotVerified = false;
+let currentOrderNumber = null; // Store order number globally
 
 // Initialize checkout page
 document.addEventListener('DOMContentLoaded', function() {
@@ -75,9 +76,23 @@ function displayOrderSummary() {
     if (summaryTotal) summaryTotal.textContent = `${(checkoutData.total || 0).toFixed(2)} EGP`;
 }
 
-// Select payment method
+// Generate order number - MOVED UP and made accessible
+function generateOrderNumber() {
+    const date = new Date();
+    const year = date.getFullYear().toString().slice(-2);
+    const month = (date.getMonth() + 1).toString().padStart(2, '0');
+    const day = date.getDate().toString().padStart(2, '0');
+    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    
+    return `NB${year}${month}${day}${random}`;
+}
+
+// FIXED: Select payment method
 function selectPayment(method) {
+    console.log('Selecting payment method:', method);
+    
     if (method === 'instapay') {
+        console.log('Opening Instapay modal...');
         openInstapayModal();
         return;
     }
@@ -131,57 +146,6 @@ function setupInstapayModal() {
     });
 }
 
-// Open Instapay Modal
-function openInstapayModal() {
-    const modal = document.getElementById('instapayModal');
-    const overlay = document.getElementById('modalOverlay');
-    const totalAmountDisplay = document.getElementById('totalAmountDisplay');
-    const amountToPay = document.getElementById('amountToPay');
-    
-    if (!modal || !overlay) return;
-    
-    // Reset modal state
-    resetInstapayModal();
-    
-    // Set total amount
-    const total = checkoutData.total || 0;
-    if (totalAmountDisplay) totalAmountDisplay.textContent = `${total.toFixed(2)} EGP`;
-    if (amountToPay) amountToPay.textContent = `${total.toFixed(2)} EGP`;
-    
-    // Show modal
-    overlay.classList.add('show');
-    modal.classList.add('show');
-    
-    // Disable body scroll
-    document.body.style.overflow = 'hidden';
-}
-
-// Close Instapay Modal
-function closeInstapayModal() {
-    const modal = document.getElementById('instapayModal');
-    const overlay = document.getElementById('modalOverlay');
-    
-    if (modal) modal.classList.remove('show');
-    if (overlay) overlay.classList.remove('show');
-    
-    // Re-enable body scroll
-    document.body.style.overflow = '';
-    
-    // If screenshot was uploaded successfully, select Instapay
-    if (screenshotVerified) {
-        selectedPayment = 'instapay';
-        const instapayRadio = document.getElementById('instapay');
-        if (instapayRadio) instapayRadio.checked = true;
-        updatePaymentSelection();
-    } else {
-        // Reset to COD if no screenshot uploaded
-        selectedPayment = 'cod';
-        const codRadio = document.getElementById('cod');
-        if (codRadio) codRadio.checked = true;
-        updatePaymentSelection();
-    }
-}
-
 // Reset Instapay Modal
 function resetInstapayModal() {
     // Show payment step, hide others
@@ -205,17 +169,58 @@ function resetInstapayModal() {
     const screenshotFile = document.getElementById('screenshotFile');
     if (screenshotFile) screenshotFile.value = '';
     
+    // Reset checkbox
+    const checkbox = document.getElementById('responsibilityCheckbox');
+    const proceedBtn = document.getElementById('proceedBtn');
+    if (checkbox) checkbox.checked = false;
+    if (proceedBtn) {
+        proceedBtn.disabled = true;
+        proceedBtn.style.background = '#ccc';
+        proceedBtn.style.cursor = 'not-allowed';
+    }
+    
     // Reset state
     uploadedScreenshot = null;
     screenshotVerified = false;
 }
 
+// Close Instapay Modal
+function closeInstapayModal() {
+    const modal = document.getElementById('instapayModal');
+    const overlay = document.getElementById('modalOverlay');
+    
+    if (modal) modal.classList.remove('show');
+    if (overlay) overlay.classList.remove('show');
+    
+    // Restore body scroll
+    document.body.classList.remove('modal-open');
+    document.body.style.overflow = '';
+    
+    // Reset checkbox
+    const checkbox = document.getElementById('responsibilityCheckbox');
+    if (checkbox) checkbox.checked = false;
+    
+    // If screenshot was uploaded successfully, select Instapay
+    if (screenshotVerified) {
+        selectedPayment = 'instapay';
+        const instapayRadio = document.getElementById('instapay');
+        if (instapayRadio) instapayRadio.checked = true;
+        updatePaymentSelection();
+    } else {
+        // Reset to COD if no screenshot uploaded
+        selectedPayment = 'cod';
+        const codRadio = document.getElementById('cod');
+        if (codRadio) codRadio.checked = true;
+        updatePaymentSelection();
+    }
+}
+
 // Copy Instapay Number
 function copyInstapayNumber() {
-    const number = '01234567890'; // UPDATE THIS WITH YOUR ACTUAL INSTAPAY NUMBER
+    const phoneNumber = '+20 111 103 0808';
     
-    navigator.clipboard.writeText(number).then(() => {
-        showNotification('Instapay number copied to clipboard!', 'success');
+    navigator.clipboard.writeText(phoneNumber).then(() => {
+        showNotification('Phone number copied to clipboard!', 'success');
         
         // Update button text temporarily
         const copyBtn = document.querySelector('.copy-btn');
@@ -232,12 +237,109 @@ function copyInstapayNumber() {
             }, 2000);
         }
     }).catch(() => {
-        showNotification('Failed to copy number. Please copy manually: ' + number, 'error');
+        showNotification(`Failed to copy. Please copy manually: ${phoneNumber}`, 'error');
+    });
+}
+
+// NEW: Copy Reference Number
+function copyReference() {
+    const referenceElement = document.getElementById('paymentReference');
+    const referenceText = referenceElement?.textContent || '';
+    
+    navigator.clipboard.writeText(referenceText).then(() => {
+        showNotification('Reference number copied!', 'success');
+        
+        // Update button text temporarily
+        const copyBtn = document.querySelector('.copy-reference-btn');
+        if (copyBtn) {
+            const originalText = copyBtn.textContent;
+            copyBtn.textContent = '✓ Copied!';
+            copyBtn.style.background = '#27ae60';
+            
+            setTimeout(() => {
+                copyBtn.textContent = originalText;
+                copyBtn.style.background = '#007bff';
+            }, 2000);
+        }
+    }).catch(() => {
+        showNotification(`Failed to copy reference: ${referenceText}`, 'error');
+    });
+}
+
+// UPDATED: Open Instapay Modal with order number
+// FIXED: Open Instapay Modal function - with proper centering
+function openInstapayModal() {
+    console.log('Opening Instapay modal...');
+    
+    const modal = document.getElementById('instapayModal');
+    const overlay = document.getElementById('modalOverlay');
+    const totalAmountDisplay = document.getElementById('totalAmountDisplay');
+    const amountToPay = document.getElementById('amountToPay');
+    
+    if (!modal) {
+        console.error('Modal element not found - looking for instapayModal');
+        return;
+    }
+    
+    // Reset modal state
+    resetInstapayModal();
+    
+    // Generate order number if not exists
+    if (!currentOrderNumber) {
+        currentOrderNumber = generateOrderNumber();
+    }
+    
+    // Set total amount and reference
+    const total = checkoutData.total || 0;
+    if (totalAmountDisplay) totalAmountDisplay.textContent = `${total.toFixed(2)} EGP`;
+    if (amountToPay) amountToPay.textContent = `${total.toFixed(2)} EGP`;
+    
+    // Update the payment reference in modal with ORDER NUMBER
+    const referenceDisplay = document.getElementById('paymentReference');
+    if (referenceDisplay) {
+        referenceDisplay.textContent = currentOrderNumber;
+    }
+    
+    // Show modal with overlay (if exists) for proper centering
+    if (overlay) overlay.classList.add('show');
+    modal.classList.add('show');
+    document.body.classList.add('modal-open');
+    
+    // Setup checkbox listener
+    setupResponsibilityCheckbox();
+    
+    console.log('Instapay modal opened successfully');
+}
+
+// Setup responsibility checkbox
+function setupResponsibilityCheckbox() {
+    const checkbox = document.getElementById('responsibilityCheckbox');
+    const proceedBtn = document.getElementById('proceedBtn');
+    
+    if (!checkbox || !proceedBtn) return;
+    
+    checkbox.addEventListener('change', function() {
+        proceedBtn.disabled = !this.checked;
+        
+        if (this.checked) {
+            proceedBtn.style.background = 'var(--btn)';
+            proceedBtn.style.cursor = 'pointer';
+        } else {
+            proceedBtn.style.background = '#ccc';
+            proceedBtn.style.cursor = 'not-allowed';
+        }
     });
 }
 
 // Proceed to upload step
 function proceedToUpload() {
+    const checkbox = document.getElementById('responsibilityCheckbox');
+    
+    if (!checkbox || !checkbox.checked) {
+        showNotification('Please confirm you understand the responsibility before proceeding', 'error');
+        return;
+    }
+    
     document.getElementById('paymentStep')?.classList.add('hidden');
     document.getElementById('uploadStep')?.classList.remove('hidden');
 }
@@ -413,23 +515,7 @@ function confirmPayment() {
     document.getElementById('confirmationStep')?.classList.remove('hidden');
 }
 
-// Generate order number
-function generateOrderNumber() {
-    const date = new Date();
-    const year = date.getFullYear().toString().slice(-2);
-    const month = (date.getMonth() + 1).toString().padStart(2, '0');
-    const day = date.getDate().toString().padStart(2, '0');
-    const random = Math.floor(Math.random() * 1000).toString().padStart(3, '0');
-    
-    return `NB${year}${month}${day}${random}`;
-}
-
-// Place order - MAIN FUNCTION// In your checkout.js file, find the placeOrder function and replace it with this:
-
-// Replace your entire placeOrder function with this:
-
-// FIXED placeOrder function - replace your existing one with this
-
+// Place order - MAIN FUNCTION - FIXED EmailJS
 async function placeOrder() {
     console.log('=== PLACING ORDER ===');
 
@@ -458,7 +544,10 @@ async function placeOrder() {
         btn.textContent = 'Processing Order...';
 
         const formData = new FormData(form);
-        const orderNumber = generateOrderNumber();
+        
+        // Use existing order number or generate new one
+        const orderNumber = currentOrderNumber || generateOrderNumber();
+        currentOrderNumber = orderNumber; // Store globally
 
         // Ensure total is calculated
         checkoutData.subtotal = Number(checkoutData.subtotal || 0);
@@ -508,7 +597,7 @@ async function placeOrder() {
 
         console.log('Order inserted successfully:', insertedOrder);
 
-        // ===== EMAIL NOTIFICATIONS =====
+        // ===== FIXED EMAIL NOTIFICATIONS =====
         emailjs.init('el1mZUzjUjqjdWKbF');
 
         try {
@@ -522,7 +611,6 @@ async function placeOrder() {
                     addressObj.floor ? `Floor: ${addressObj.floor}` : '',
                     addressObj.apartment_number ? `Apartment: ${addressObj.apartment_number}` : '',
                     addressObj.landmark ? `Landmark: ${addressObj.landmark}` : '',
-                    addressObj.city ? `City: ${addressObj.city}` : '',
                     addressObj.postal_code ? `Postal Code: ${addressObj.postal_code}` : ''
                 ].filter(part => part);
                 if (addressParts.length > 0) address += '\n' + addressParts.join('\n');
@@ -539,8 +627,9 @@ async function placeOrder() {
                 return methods[method] || method;
             }
 
-            // Owner Notification
+            // Owner Notification - FIXED: Added to_email parameter
             const ownerParams = {
+                to_email: 'nourabellebynour@gmail.com', // FIXED: Added recipient
                 customer_name: orderData.customer_name,
                 customer_email: orderData.customer_email,
                 customer_phone: orderData.customer_phone,
@@ -548,21 +637,26 @@ async function placeOrder() {
                 payment_method: formatPaymentMethod(orderData.payment_method),
                 total_amount: orderData.total_amount.toFixed(2) + " EGP",
                 items_list: buildItemsList(orderData.items),
-                full_address: buildFullAddress(orderData.shipping_address)
+                full_address: buildFullAddress(orderData.shipping_address),
+                payment_screenshot_url: orderData.payment_screenshot || 'No screenshot provided',
+                order_notes: orderData.notes || 'No special notes'
             };
 
             await emailjs.send("service_cigidea", "template_pkp5jrk", ownerParams);
             console.log("Owner notification sent successfully");
 
-            // Customer Notification
+            // Customer Notification - FIXED: Added to_email parameter
             const customerParams = {
-                to_email: orderData.customer_email,
+                to_email: orderData.customer_email, // FIXED: Added recipient
                 customer_name: orderData.customer_name,
                 order_number: orderData.order_number,
+                order_date: new Date().toLocaleString(),
                 payment_method: formatPaymentMethod(orderData.payment_method),
                 total_amount: orderData.total_amount.toFixed(2) + " EGP",
                 items_list: buildItemsList(orderData.items),
-                shipping_address: buildFullAddress(orderData.shipping_address)
+                full_address: buildFullAddress(orderData.shipping_address),
+                store_email: 'nourabellebynour@gmail.com',
+                store_instagram: '@nourabellebynour'
             };
 
             await emailjs.send("service_cigidea", "template_aezvcul", customerParams);
@@ -697,10 +791,15 @@ function showNotification(message, type = 'success') {
     }, 4000);
 }
 
-// Listen for payment method changes
+// Event listeners with better debugging
 document.addEventListener('change', function(e) {
+    console.log('Change event:', e.target.name, e.target.value);
+    
     if (e.target.name === 'payment') {
+        console.log('Payment method changed to:', e.target.value);
+        
         if (e.target.value === 'instapay') {
+            console.log('Instapay selected, opening modal...');
             openInstapayModal();
         } else {
             selectedPayment = e.target.value;
@@ -709,13 +808,19 @@ document.addEventListener('change', function(e) {
     }
 });
 
-// Close modal on outside click
+// Click handler for payment options
 document.addEventListener('click', function(e) {
-    const modal = document.getElementById('instapayModal');
-    const overlay = document.getElementById('modalOverlay');
-    
-    if (e.target === overlay) {
-        closeInstapayModal();
+    // Check if clicked on instapay payment option
+    const paymentOption = e.target.closest('.payment-option');
+    if (paymentOption) {
+        const radio = paymentOption.querySelector('input[type="radio"]');
+        if (radio && radio.value === 'instapay') {
+            console.log('Instapay payment option clicked');
+            e.preventDefault();
+            e.stopPropagation();
+            openInstapayModal();
+            return;
+        }
     }
 });
 
@@ -735,6 +840,7 @@ window.placeOrder = placeOrder;
 window.openInstapayModal = openInstapayModal;
 window.closeInstapayModal = closeInstapayModal;
 window.copyInstapayNumber = copyInstapayNumber;
+window.copyReference = copyReference;
 window.proceedToUpload = proceedToUpload;
 window.removeScreenshot = removeScreenshot;
 window.confirmPayment = confirmPayment;

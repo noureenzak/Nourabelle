@@ -559,3 +559,71 @@
         font-size: 1rem;
     }
 }
+/* Add this CSS to your product.css file */
+
+/* Mobile scrollbar styling for thumbnail container */
+@media (max-width: 768px) {
+    .thumbnail-container {
+        /* For Webkit browsers (Chrome, Safari, Edge) */
+        scrollbar-width: thin;
+        scrollbar-color: rgba(173, 124, 124, 0.4) transparent;
+    }
+
+    .thumbnail-container::-webkit-scrollbar {
+        height: 6px; /* Thin scrollbar */
+    }
+
+    .thumbnail-container::-webkit-scrollbar-track {
+        background: rgba(240, 227, 218, 0.3); /* Light beige track */
+        border-radius: 10px;
+    }
+
+    .thumbnail-container::-webkit-scrollbar-thumb {
+        background: rgba(173, 124, 124, 0.5); /* Light pink thumb */
+        border-radius: 10px;
+        transition: background 0.3s ease;
+    }
+
+    .thumbnail-container::-webkit-scrollbar-thumb:hover {
+        background: rgba(173, 124, 124, 0.7); /* Slightly darker on hover */
+    }
+
+    /* Also apply to any other horizontal scrolling containers on product page */
+    .product-scroll,
+    .image-scroll {
+        scrollbar-width: thin;
+        scrollbar-color: rgba(173, 124, 124, 0.4) transparent;
+    }
+
+    .product-scroll::-webkit-scrollbar,
+    .image-scroll::-webkit-scrollbar {
+        height: 6px;
+    }
+
+    .product-scroll::-webkit-scrollbar-track,
+    .image-scroll::-webkit-scrollbar-track {
+        background: rgba(240, 227, 218, 0.3);
+        border-radius: 10px;
+    }
+
+    .product-scroll::-webkit-scrollbar-thumb,
+    .image-scroll::-webkit-scrollbar-thumb {
+        background: rgba(173, 124, 124, 0.5);
+        border-radius: 10px;
+        transition: background 0.3s ease;
+    }
+
+    .product-scroll::-webkit-scrollbar-thumb:hover,
+    .image-scroll::-webkit-scrollbar-thumb:hover {
+        background: rgba(173, 124, 124, 0.7);
+    }
+}
+
+/* For very small mobile devices */
+@media (max-width: 480px) {
+    .thumbnail-container::-webkit-scrollbar,
+    .product-scroll::-webkit-scrollbar,
+    .image-scroll::-webkit-scrollbar {
+        height: 4px; /* Even thinner on very small screens */
+    }
+}

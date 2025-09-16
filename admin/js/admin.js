@@ -208,11 +208,25 @@ async function loadOverviewData() {
         document.getElementById('totalProducts').textContent = products?.length || 0;
         document.getElementById('totalOrders').textContent = orders?.length || 0;
         
-        const pendingCount = orders?.filter(order => order.status === 'pending').length || 0;
+        const pendingCount = orders?.filter(order => 
+            order.status === 'pending' || order.status === 'payment_pending'
+        ).length || 0;
         document.getElementById('pendingOrders').textContent = pendingCount;
         
-        const totalRevenue = orders?.reduce((sum, order) => sum + parseFloat(order.total_amount || 0), 0) || 0;
-        document.getElementById('totalRevenue').textContent = `$${totalRevenue.toFixed(2)}`;
+        // FIXED: Calculate revenue only for confirmed/delivered orders (not cancelled)
+        const confirmedOrders = orders?.filter(order => 
+            order.status === 'confirmed' || 
+            order.status === 'delivered' || 
+            order.status === 'processing' || 
+            order.status === 'shipped'
+        ) || [];
+        
+        const totalRevenue = confirmedOrders.reduce((sum, order) => 
+            sum + parseFloat(order.total_amount || 0), 0
+        );
+        
+        // FIXED: Display in EGP instead of dollars
+        document.getElementById('totalRevenue').textContent = `${totalRevenue.toFixed(2)} EGP`;
         
         // Load recent orders
         loadRecentOrders(orders?.slice(-5).reverse() || []);
@@ -221,6 +235,7 @@ async function loadOverviewData() {
         console.error('Error loading overview:', error);
     }
 }
+
 
 // Load recent orders
 function loadRecentOrders(orders) {
@@ -449,19 +464,40 @@ function renderCategories(categories) {
     if (!container) return;
     
     if (!categories.length) {
-        container.innerHTML = '<div class="loading">No categories found</div>';
+        container.innerHTML = `
+            <div class="empty-state">
+                <div class="empty-icon">📁</div>
+                <h3>No categories found</h3>
+                <p>Create your first category to organize your products</p>
+                <button class="primary-btn" onclick="addCategory()">Add Category</button>
+            </div>
+        `;
         return;
     }
     
     const html = categories.map(category => `
-        <div class="category-item">
+        <div class="category-item enhanced-card">
             <div class="category-info">
-                <h4>${category.name || 'Untitled'}</h4>
-                <p>${category.description || 'No description'}</p>
+                <div class="category-header">
+                    <h4 class="category-name">${category.name || 'Untitled'}</h4>
+                    <span class="category-status ${category.is_active ? 'active' : 'inactive'}">
+                        ${category.is_active ? 'Active' : 'Inactive'}
+                    </span>
+                </div>
+                <p class="category-description">${category.description || 'No description provided'}</p>
+                <div class="category-meta">
+                    <small>Created: ${category.created_at ? new Date(category.created_at).toLocaleDateString() : 'Unknown'}</small>
+                </div>
             </div>
             <div class="category-actions">
-                <button class="edit-btn" onclick="editCategory(${category.id})">Edit</button>
-                <button class="danger-btn" onclick="deleteCategory(${category.id})">Delete</button>
+                <button class="edit-btn enhanced-btn" onclick="editCategory(${category.id})" title="Edit Category">
+                    <span class="btn-icon">✏️</span>
+                    Edit
+                </button>
+                <button class="delete-btn enhanced-btn" onclick="deleteCategory(${category.id})" title="Delete Category">
+                    <span class="btn-icon">🗑️</span>
+                    Delete
+                </button>
             </div>
         </div>
     `).join('');
@@ -1154,43 +1190,202 @@ function saveSettings() {
 // Replace the placeholder addCategory function with this:
 async function addCategory() {
     const name = prompt('Enter category name:');
-    if (!name || !name.trim()) return;
+    if (!name || !name.trim()) {
+        showMessage('Category name is required', 'error');
+        return;
+    }
     
     const description = prompt('Enter category description (optional):') || '';
     
     try {
         showLoading(true);
         
+        // Check if category already exists (case insensitive)
+        const { data: existingCategories } = await supabase
+            .from('categories')
+            .select('name')
+            .ilike('name', name.trim());
+        
+        if (existingCategories && existingCategories.length > 0) {
+            throw new Error('A category with this name already exists');
+        }
+        
+        const categoryData = {
+            name: name.trim().toLowerCase(),
+            description: description.trim() || null,
+            is_active: true,
+            created_at: new Date().toISOString(),
+        };
+        
+        console.log('Creating category with data:', categoryData);
+        
         const { data, error } = await supabase
             .from('categories')
-            .insert([{
-                name: name.trim().toLowerCase(),
-                description: description.trim(),
-                is_active: true,
-                created_at: new Date().toISOString()
-            }])
+            .insert([categoryData])
             .select();
         
-        if (error) throw error;
+        if (error) {
+            console.error('Category creation error:', error);
+            throw new Error(`Database error: ${error.message}`);
+        }
         
+        console.log('Category created successfully:', data);
         showMessage('Category created successfully', 'success');
-        await loadCategories(); // Reload categories
+        
+        // Reload categories and update filters
+        await loadCategories();
         
     } catch (error) {
         console.error('Error creating category:', error);
-        showMessage('Error creating category: ' + error.message, 'error');
+        showMessage(`Error creating category: ${error.message}`, 'error');
     } finally {
         showLoading(false);
     }
 }
 
-function editCategory(id) {
-    showMessage('Category editing coming soon', 'info');
+
+async function addCategory() {
+    const name = prompt('Enter category name:');
+    if (!name || !name.trim()) {
+        showMessage('Category name is required', 'error');
+        return;
+    }
+    
+    const description = prompt('Enter category description (optional):') || '';
+    
+    try {
+        showLoading(true);
+        
+        // Check if category already exists (case insensitive)
+        const { data: existingCategories } = await supabase
+            .from('categories')
+            .select('name')
+            .ilike('name', name.trim());
+        
+        if (existingCategories && existingCategories.length > 0) {
+            throw new Error('A category with this name already exists');
+        }
+        
+        const categoryData = {
+            name: name.trim().toLowerCase(),
+            description: description.trim() || null,
+            is_active: true,
+            created_at: new Date().toISOString(),
+        };
+        
+        console.log('Creating category with data:', categoryData);
+        
+        const { data, error } = await supabase
+            .from('categories')
+            .insert([categoryData])
+            .select();
+        
+        if (error) {
+            console.error('Category creation error:', error);
+            throw new Error(`Database error: ${error.message}`);
+        }
+        
+        console.log('Category created successfully:', data);
+        showMessage('Category created successfully', 'success');
+        
+        // Reload categories and update filters
+        await loadCategories();
+        
+    } catch (error) {
+        console.error('Error creating category:', error);
+        showMessage(`Error creating category: ${error.message}`, 'error');
+    } finally {
+        showLoading(false);
+    }
 }
 
-function deleteCategory(id) {
-    if (confirm('Delete this category?')) {
-        showMessage('Category deletion coming soon', 'info');
+// FIXED: Enhanced category deletion
+async function deleteCategory(id) {
+    if (!confirm('Are you sure you want to delete this category? This action cannot be undone.')) {
+        return;
+    }
+    
+    try {
+        showLoading(true);
+        
+        // First check if any products use this category
+        const category = allCategories.find(cat => cat.id === id);
+        if (category) {
+            const { data: productsUsingCategory } = await supabase
+                .from('products')
+                .select('id')
+                .eq('category', category.name);
+            
+            if (productsUsingCategory && productsUsingCategory.length > 0) {
+                const confirmDelete = confirm(
+                    `This category is used by ${productsUsingCategory.length} product(s). ` +
+                    `Deleting it will not affect existing products, but they won't be able to select this category in the future. Continue?`
+                );
+                if (!confirmDelete) return;
+            }
+        }
+        
+        const { error } = await supabase
+            .from('categories')
+            .delete()
+            .eq('id', id);
+        
+        if (error) {
+            throw new Error(`Database error: ${error.message}`);
+        }
+        
+        showMessage('Category deleted successfully', 'success');
+        await loadCategories(); // Reload categories
+        
+    } catch (error) {
+        console.error('Error deleting category:', error);
+        showMessage(`Error deleting category: ${error.message}`, 'error');
+    } finally {
+        showLoading(false);
+    }
+}
+
+// FIXED: Enhanced category editing
+async function editCategory(id) {
+    const category = allCategories.find(cat => cat.id === id);
+    if (!category) {
+        showMessage('Category not found', 'error');
+        return;
+    }
+    
+    const newName = prompt('Enter new category name:', category.name);
+    if (!newName || !newName.trim()) {
+        return;
+    }
+    
+    const newDescription = prompt('Enter new category description:', category.description || '');
+    
+    try {
+        showLoading(true);
+        
+        const updateData = {
+            name: newName.trim().toLowerCase(),
+            description: newDescription.trim() || null
+            // Removed: updated_at: new Date().toISOString()
+        };
+        
+        const { error } = await supabase
+            .from('categories')
+            .update(updateData)
+            .eq('id', id);
+        
+        if (error) {
+            throw new Error(`Database error: ${error.message}`);
+        }
+        
+        showMessage('Category updated successfully', 'success');
+        await loadCategories();
+        
+    } catch (error) {
+        console.error('Error updating category:', error);
+        showMessage(`Error updating category: ${error.message}`, 'error');
+    } finally {
+        showLoading(false);
     }
 }
 
@@ -1261,9 +1456,13 @@ async function viewOrder(id) {
     }
 }
 
+// FIXED: Close order modal with X button working
 function closeOrderModal() {
     const modal = document.getElementById('orderModal');
-    if (modal) modal.classList.remove('show');
+    if (modal) {
+        modal.classList.remove('show');
+        console.log('Order modal closed');
+    }
 }
 
 // Debug function to check database contents
@@ -1334,7 +1533,16 @@ function renderOrdersEnhanced(orders) {
     if (!container) return;
     
     if (!orders.length) {
-        container.innerHTML = '<tr><td colspan="7">No orders found</td></tr>';
+        container.innerHTML = `
+            <tr>
+                <td colspan="6" class="empty-table">
+                    <div class="empty-state-small">
+                        <div class="empty-icon">📋</div>
+                        <p>No orders found</p>
+                    </div>
+                </td>
+            </tr>
+        `;
         return;
     }
     
@@ -1343,40 +1551,47 @@ function renderOrdersEnhanced(orders) {
         const paymentIcon = getPaymentIcon(order.payment_method);
         
         return `
-            <tr data-id="${order.id}">
-                <td>
-                    <strong>#${order.order_number || 'N/A'}</strong>
-                    ${order.payment_screenshot ? '<br><span style="color: var(--info); font-size: 0.8rem;">📷 Screenshot</span>' : ''}
+            <tr class="order-row" data-id="${order.id}">
+                <td class="order-number-cell">
+                    <div class="order-number-wrapper">
+                        <strong class="order-number">#${order.order_number || 'N/A'}</strong>
+                        ${order.payment_screenshot ? '<div class="screenshot-indicator">📷 Screenshot</div>' : ''}
+                    </div>
                 </td>
-                <td>
-                    <div><strong>${order.customer_name || 'Unknown'}</strong></div>
-                    <div style="font-size: 0.9rem; color: #666;">${order.customer_email || 'N/A'}</div>
-                    <div style="font-size: 0.8rem; color: #888;">${order.customer_phone || 'N/A'}</div>
+                <td class="customer-cell">
+                    <div class="customer-info">
+                        <div class="customer-name">${order.customer_name || 'Unknown'}</div>
+                        <div class="customer-email">${order.customer_email || 'N/A'}</div>
+                        <div class="customer-phone">${order.customer_phone || 'N/A'}</div>
+                    </div>
                 </td>
-                <td>
-                    <div><strong>${order.total_amount || '0.00'} EGP</strong></div>
-                    <div style="font-size: 0.8rem; color: #666;">${paymentIcon} ${formatPaymentMethod(order.payment_method)}</div>
+                <td class="amount-cell">
+                    <div class="amount-wrapper">
+                        <div class="total-amount">${order.total_amount || '0.00'} EGP</div>
+                        <div class="payment-method">${paymentIcon} ${formatPaymentMethod(order.payment_method)}</div>
+                    </div>
                 </td>
-                <td>
+                <td class="status-cell">
                     <span class="status-badge ${statusClass}">${formatStatus(order.status)}</span>
                 </td>
-                <td>
-                    <div>${order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</div>
-                    <div style="font-size: 0.8rem; color: #666;">${order.created_at ? new Date(order.created_at).toLocaleTimeString() : ''}</div>
+                <td class="date-cell">
+                    <div class="date-wrapper">
+                        <div class="order-date">${order.created_at ? new Date(order.created_at).toLocaleDateString() : 'N/A'}</div>
+                        <div class="order-time">${order.created_at ? new Date(order.created_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : ''}</div>
+                    </div>
                 </td>
-                <td>
-                    <div style="display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap;">
-                        <button class="edit-btn" onclick="viewOrderDetails(${order.id})" style="font-size: 0.8rem; padding: 6px 12px;">View</button>
-                        <select onchange="updateOrderStatus(${order.id}, this.value)" style="font-size: 0.8rem; padding: 4px;">
-                            <option value="">Change Status</option>
-                            <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
-                            <option value="payment_pending" ${order.status === 'payment_pending' ? 'selected' : ''}>Payment Pending</option>
-                            <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
-                            <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
-                            <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
-                            <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
-                            <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
-                        </select>
+                <td class="actions-cell">
+                    <div class="action-group">
+                        <button class="view-btn enhanced-btn" onclick="viewOrderDetails(${order.id})" title="View Order Details">
+                             View
+                        </button>
+                        <select class="status-select enhanced-select" onchange="updateOrderStatus(${order.id}, this.value)">
+    <option value="">Change Status</option>
+    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+    <option value="confirmed" ${order.status === 'confirmed' ? 'selected' : ''}>Confirmed</option>
+    <option value="shipped" ${order.status === 'shipped' ? 'selected' : ''}>Shipped</option>
+    <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
+</select>
                     </div>
                 </td>
             </tr>
@@ -1453,6 +1668,7 @@ async function viewOrderDetails(orderId) {
 }
 
 // Show enhanced order details modal
+// FIXED: Enhanced order details modal without print option
 function showOrderDetailsModal(order) {
     const modal = document.getElementById('orderModal');
     const orderDetails = document.getElementById('orderDetails');
@@ -1463,17 +1679,22 @@ function showOrderDetailsModal(order) {
     }
     
     // Build comprehensive address string
-    let fullAddress = order.shipping_address || '';
-    if (order.building_info) fullAddress += `\nBuilding: ${order.building_info}`;
-    if (order.floor) fullAddress += `\nFloor: ${order.floor}`;
-    if (order.apartment_number) fullAddress += `\nApartment: ${order.apartment_number}`;
-    if (order.landmark) fullAddress += `\nLandmark: ${order.landmark}`;
-    if (order.shipping_city) fullAddress += `\nCity: ${order.shipping_city}`;
-    if (order.postal_code) fullAddress += `\nPostal Code: ${order.postal_code}`;
+    let fullAddress = '';
+    if (typeof order.shipping_address === 'object' && order.shipping_address !== null) {
+        const addr = order.shipping_address;
+        fullAddress = addr.street_address || '';
+        if (addr.building_info) fullAddress += `\nBuilding: ${addr.building_info}`;
+        if (addr.floor) fullAddress += `\nFloor: ${addr.floor}`;
+        if (addr.apartment_number) fullAddress += `\nApartment: ${addr.apartment_number}`;
+        if (addr.landmark) fullAddress += `\nLandmark: ${addr.landmark}`;
+        if (addr.postal_code) fullAddress += `\nPostal Code: ${addr.postal_code}`;
+    } else if (typeof order.shipping_address === 'string') {
+        fullAddress = order.shipping_address;
+    }
     
     const orderHtml = `
         <div class="order-details-content">
-            <!-- Order Header -->
+            <!-- FIXED: Order Header with working close button -->
             <div class="order-header">
                 <div class="order-number">
                     <h2>Order #${order.order_number || 'N/A'}</h2>
@@ -1492,7 +1713,7 @@ function showOrderDetailsModal(order) {
                         <strong>Name:</strong> ${order.customer_name || 'N/A'}
                     </div>
                     <div class="detail-item">
-                        <strong>Email:</strong> ${order.customer_email || 'N/A'}
+                        <strong>Email:</strong> <a href="mailto:${order.customer_email || ''}" class="email-link">${order.customer_email || 'N/A'}</a>
                     </div>
                     <div class="detail-item">
                         <strong>Phone:</strong> ${order.customer_phone || 'N/A'}
@@ -1504,7 +1725,7 @@ function showOrderDetailsModal(order) {
             <div class="detail-section">
                 <h3>Shipping Information</h3>
                 <div class="address-block">
-                    <pre>${fullAddress}</pre>
+                    <pre>${fullAddress || 'No address provided'}</pre>
                 </div>
             </div>
 
@@ -1576,11 +1797,11 @@ function showOrderDetailsModal(order) {
                     <table style="width: 100%; max-width: 400px; margin-left: auto;">
                         <tr>
                             <td style="padding: 0.5rem; border-bottom: 1px solid var(--medium-gray);">Subtotal:</td>
-                            <td style="padding: 0.5rem; border-bottom: 1px solid var(--medium-gray); text-align: right;">${order.subtotal_amount || '0.00'} EGP</td>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid var(--medium-gray); text-align: right;">${order.subtotal || '0.00'} EGP</td>
                         </tr>
                         <tr>
                             <td style="padding: 0.5rem; border-bottom: 1px solid var(--medium-gray);">Shipping:</td>
-                            <td style="padding: 0.5rem; border-bottom: 1px solid var(--medium-gray); text-align: right;">${order.shipping_amount || '0.00'} EGP</td>
+                            <td style="padding: 0.5rem; border-bottom: 1px solid var(--medium-gray); text-align: right;">${order.shipping_cost || '0.00'} EGP</td>
                         </tr>
                         <tr style="font-weight: 600; font-size: 1.1rem;">
                             <td style="padding: 1rem 0.5rem 0.5rem; border-top: 2px solid var(--btn);">Total:</td>
@@ -1590,20 +1811,20 @@ function showOrderDetailsModal(order) {
                 </div>
             </div>
 
-            ${order.order_notes ? `
+            ${order.notes ? `
                 <div class="detail-section">
                     <h3>Order Notes</h3>
                     <div class="notes-block">
-                        <p style="background: var(--light-gray); padding: 1rem; border-radius: 8px; margin: 0;">${order.order_notes}</p>
+                        <p style="background: var(--light-gray); padding: 1rem; border-radius: 8px; margin: 0;">${order.notes}</p>
                     </div>
                 </div>
             ` : ''}
 
-            <!-- Quick Actions -->
+            <!-- FIXED: Quick Actions without print -->
             <div class="detail-section">
                 <h3>Quick Actions</h3>
                 <div class="action-buttons">
-                    <select onchange="updateOrderStatus(${order.id}, this.value)" style="padding: 8px 12px; margin-right: 1rem; border-radius: 6px; border: 2px solid var(--medium-gray);">
+                    <select id="statusSelect_${order.id}" onchange="updateOrderStatusFromModal(${order.id}, this.value)" style="padding: 8px 12px; margin-right: 1rem; border-radius: 8px; border: 2px solid var(--accent); background: white; color: var(--text); font-family: var(--font);">
                         <option value="">Update Status</option>
                         <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
                         <option value="payment_pending" ${order.status === 'payment_pending' ? 'selected' : ''}>Payment Pending</option>
@@ -1613,17 +1834,35 @@ function showOrderDetailsModal(order) {
                         <option value="delivered" ${order.status === 'delivered' ? 'selected' : ''}>Delivered</option>
                         <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
                     </select>
-                    <button class="secondary-btn" onclick="printOrder(${order.id})" style="margin-right: 0.5rem;">
-                        🖨️ Print Order
+                    <button class="email-btn" onclick="sendOrderUpdate('${order.customer_email}', '${order.order_number}')" style="background: var(--btn); color: white; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: var(--font); font-weight: 500; margin-right: 10px;">
+                        Email Customer
                     </button>
-                    <button class="primary-btn" onclick="sendOrderUpdate('${order.customer_email}', '${order.order_number}')">
-                        📧 Email Customer
+                    <button class="close-modal-btn" onclick="closeOrderModal()" style="background: var(--medium-gray); color: var(--text); border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-family: var(--font); font-weight: 500;">
+                        Close
                     </button>
                 </div>
             </div>
         </div>
 
         <style>
+        .email-link {
+            color: var(--btn);
+            text-decoration: none;
+        }
+        .email-link:hover {
+            text-decoration: underline;
+        }
+        
+        .email-btn:hover {
+            background: var(--btn-hover) !important;
+            transform: translateY(-1px);
+        }
+        
+        .close-modal-btn:hover {
+            background: var(--dark-gray) !important;
+            color: white;
+        }
+        
         .order-details-content {
             max-height: 80vh;
             overflow-y: auto;
@@ -1748,8 +1987,8 @@ function showOrderDetailsModal(order) {
     modal.classList.add('show');
 }
 
-// Enhanced update order status function
-async function updateOrderStatus(orderId, newStatus) {
+// NEW: Update order status from modal
+async function updateOrderStatusFromModal(orderId, newStatus) {
     if (!newStatus) return;
     
     try {
@@ -1759,7 +1998,6 @@ async function updateOrderStatus(orderId, newStatus) {
             .from('orders')
             .update({ 
                 status: newStatus,
-                updated_at: new Date().toISOString()
             })
             .eq('id', orderId);
         
@@ -1769,8 +2007,18 @@ async function updateOrderStatus(orderId, newStatus) {
         
         showMessage(`Order status updated to ${formatStatus(newStatus)}`, 'success');
         
-        // Reload orders to reflect changes
-        await loadOrdersEnhanced();
+        // Update the status badge in the modal
+        const statusBadge = document.querySelector('.status-badge');
+        if (statusBadge) {
+            statusBadge.className = `status-badge ${getStatusClass(newStatus)}`;
+            statusBadge.textContent = formatStatus(newStatus);
+        }
+        
+        // Reload orders and overview to reflect changes
+        await Promise.all([
+            loadOrdersEnhanced(),
+            loadOverviewData()
+        ]);
         
     } catch (error) {
         console.error('Error updating order status:', error);
@@ -1891,9 +2139,16 @@ ${order.postal_code ? 'Postal Code: ' + order.postal_code : ''}</pre>
 
 // Send order update email
 function sendOrderUpdate(customerEmail, orderNumber) {
-    // This would integrate with your email service
-    showMessage(`Email functionality will be implemented soon for ${customerEmail}`, 'info');
+    const subject = `Order Update - #${orderNumber}`;
+    const body = `Dear Customer,\n\nThis is regarding your order #${orderNumber}.\n\nBest regards,\nNourabelle Team`;
+    
+    const mailtoLink = document.createElement('a');
+    mailtoLink.href = `mailto:${customerEmail}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    mailtoLink.click();
+    
+    showMessage(`Opening email for ${customerEmail}`, 'success');
 }
+
 
 // Close order modal
 function closeOrderModal() {
@@ -1929,6 +2184,12 @@ window.updateSizingSystem = updateSizingSystem;
 window.handleProductSizing = handleProductSizing;
 window.setStandardSizing = setStandardSizing;
 window.setCombinedSizing = setCombinedSizing;
+window.sendOrderUpdate = sendOrderUpdate;
+window.updateOrderStatusFromModal = updateOrderStatusFromModal;
+window.closeOrderModal = closeOrderModal;
+window.addCategory = addCategory;
+window.renderCategories = renderCategories;
+window.renderOrdersEnhanced = renderOrdersEnhanced;
 
 console.log('Nourabelle Admin Dashboard script loaded successfully - All functions available');
 

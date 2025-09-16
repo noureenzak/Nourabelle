@@ -33,9 +33,13 @@ async function initializeProductsPage() {
         // Show loading state
         showLoadingState(true);
         
-        // Load products from Supabase
+        // Load products from database
         console.log('1. Loading products from database...');
         await loadAllProductsFromDatabase();
+        
+        // Load categories from database
+        console.log('2. Loading categories from database...');
+        await loadCategoryFilters();
         
         // Hide loading state
         showLoadingState(false);
@@ -48,6 +52,55 @@ async function initializeProductsPage() {
     }
 }
 
+// Load categories from categories table for filter dropdown
+async function loadCategoryFilters() {
+    try {
+        console.log('🔍 Loading categories from categories table...');
+        
+        const { data: categories, error } = await supabase
+            .from('categories')
+            .select('*')
+            .eq('is_active', true)
+            .order('name');
+        
+        if (error) {
+            console.error('❌ Error loading categories:', error);
+            return;
+        }
+        
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter && categories) {
+            // Clear and rebuild options
+            categoryFilter.innerHTML = `
+                <option value="all">All Categories</option>
+                <option value="sale">Sale Items</option>
+            `;
+            
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.name.toLowerCase();
+                option.textContent = cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
+                categoryFilter.appendChild(option);
+            });
+            
+            console.log('✅ Loaded', categories.length, 'categories from categories table');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error loading categories from categories table:', error);
+        
+        // Fallback to basic categories if database fails
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter) {
+            categoryFilter.innerHTML = `
+                <option value="all">All Categories</option>
+                <option value="sets">Sets</option>
+                <option value="cardigans">Cardigans</option>
+                <option value="sale">Sale Items</option>
+            `;
+        }
+    }
+}
 // ===============================================================================
 // DATABASE FUNCTIONS
 // ===============================================================================

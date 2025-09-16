@@ -2,10 +2,10 @@
 'use strict';
 
 // Global state
-let currentProduct = null;
-let currentImageIndex = 0;
-let productImages = [];
-let cart = [];
+var currentProduct = null;
+var currentImageIndex = 0;
+var productImages = [];
+var cart = [];
 
 // Initialize when DOM loads
 document.addEventListener('DOMContentLoaded', function() {
@@ -230,32 +230,94 @@ function updateProductPricing() {
     }
 }
 // Add this function to products.js
+// In your js/products.js file, add this function after the existing functions
+
+// Load categories from categories table for filter dropdown
 async function loadCategoryFilters() {
     try {
-        const { data: categories } = await supabase
+        console.log('🔍 Loading categories from categories table...');
+        
+        const { data: categories, error } = await supabase
             .from('categories')
             .select('*')
             .eq('is_active', true)
             .order('name');
         
+        if (error) {
+            console.error('❌ Error loading categories:', error);
+            return;
+        }
+        
         const categoryFilter = document.getElementById('categoryFilter');
         if (categoryFilter && categories) {
-            const options = categories.map(cat => 
-                `<option value="${cat.name}">${cat.name.charAt(0).toUpperCase() + cat.name.slice(1)}</option>`
-            ).join('');
-            
+            // Clear and rebuild options
             categoryFilter.innerHTML = `
                 <option value="all">All Categories</option>
-                ${options}
+                <option value="sale">Sale Items</option>
+            `;
+            
+            categories.forEach(cat => {
+                const option = document.createElement('option');
+                option.value = cat.name.toLowerCase();
+                option.textContent = cat.name.charAt(0).toUpperCase() + cat.name.slice(1);
+                categoryFilter.appendChild(option);
+            });
+            
+            console.log('✅ Loaded', categories.length, 'categories from categories table');
+        }
+        
+    } catch (error) {
+        console.error('❌ Error loading categories from categories table:', error);
+        
+        // Fallback to basic categories if database fails
+        const categoryFilter = document.getElementById('categoryFilter');
+        if (categoryFilter) {
+            categoryFilter.innerHTML = `
+                <option value="all">All Categories</option>
+                <option value="sets">Sets</option>
+                <option value="cardigans">Cardigans</option>
                 <option value="sale">Sale Items</option>
             `;
         }
+    }
+}
+
+// UPDATE your existing initializeProductsPage function - find this function and replace it:
+async function initializeProductsPage() {
+    console.log('=== PRODUCTS PAGE INITIALIZATION ===');
+    
+    try {
+        // Setup functionality first
+        setupMobileMenu();
+        setupSearch();
+        setupFilters();
+        loadCartFromStorage();
+        updateCartCount();
+        
+        // Show loading state
+        showLoadingState(true);
+        
+        // Load products AND categories from Supabase
+        console.log('1. Loading products and categories from database...');
+        await Promise.all([
+            loadAllProductsFromDatabase(),
+            loadCategoryFilters()  // This loads from your categories table
+        ]);
+        
+        // Hide loading state
+        showLoadingState(false);
+        
+        console.log('✅ Products page initialization complete');
     } catch (error) {
-        console.error('Error loading category filters:', error);
+        console.error('❌ Error initializing products page:', error);
+        showLoadingState(false);
+        showNoProducts('Error loading products. Please refresh the page.');
     }
 }
 
 // FLEXIBLE SIZING SYSTEM - supports both S/M/L and S-M/M-L
+// In your product.js file, replace the updateProductSizes function with this:
+
 function updateProductSizes(stock) {
     const sizeSelect = document.getElementById('size');
     if (!sizeSelect) return;
@@ -264,6 +326,22 @@ function updateProductSizes(stock) {
     
     // Get available sizes from stock keys
     const availableSizes = Object.keys(stock);
+    
+    // Define size order for proper sorting
+    const sizeOrder = ['XS', 'S', 'S-M', 'M', 'M-L', 'L'];
+    
+    // Sort sizes according to the defined order
+    const sortedSizes = availableSizes.sort((a, b) => {
+        const indexA = sizeOrder.indexOf(a);
+        const indexB = sizeOrder.indexOf(b);
+        
+        // If size not in predefined order, put it at the end
+        if (indexA === -1 && indexB === -1) return a.localeCompare(b);
+        if (indexA === -1) return 1;
+        if (indexB === -1) return -1;
+        
+        return indexA - indexB;
+    });
     
     // Clear existing options
     sizeSelect.innerHTML = '';
@@ -276,13 +354,14 @@ function updateProductSizes(stock) {
     defaultOption.textContent = 'Select Size';
     sizeSelect.appendChild(defaultOption);
     
-    availableSizes.forEach(size => {
+    sortedSizes.forEach(size => {
         const stockCount = stock[size] || 0;
         const option = document.createElement('option');
         option.value = size;
-option.textContent = stockCount > 0 ? 
-    (stockCount < 2 ? `${size} (Low Stock)` : `${size}`) : 
-    `${size} (Out of stock)`;        option.disabled = stockCount === 0;
+        option.textContent = stockCount > 0 ? 
+            (stockCount < 2 ? `${size} (Low Stock)` : `${size}`) : 
+            `${size} (Out of stock)`;
+        option.disabled = stockCount === 0;
         
         if (stockCount > 0) hasStock = true;
         
@@ -296,7 +375,7 @@ option.textContent = stockCount > 0 ?
         buyButton.textContent = hasStock ? 'Add to Cart' : 'Out of Stock';
     }
     
-    console.log('👗 Sizes updated. Available sizes:', availableSizes, 'Has stock:', hasStock);
+    console.log('👗 Sizes updated in order:', sortedSizes, 'Has stock:', hasStock);
 }
 
 // Update product features
