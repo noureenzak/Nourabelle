@@ -389,7 +389,7 @@ body {
   outline: none;
 }
 
-/* Hero Section - FIXED for full-width on desktop */
+/* Hero Section - Mobile unchanged, Laptop gets collage */
 .hero {
   margin-top: 60px;
   position: relative;
@@ -411,7 +411,7 @@ body {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  object-position: center;
+  object-position: center 30%;
   opacity: 0;
   transition: opacity 1.5s ease-in-out;
   background-color: #000;
@@ -421,18 +421,61 @@ body {
   opacity: 1;
 }
 
-/* FIXED: Remove the contain behavior on large screens to fill full width */
-@media (min-width: 1200px) {
-  .slider-wrapper {
-    height: 80vh;
+/* Hide desktop collage on mobile/tablet */
+.desktop-collage {
+  display: none;
+}
+
+/* Mobile slider shows by default */
+.mobile-slider {
+  display: block;
+}
+
+/* LAPTOP COLLAGE - Two images side by side */
+@media (min-width: 1024px) {
+  /* Hide mobile slider on laptop */
+  .mobile-slider {
+    display: none;
   }
   
-  .slide-img {
+  /* Show desktop collage */
+  .desktop-collage {
+    display: flex;
+    height: 75vh;
+    min-height: 650px;
+    max-height: 850px;
+  }
+  
+  /* Left and right containers */
+  .collage-left,
+  .collage-right {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    /* NO gap between images */
+  }
+  
+  /* Collage images */
+  .collage-img {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    object-position: center;
+    object-position: center 20%;
+    opacity: 0;
+    transition: opacity 1.5s ease-in-out;
+  }
+  
+  /* Show active images */
+  .collage-img.active-left,
+  .collage-img.active-right {
+    opacity: 1;
   }
 }
 
+/* Keep overlay unchanged */
 .overlay {
   position: absolute;
   inset: 0;
@@ -456,8 +499,6 @@ body {
   transition: all 0.4s ease;
   backdrop-filter: blur(10px);
   box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  border: none;
-  outline: none;
 }
 
 .shop-now-btn:hover {

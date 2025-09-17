@@ -73,11 +73,10 @@ function displayOrderSummary() {
     // Display totals
 if (summarySubtotal) summarySubtotal.textContent = `${(checkoutData.subtotal || 0).toFixed(2)} EGP`;
 if (summaryShipping) {
-    const shippingText = checkoutData.shippingLocationText ? 
-        `${(checkoutData.shipping || 0).toFixed(2)} EGP (${checkoutData.shippingLocationText})` : 
-        `${(checkoutData.shipping || 0).toFixed(2)} EGP`;
-    summaryShipping.textContent = shippingText;
+    summaryShipping.textContent = `${(checkoutData.shipping || 0).toFixed(2)} EGP`;
 }
+
+
 if (summaryTotal) summaryTotal.textContent = `${(checkoutData.total || 0).toFixed(2)} EGP`;
 }
 
@@ -222,10 +221,10 @@ function closeInstapayModal() {
 
 // Copy Instapay Number
 function copyInstapayNumber() {
-    const phoneNumber = '+20 111 103 0808';
+    const instapayEmail = 'nourhan.mohamed6636@instapay';  // NEW: Use email instead
     
-    navigator.clipboard.writeText(phoneNumber).then(() => {
-        showNotification('Phone number copied to clipboard!', 'success');
+    navigator.clipboard.writeText(instapayEmail).then(() => {
+        showNotification('Instapay address copied to clipboard!', 'success');
         
         // Update button text temporarily
         const copyBtn = document.querySelector('.copy-btn');
@@ -242,7 +241,7 @@ function copyInstapayNumber() {
             }, 2000);
         }
     }).catch(() => {
-        showNotification(`Failed to copy. Please copy manually: ${phoneNumber}`, 'error');
+        showNotification(`Failed to copy. Please copy manually: ${instapayEmail}`, 'error');
     });
 }
 

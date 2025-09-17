@@ -89,21 +89,38 @@
     <div class="search-results" id="searchResults"></div>
   </div>
 
-  <!-- Hero Section with sliding images -->
-  <section class="hero">
-    <div class="slider-wrapper">
-      <img src="assets/images/hero1.jpg" class="slide-img active" alt="Hero Image 1">
-      <img src="assets/images/hero2.jpg" class="slide-img" alt="Hero Image 2">
-      <img src="assets/images/hero3.jpg" class="slide-img" alt="Hero Image 3">
-      <img src="assets/images/blueset2.jpg" class="slide-img" alt="Blue Set">
-      <img src="assets/images/browncardigan2.jpg" class="slide-img" alt="Brown Cardigan">
+<!-- Hero Section - Mobile unchanged, Laptop gets collage -->
+<section class="hero">
+  <!-- Mobile/Tablet: Normal slider (unchanged) -->
+  <div class="slider-wrapper mobile-slider">
+    <img src="assets/images/hero1.jpg" class="slide-img active" alt="Nourabelle Collection 1">
+    <img src="assets/images/hero2.jpg" class="slide-img" alt="Nourabelle Collection 2">
+    <img src="assets/images/hero3.jpg" class="slide-img" alt="Nourabelle Collection 3">
+    <img src="assets/images/hero4.jpg" class="slide-img" alt="Nourabelle Collection 4">
+    <img src="assets/images/hero5.jpg" class="slide-img" alt="Nourabelle Collection 5">
+    <img src="assets/images/hero6.jpg" class="slide-img" alt="Nourabelle Collection 6">
+  </div>
+  
+  <!-- Laptop: Collage layout (2 images side by side) -->
+  <div class="hero-collage desktop-collage">
+    <div class="collage-left">
+      <img src="assets/images/hero1.jpg" class="collage-img active-left" alt="Nourabelle Collection 1">
+      <img src="assets/images/hero3.jpg" class="collage-img" alt="Nourabelle Collection 3">
+      <img src="assets/images/hero5.jpg" class="collage-img" alt="Nourabelle Collection 5">
     </div>
-    <div class="overlay">
-      <a href="pages/products.html" class="shop-now-btn">
-        Discover Collection
-      </a>
+    <div class="collage-right">
+      <img src="assets/images/hero2.jpg" class="collage-img active-right" alt="Nourabelle Collection 2">
+      <img src="assets/images/hero4.jpg" class="collage-img" alt="Nourabelle Collection 4">
+      <img src="assets/images/hero6.jpg" class="collage-img" alt="Nourabelle Collection 6">
     </div>
-  </section>
+  </div>
+  
+  <div class="overlay">
+    <a href="pages/products.html" class="shop-now-btn">
+      Discover Collection
+    </a>
+  </div>
+</section>
 
   <!-- Bestsellers Section -->
   <section class="bestsellers" id="products">

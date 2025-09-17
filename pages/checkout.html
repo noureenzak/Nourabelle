@@ -43,22 +43,7 @@
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
       position: relative;
     }
-    
-    /* Enhanced styling for better UX */
-    .copy-reference-btn {
-      margin-top: 8px !important;
-      padding: 6px 12px !important;
-      background: #007bff !important;
-      color: white !important;
-      border: none !important;
-      border-radius: 4px !important;
-      cursor: pointer !important;
-      font-size: 0.85rem !important;
-    }
-    
-    .copy-reference-btn:hover {
-      background: #0056b3 !important;
-    }
+ 
     
     /* Clear instruction styling */
     .final-instruction {
@@ -345,33 +330,49 @@
               <div class="amount" id="totalAmountDisplay">0 EGP</div>
             </div>
             
-            <!-- Account Details - PHONE NUMBER ONLY -->
-            <div class="instapay-details">
-              <div class="account-info">
-                <span>Send to this Instapay number:</span>
-                <div class="phone-display">
-                  <strong>+20 111 103 0808</strong>
-                </div>
-                <button class="copy-btn" onclick="copyInstapayNumber()">📋 Copy Number</button>
-              </div>
-            </div>
+           <div class="qr-code-section" style="margin: 20px 0; text-align: center;">
+  <div style="background: white; padding: 20px; border-radius: 12px; border: 2px solid var(--btn); display: inline-block;">
+    <img src="../assets/images/instapay-qr.jpg" alt="Instapay QR Code" style="width: 200px; height: 200px; display: block;">
+  </div>
+</div>
+
+<!-- Account Details -->
+<div class="instapay-details">
+  <div class="account-info">
+    <span>Send to this Instapay address:</span>
+    <div class="phone-display">
+      <strong>nourhan.mohamed6636@instapay</strong>
+    </div>
+    <button class="copy-btn" onclick="copyInstapayNumber()">Copy Address</button>
+    
+    <p style="margin: 15px 0 0 0; font-size: 0.9rem; color: var(--text); line-height: 1.4;">
+      You can scan the QR code above or copy the account address to send payment through Instapay.
+    </p>
+  </div>
+</div>
             
             <!-- Payment Reference - NOW SHOWS ORDER NUMBER -->
-            <div class="payment-reference">
-              <span>Use this order number as reference:</span>
-              <div class="reference-code" id="paymentReference" style="background: #f0f8ff; padding: 8px; border-radius: 4px; font-weight: bold; text-align: center;">ORDER-123456</div>
-              <small>Copy this order number and paste it in the transfer notes</small>
-              <button class="copy-reference-btn" onclick="copyReference()">📋 Copy Order Number</button>
-            </div>
+<div class="payment-reference">
+  <span>Use this order number as reference:</span>
+  <div class="reference-code" id="paymentReference" style="background: #f0f8ff; padding: 8px; border-radius: 4px; font-weight: bold; text-align: center;">ORDER-123456</div>
+  <small>Copy this order number and paste it in the transfer notes</small>
+  <button class="copy-reference-btn" onclick="copyReference()">Copy Order Number</button>
+</div>
             
-            <div class="instructions">
-              <p><strong>Payment Steps:</strong></p>
-              <p>1. Open your Instapay app</p>
-              <p>2. Transfer <strong id="amountToPay">0 EGP</strong> to: <strong>+20 111 103 0808</strong></p>
-              <p>3. Paste the order number above in the transfer notes</p>
-              <p>4. Take a screenshot of the successful payment</p>
-              <p>5. Come back here and upload the screenshot</p>
-            </div>
+<div class="instructions">
+  <p><strong>Payment Steps:</strong></p>
+  <p>1. Open your Instapay app</p>
+  <p>2. Scan QR code or send to: <strong>nourhan.mohamed6636@instapay</strong></p>
+  <p>3. Transfer <strong id="amountToPay">0 EGP</strong></p>
+  <p>4. Add the order number in transfer notes</p>
+  <p>5. Take a screenshot of successful payment</p>
+  <p>6. Upload screenshot in the next page</p>
+  
+  <!-- Updated note with theme colors -->
+  <div class="note-section">
+    <p><strong>Note:</strong> After payment, you'll be taken to the next step to upload your screenshot.</p>
+  </div>
+</div>
             
             <!-- RESPONSIBILITY CHECKBOX -->
             <div class="responsibility-check" style="margin: 20px 0; padding: 15px; background: #fff3cd; border: 1px solid #ffeaa7; border-radius: 6px;">

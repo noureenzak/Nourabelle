@@ -351,23 +351,74 @@ function initSearch() {
 // HERO SLIDER
 // ===============================================================================
 
+// Updated Hero Slider for 6 Images - No Zoom Issues
+// Enhanced Hero Slider - Mobile single slider + Laptop collage
 function initHeroSlider() {
-    const slides = document.querySelectorAll('.slide-img');
+    // Mobile/tablet slider elements
+    const slides = document.querySelectorAll('.mobile-slider .slide-img');
     
-    if (slides.length <= 1) {
+    // Laptop collage elements
+    const leftImages = document.querySelectorAll('.collage-left .collage-img');
+    const rightImages = document.querySelectorAll('.collage-right .collage-img');
+    
+    if (slides.length <= 1 && leftImages.length <= 1) {
         console.log('Hero slider: Not enough slides');
         return;
     }
 
+    let currentSlide = 0;
+    let currentLeftIndex = 0;
+    let currentRightIndex = 0;
+    let sliderInterval;
+
     function nextSlide() {
-        slides[currentSlide].classList.remove('active');
-        currentSlide = (currentSlide + 1) % slides.length;
-        slides[currentSlide].classList.add('active');
+        // Mobile/tablet: Normal slider (unchanged)
+        if (slides.length > 1) {
+            slides[currentSlide].classList.remove('active');
+            currentSlide = (currentSlide + 1) % slides.length;
+            slides[currentSlide].classList.add('active');
+        }
+        
+        // Laptop: Collage slider (2 images at once)
+        if (leftImages.length > 1 && rightImages.length > 1) {
+            // Hide current images
+            leftImages[currentLeftIndex].classList.remove('active-left');
+            rightImages[currentRightIndex].classList.remove('active-right');
+            
+            // Move to next pair
+            currentLeftIndex = (currentLeftIndex + 1) % leftImages.length;
+            currentRightIndex = (currentRightIndex + 1) % rightImages.length;
+            
+            // Show new images
+            leftImages[currentLeftIndex].classList.add('active-left');
+            rightImages[currentRightIndex].classList.add('active-right');
+        }
+        
+        console.log(`Showing slide pair: ${currentSlide + 1}/${slides.length} (mobile) | ${currentLeftIndex + 1},${currentRightIndex + 1} (desktop)`);
     }
 
-    setInterval(nextSlide, 4000);
-    console.log(`✅ Hero slider initialized with ${slides.length} slides`);
+    // Start the slider - changes every 2 seconds as requested
+    sliderInterval = setInterval(nextSlide, 2500);
+    
+    // Pause on hover (better UX)
+    const hero = document.querySelector('.hero');
+    if (hero) {
+        hero.addEventListener('mouseenter', () => {
+            clearInterval(sliderInterval);
+        });
+        
+        hero.addEventListener('mouseleave', () => {
+            sliderInterval = setInterval(nextSlide, 3000);
+        });
+    }
+
+    console.log(`✅ Hero slider initialized: ${slides.length} mobile slides, ${leftImages.length} collage pairs`);
 }
+
+// Make sure to call this when page loads
+document.addEventListener('DOMContentLoaded', function() {
+    initHeroSlider();
+});
 
 // ===============================================================================
 // CART MANAGEMENT
